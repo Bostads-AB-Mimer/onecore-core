@@ -3,6 +3,7 @@ import { Lease } from '../types'
 import Config from '../../../common/config'
 
 const tenantsContractsServiceUrl = Config.tenantsContractsService.url
+console.log('tcservice', tenantsContractsServiceUrl)
 
 const getLease = async (leaseId: string): Promise<Lease> => {
   const leaseResponse = await axios(

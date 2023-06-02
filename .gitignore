@@ -2,3 +2,5 @@
 ./build
 build
 node_modules
+.env
+config.json

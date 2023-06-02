@@ -10,7 +10,7 @@ export interface Config {
 const config = configPackage({
   file: `${__dirname}/../config.json`,
   defaults: {
-    port: 5001,
+    port: 5010,
     tenantsContractsService: {
       url: 'http://localhost:5020',
     },
