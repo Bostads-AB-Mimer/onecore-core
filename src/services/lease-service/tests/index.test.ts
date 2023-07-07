@@ -4,7 +4,7 @@ import KoaRouter from '@koa/router'
 import bodyParser from 'koa-bodyparser'
 import { routes } from '../index'
 import * as tenantLeaseAdapter from '../adapters/tenant-lease-adapter'
-import * as apartmentAdapter from '../adapters/apartment-adapter'
+import * as apartmentAdapter from '../../rental-property-service/adapters/rental-property-adapter'
 import leaseMock from './leaseMock'
 import apartmentMock from './apartmentMock'
 
