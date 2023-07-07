@@ -7,7 +7,6 @@ import config from './common/config'
 
 import api from './api'
 import { routes as authRoutes } from './services/auth-service'
-import errorHandler from './middlewares/error-handler'
 
 const app = new Koa()
 
@@ -16,8 +15,6 @@ app.use(cors())
 app.on('error', (err) => {
   console.error(err)
 })
-
-app.use(errorHandler())
 
 app.use(bodyParser())
 
