@@ -9,10 +9,10 @@ import KoaRouter from '@koa/router'
 import {
   getRentalProperty,
   getRoomTypeWithMaterialOptions,
-  getSingleMaterialOption,
-  getRoomTypes,
-  getMaterialOptionGroup,
-  getMaterialOptionGroups,
+  // getSingleMaterialOption,
+  // getRoomTypes,
+  // getMaterialOptionGroup,
+  // getMaterialOptionGroups,
   getMaterialOption,
   getMaterialChoices,
 } from './adapters/rental-property-adapter'
@@ -32,24 +32,15 @@ export const routes = (router: KoaRouter) => {
   })
 
   router.get(
-    '(.*)/rentalproperties/:id/material-options/details',
+    '(.*)/rentalproperties/:id/material-option/:materialOptionId',
     async (ctx) => {
-      if (
-        ctx.request.query.roomTypeId &&
-        ctx.request.query.materialOptionGroupId &&
-        ctx.request.query.materialOptionId
-      ) {
-        const option = await getSingleMaterialOption(
-          Math.round(Math.random() * 100000).toString(),
-          ctx.request.query.roomTypeId[0],
-          ctx.request.query.materialOptionGroupId[0],
-          ctx.request.query.materialOptionId[0]
-        )
+      console.log('ctx.params.materialOptionId', ctx.params.materialOptionId)
+      const option = await getMaterialOption(
+        ctx.params.id,
+        ctx.params.materialOptionId
+      )
 
-        ctx.body = {
-          materialOption: option,
-        }
-      }
+      ctx.body = option
     }
   )
 
@@ -59,11 +50,11 @@ export const routes = (router: KoaRouter) => {
     ctx.body = materialChoices
   })
 
-  router.get('(.*)/rentalproperties/:id/room-types', async (ctx) => {
-    const roomTypes = await getRoomTypes(ctx.params.id)
+  // router.get('(.*)/rentalproperties/:id/room-types', async (ctx) => {
+  //   const roomTypes = await getRoomTypes(ctx.params.id)
 
-    ctx.body = roomTypes
-  })
+  //   ctx.body = roomTypes
+  // })
 
   router.get('(.*)/rentalproperties/:id', async (ctx) => {
     const responseData = await getRentalProperty(ctx.params.id)
@@ -73,37 +64,37 @@ export const routes = (router: KoaRouter) => {
     }
   })
 
-  router.get(
-    '(.*)/room-types/:roomTypeId/material-option-groups/:optionGroupId',
-    async (ctx) => {
-      const group = await getMaterialOptionGroup(
-        ctx.params.roomTypeId,
-        ctx.params.optionGroupId
-      )
+  // router.get(
+  //   '(.*)/room-types/:roomTypeId/material-option-groups/:optionGroupId',
+  //   async (ctx) => {
+  //     const group = await getMaterialOptionGroup(
+  //       ctx.params.roomTypeId,
+  //       ctx.params.optionGroupId
+  //     )
 
-      ctx.body = group
-    }
-  )
+  //     ctx.body = group
+  //   }
+  // )
 
-  router.get(
-    '(.*)/room-types/:roomTypeId/material-option-groups',
-    async (ctx) => {
-      const groups = await getMaterialOptionGroups(ctx.params.roomTypeId)
+  // router.get(
+  //   '(.*)/room-types/:roomTypeId/material-option-groups',
+  //   async (ctx) => {
+  //     const groups = await getMaterialOptionGroups(ctx.params.roomTypeId)
 
-      ctx.body = groups
-    }
-  )
+  //     ctx.body = groups
+  //   }
+  // )
 
-  router.get(
-    '(.*)/room-types/:roomTypeId/material-option-groups/:optionGroupId/options/:optionId',
-    async (ctx) => {
-      const option = await getMaterialOption(
-        ctx.params.roomTypeId,
-        ctx.params.optionGroupId,
-        ctx.params.optionId
-      )
+  // router.get(
+  //   '(.*)/room-types/:roomTypeId/material-option-groups/:optionGroupId/options/:optionId',
+  //   async (ctx) => {
+  //     const option = await getMaterialOption(
+  //       ctx.params.roomTypeId,
+  //       ctx.params.optionGroupId,
+  //       ctx.params.optionId
+  //     )
 
-      ctx.body = option
-    }
-  )
+  //     ctx.body = option
+  //   }
+  // )
 }
