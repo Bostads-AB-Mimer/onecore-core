@@ -15,6 +15,7 @@ import {
   // getMaterialOptionGroups,
   getMaterialOption,
   getMaterialChoices,
+  saveMaterialChoice,
 } from './adapters/rental-property-adapter'
 import { getFloorPlanStream } from './adapters/document-adapter'
 
@@ -34,7 +35,6 @@ export const routes = (router: KoaRouter) => {
   router.get(
     '(.*)/rentalproperties/:id/material-option/:materialOptionId',
     async (ctx) => {
-      console.log('ctx.params.materialOptionId', ctx.params.materialOptionId)
       const option = await getMaterialOption(
         ctx.params.id,
         ctx.params.materialOptionId
@@ -48,6 +48,16 @@ export const routes = (router: KoaRouter) => {
     const materialChoices = await getMaterialChoices(ctx.params.id)
 
     ctx.body = materialChoices
+  })
+
+  router.post('(.*)/rentalproperties/:id/material-choices', async (ctx) => {
+    await getMaterialChoices(ctx.params.id)
+
+    if (ctx.request.body) {
+      const result = await saveMaterialChoice(ctx.params.id, ctx.request.body)
+
+      ctx.body = result
+    }
   })
 
   // router.get('(.*)/rentalproperties/:id/room-types', async (ctx) => {

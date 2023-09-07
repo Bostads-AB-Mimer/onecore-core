@@ -1,6 +1,6 @@
 import axios from 'axios'
 import {
-  // MaterialChoice,
+  MaterialChoice,
   MaterialOption,
   // MaterialOptionGroup,
   RentalProperty,
@@ -137,6 +137,22 @@ const getMaterialChoices = async (apartmentId: string) => {
   return materialOptionGroupsResponse.data
 }
 
+const saveMaterialChoice = async (
+  rentalPropertyId: string,
+  materialChoices: Array<MaterialChoice>
+) => {
+  await axios(
+    `${propertyInfoServiceUrl}/rentalproperties/${rentalPropertyId}/material-choices`,
+    {
+      method: 'post',
+      data: materialChoices,
+    }
+  ).then((result) => {
+    // console.log('result', result)
+    return result
+  })
+}
+
 export {
   getRentalProperty,
   getRoomTypeWithMaterialOptions,
@@ -146,4 +162,5 @@ export {
   // getMaterialOptionGroups,
   getMaterialOption,
   getMaterialChoices,
+  saveMaterialChoice,
 }
