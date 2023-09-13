@@ -9,10 +9,6 @@ import KoaRouter from '@koa/router'
 import {
   getRentalProperty,
   getRoomTypeWithMaterialOptions,
-  // getSingleMaterialOption,
-  // getRoomTypes,
-  // getMaterialOptionGroup,
-  // getMaterialOptionGroups,
   getMaterialOption,
   getMaterialChoices,
   saveMaterialChoice,
@@ -60,12 +56,6 @@ export const routes = (router: KoaRouter) => {
     }
   })
 
-  // router.get('(.*)/rentalproperties/:id/room-types', async (ctx) => {
-  //   const roomTypes = await getRoomTypes(ctx.params.id)
-
-  //   ctx.body = roomTypes
-  // })
-
   router.get('(.*)/rentalproperties/:id', async (ctx) => {
     const responseData = await getRentalProperty(ctx.params.id)
 
@@ -73,38 +63,4 @@ export const routes = (router: KoaRouter) => {
       data: responseData,
     }
   })
-
-  // router.get(
-  //   '(.*)/room-types/:roomTypeId/material-option-groups/:optionGroupId',
-  //   async (ctx) => {
-  //     const group = await getMaterialOptionGroup(
-  //       ctx.params.roomTypeId,
-  //       ctx.params.optionGroupId
-  //     )
-
-  //     ctx.body = group
-  //   }
-  // )
-
-  // router.get(
-  //   '(.*)/room-types/:roomTypeId/material-option-groups',
-  //   async (ctx) => {
-  //     const groups = await getMaterialOptionGroups(ctx.params.roomTypeId)
-
-  //     ctx.body = groups
-  //   }
-  // )
-
-  // router.get(
-  //   '(.*)/room-types/:roomTypeId/material-option-groups/:optionGroupId/options/:optionId',
-  //   async (ctx) => {
-  //     const option = await getMaterialOption(
-  //       ctx.params.roomTypeId,
-  //       ctx.params.optionGroupId,
-  //       ctx.params.optionId
-  //     )
-
-  //     ctx.body = option
-  //   }
-  // )
 }
