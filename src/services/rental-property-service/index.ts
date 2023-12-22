@@ -70,7 +70,7 @@ export const routes = (router: KoaRouter) => {
   })
 
   router.get('(.*)/rentalproperties/material-choice-statuses', async (ctx) => {
-    let materialChoiceStatuses = await getMaterialChoiceStatuses(
+    const materialChoiceStatuses = await getMaterialChoiceStatuses(
       ctx.params.projectCode
     )
 
