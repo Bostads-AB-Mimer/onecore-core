@@ -37,8 +37,7 @@ export const routes = (router: KoaRouter) => {
       return
     }
 
-    const saltAndHash = await hash.createSaltAndHash(query.password as string)
-    ctx.body = saltAndHash
+    ctx.body = await hash.createSaltAndHash(query.password as string)
   })
 
   /**
@@ -78,8 +77,7 @@ export const routes = (router: KoaRouter) => {
     }
 
     try {
-      const token = await createToken(username, password)
-      ctx.body = token
+      ctx.body  = await createToken(username, password)
     } catch (error) {
       if (createHttpError.isHttpError(error)) {
         ctx.status = (error as createHttpError.HttpError).statusCode

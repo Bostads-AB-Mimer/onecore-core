@@ -25,48 +25,38 @@ export const routes = (router: KoaRouter) => {
   })
 
   router.get('(.*)/rentalproperties/:id/material-options', async (ctx) => {
-    const roomTypes = await getRoomTypeWithMaterialOptions(ctx.params.id)
-
-    ctx.body = roomTypes
+    return await getRoomTypeWithMaterialOptions(ctx.params.id)
   })
 
   router.get(
     '(.*)/rentalproperties/:id/material-option/:materialOptionId',
     async (ctx) => {
-      const option = await getMaterialOption(
+      ctx.body = await getMaterialOption(
         ctx.params.id,
         ctx.params.materialOptionId
       )
-
-      ctx.body = option
     }
   )
 
   router.get(
     '(.*)/rentalproperties/:apartmentId/:contractId/material-choices',
     async (ctx) => {
-      const materialChoices = await getMaterialChoices(
+      ctx.body =  getMaterialChoices(
         ctx.params.apartmentId,
         ctx.params.contractId
       )
-
-      ctx.body = materialChoices
     }
   )
 
   router.get(
     '(.*)/rentalproperties/:id/rooms-with-material-choices',
     async (ctx) => {
-      const materialChoices = await getRoomsWithMaterialChoices(ctx.params.id)
-
-      ctx.body = materialChoices
+      ctx.body = await getRoomsWithMaterialChoices(ctx.params.id)
     }
   )
 
   router.get('(.*)/rentalproperties/:id/material-choices', async (ctx) => {
-    const materialChoices = await getMaterialChoices(ctx.params.id)
-
-    ctx.body = materialChoices
+    ctx.body =  await getMaterialChoices(ctx.params.id)
   })
 
   router.get('(.*)/rentalproperties/material-choice-statuses', async (ctx) => {
@@ -89,9 +79,7 @@ export const routes = (router: KoaRouter) => {
     await getMaterialChoices(ctx.params.id)
 
     if (ctx.request.body) {
-      const result = await saveMaterialChoice(ctx.params.id, ctx.request.body)
-
-      ctx.body = result
+      ctx.body =  await saveMaterialChoice(ctx.params.id, ctx.request.body)
     }
   })
 

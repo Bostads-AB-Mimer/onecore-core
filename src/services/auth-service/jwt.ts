@@ -5,7 +5,7 @@ import hash from './hash'
 import config from '../../common/config'
 
 const getUser = async (username: string) => {
-  const user = {
+  return  {
     id: username,
     locked: false,
     disabled: false,
@@ -13,8 +13,6 @@ const getUser = async (username: string) => {
     passwordHash: config.auth.testAccount.hash,
     salt: config.auth.testAccount.salt,
   }
-
-  return user
 }
 
 const setUserFailedLoginAttempts = async (userId: string, attempts: number) => {
@@ -33,11 +31,11 @@ export const createToken = async (username: string, password: string) => {
       throw createHttpError(401, new Error(`Unknown user or invalid password.`))
     }
 
-    if (user.locked === true) {
+    if (user.locked) {
       throw createHttpError(403, new Error(`User locked: ${username}.`))
     }
 
-    if (user.disabled === true) {
+    if (user.disabled) {
       throw createHttpError(403, new Error(`User disabled: ${username}.`))
     }
 
