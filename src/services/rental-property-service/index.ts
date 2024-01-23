@@ -33,7 +33,7 @@ export const routes = (router: KoaRouter) => {
   router.get(
     '(.*)/rentalproperties/:id/material-option/:materialOptionId',
     async (ctx) => {
-      const option =await getMaterialOption(
+      const option = await getMaterialOption(
         ctx.params.id,
         ctx.params.materialOptionId
       )
@@ -58,6 +58,7 @@ export const routes = (router: KoaRouter) => {
     '(.*)/rentalproperties/:id/rooms-with-material-choices',
     async (ctx) => {
       const materialChoices = await getRoomsWithMaterialChoices(ctx.params.id)
+
       ctx.body = materialChoices
     }
   )
