@@ -13,13 +13,17 @@ import {
 } from './adapters/tenant-lease-adapter'
 
 const getLeaseWithRelatedEntities = async (rentalId: string) => {
-  return  await getLease(rentalId)
+  const lease = await getLease(rentalId)
+
+  return lease
 }
 
 const getLeasesWithRelatedEntitiesForPnr = async (
   nationalRegistrationNumber: string
 ) => {
-  return await getLeasesForPnr(nationalRegistrationNumber)
+  const leases = await getLeasesForPnr(nationalRegistrationNumber)
+
+  return leases
 }
 
 export const routes = (router: KoaRouter) => {

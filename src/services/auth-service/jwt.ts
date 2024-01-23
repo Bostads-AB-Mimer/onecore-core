@@ -5,7 +5,7 @@ import hash from './hash'
 import config from '../../common/config'
 
 const getUser = async (username: string) => {
-  return  {
+  const user = {
     id: username,
     locked: false,
     disabled: false,
@@ -13,6 +13,8 @@ const getUser = async (username: string) => {
     passwordHash: config.auth.testAccount.hash,
     salt: config.auth.testAccount.salt,
   }
+
+  return user
 }
 
 const setUserFailedLoginAttempts = async (userId: string, attempts: number) => {
