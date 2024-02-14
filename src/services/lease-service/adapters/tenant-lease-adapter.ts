@@ -32,4 +32,12 @@ const getContactForPnr = async (
   return contactResponse.data.data
 }
 
-export { getLease, getLeasesForPnr, getContactForPnr }
+const getContact = async (contactId: string) => {
+  const contactResponse = await axios(
+    tenantsLeasesServiceUrl + '/contact/' + contactId
+  )
+
+  return contactResponse.data.data
+}
+
+export { getLease, getLeasesForPnr, getContactForPnr, getContact }

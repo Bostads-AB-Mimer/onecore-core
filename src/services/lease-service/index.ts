@@ -58,15 +58,4 @@ export const routes = (router: KoaRouter) => {
       data: responseData,
     }
   })
-
-  /**
-   * Returns all leases with populated sub objects
-   */
-  /*  router.get('(.*)/leases', async (ctx) => {
-
-
-    ctx.body = {
-      data: leases,
-    }
-  })*/
 }

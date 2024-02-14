@@ -16,6 +16,10 @@ import {
   getRoomsWithMaterialChoices,
 } from './adapters/rental-property-adapter'
 import { getFloorPlanStream } from './adapters/document-adapter'
+import { getContactForPnr } from '../lease-service/adapters/tenant-lease-adapter'
+import { getParkingSpace } from './adapters/xpand-adapter'
+import { ParkingSpaceApplicationCategory } from '../../common/types'
+import app from '../../app'
 
 export const routes = (router: KoaRouter) => {
   router.get('(.*)/rentalproperties/:id/floorplan', async (ctx) => {
@@ -100,6 +104,79 @@ export const routes = (router: KoaRouter) => {
 
     ctx.body = {
       data: responseData,
+    }
+  })
+
+  router.post('(.*)/parkingspaces/:id/leases', async (ctx) => {
+    if (!ctx.params.id) {
+      ctx.status = 400
+      ctx.body = {
+        message:
+          'Parking space id is missing. It needs to be passed in the url.',
+      }
+
+      return
+    }
+
+    if (!ctx.request.body.contactId) {
+      ctx.status = 400
+      ctx.body = {
+        message:
+          'Contact id is missing. It needs to be passed in the body (contactId.)',
+      }
+
+      return
+    }
+
+    try {
+      // Step 1. Get parking space, choose process according to type (internal/external)
+      const parkingSpace = await getParkingSpace(ctx.params.id)
+
+      if (
+        parkingSpace.applicationCategory !=
+        ParkingSpaceApplicationCategory.external
+      ) {
+        ctx.status = 400
+        ctx.body = {
+          message:
+            'This route currently only handles external parking spaces. The parking space provided is not external.',
+        }
+      }
+
+      // Step 2. Get information about applicant and contracts
+      const applicantContact = await getContactForPnr(
+        ctx.request.body.contactId
+      )
+
+      let creditCheck = false
+
+      if (!applicantContact.leaseIds || applicantContact.leaseIds.length == 0) {
+        // Step 3A. External credit check if applicant is not a tenant.
+        creditCheck = true
+      } else {
+        // Step 3B. Internal credit check if applicant is a tenant
+      }
+
+      if (creditCheck) {
+        // Step 4A. Create lease
+        //createLease()
+        // Step 5A. Notify of success
+      } else {
+        // Step 5B. Notify of rejection
+      }
+      console.log(parkingSpace, applicantContact)
+
+      // Step 4. Create lease or reject application.
+      // Step 5. Communicate result to applicant.
+      // Step 6. Communicate result to leasing department.
+
+      ctx.body = {
+        status: 1,
+        message: 'Parking space lease created.',
+        lease: {},
+      }
+    } catch (error) {
+      // Step 6: Communicate error to dev team and customer service
     }
   })
 }
