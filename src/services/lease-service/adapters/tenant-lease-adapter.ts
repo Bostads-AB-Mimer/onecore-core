@@ -34,7 +34,7 @@ const getContactForPnr = async (
 
 const getContact = async (contactId: string) => {
   const contactResponse = await axios(
-    tenantsLeasesServiceUrl + '/contact/' + contactId
+    tenantsLeasesServiceUrl + '/contact/contactCode/' + contactId
   )
 
   return contactResponse.data.data

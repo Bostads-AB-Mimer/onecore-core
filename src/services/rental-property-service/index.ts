@@ -18,6 +18,7 @@ import {
 import { getFloorPlanStream } from './adapters/document-adapter'
 import {
   createLease,
+  getContact,
   getContactForPnr,
 } from '../lease-service/adapters/tenant-lease-adapter'
 import { getParkingSpace } from './adapters/xpand-adapter'
@@ -110,8 +111,10 @@ export const routes = (router: KoaRouter) => {
     }
   })
 
-  router.post('(.*)/parkingspaces/:id/leases', async (ctx) => {
-    if (!ctx.params.id) {
+  router.post('(.*)/parkingspaces/:parkingSpaceId/leases', async (ctx) => {
+    const parkingSpaceId = ctx.params.parkingSpaceId
+
+    if (!parkingSpaceId) {
       ctx.status = 400
       ctx.body = {
         message:
@@ -121,24 +124,31 @@ export const routes = (router: KoaRouter) => {
       return
     }
 
-    if (!ctx.request.body.contactId) {
+    const contactId = ctx.request.body.contactId
+
+    if (!contactId) {
       ctx.status = 400
       ctx.body = {
         message:
-          'Contact id is missing. It needs to be passed in the body (contactId.)',
+          'Contact id is missing. It needs to be passed in the body (contactId)',
       }
 
       return
     }
 
+    let log: string[] = [
+      `Ansökan om extern bilplats ${new Date().toISOString()}`,
+      `Sökande ${contactId} ansöker om bilplats ${parkingSpaceId}`,
+    ]
+
     try {
       // Step 1. Get parking space, choose process according to type (internal/external)
-      const parkingSpace = await getParkingSpace(ctx.params.id)
+      const parkingSpace = await getParkingSpace(parkingSpaceId)
 
       if (!parkingSpace) {
         ctx.status = 404
         ctx.body = {
-          message: 'The parking spot does not exist or is no longer available.',
+          message: `The parking space ${parkingSpaceId} does not exist or is no longer available.`,
         }
 
         return
@@ -158,12 +168,10 @@ export const routes = (router: KoaRouter) => {
       }
 
       // Step 2. Get information about applicant and contracts
-      const applicantContact = await getContactForPnr(
-        ctx.request.body.contactId
-      )
+      const applicantContact = await getContact(contactId)
 
       if (!applicantContact) {
-        ctx.status = 400
+        ctx.status = 500
         ctx.body = {
           message: 'The applicant could not be retrieved.',
         }
@@ -176,9 +184,11 @@ export const routes = (router: KoaRouter) => {
       if (!applicantContact.leaseIds || applicantContact.leaseIds.length == 0) {
         // Step 3A. External credit check if applicant is not a tenant.
         creditCheck = true
+        log.push(`External credit check performed, result: ${creditCheck}`)
       } else {
         // Step 3B. Internal credit check if applicant is a tenant
         creditCheck = true
+        log.push(`Internal credit check performed, result: ${creditCheck}`)
       }
 
       console.log(parkingSpace, applicantContact)
@@ -187,10 +197,12 @@ export const routes = (router: KoaRouter) => {
         // Step 4A. Create lease
         const lease = await createLease(
           parkingSpace.parkingSpaceId,
-          applicantContact.contactId,
+          applicantContact.contactCode,
           '2024-01-01',
           '001'
         )
+
+        log.push(`Kontrakt skapat: ${lease.LeaseId}`)
 
         console.log('lease', lease)
         // Step 5A. Notify of success
@@ -199,16 +211,24 @@ export const routes = (router: KoaRouter) => {
           message: 'Parking space lease created.',
           lease: lease,
         }
+
+        console.log('\n\n---\n', log.join('\n'))
       } else {
         // Step 5B. Notify of rejection
         ctx.body = {
           status: 'Failure',
           message: 'The parking space lease application has been rejected',
         }
+
+        log.push(
+          `Ansökan kunde inte beviljas på grund av ouppfyllda kreditkrav (se ovan).`
+        )
+        console.log('\n\n---\n', log.join('\n'))
       }
     } catch (error) {
       // Step 6: Communicate error to dev team and customer service
       console.log('Error', error)
+      console.log('\n\n---\n', log.join('\n'))
       ctx.status = 400
       ctx.body = {
         message: 'A technical error has occured',
