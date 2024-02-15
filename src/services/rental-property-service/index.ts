@@ -16,7 +16,10 @@ import {
   getRoomsWithMaterialChoices,
 } from './adapters/rental-property-adapter'
 import { getFloorPlanStream } from './adapters/document-adapter'
-import { getContactForPnr } from '../lease-service/adapters/tenant-lease-adapter'
+import {
+  createLease,
+  getContactForPnr,
+} from '../lease-service/adapters/tenant-lease-adapter'
 import { getParkingSpace } from './adapters/xpand-adapter'
 import { ParkingSpaceApplicationCategory } from '../../common/types'
 import app from '../../app'
@@ -132,6 +135,15 @@ export const routes = (router: KoaRouter) => {
       // Step 1. Get parking space, choose process according to type (internal/external)
       const parkingSpace = await getParkingSpace(ctx.params.id)
 
+      if (!parkingSpace) {
+        ctx.status = 404
+        ctx.body = {
+          message: 'The parking spot does not exist or is no longer available.',
+        }
+
+        return
+      }
+
       if (
         parkingSpace.applicationCategory !=
         ParkingSpaceApplicationCategory.external
@@ -141,12 +153,23 @@ export const routes = (router: KoaRouter) => {
           message:
             'This route currently only handles external parking spaces. The parking space provided is not external.',
         }
+
+        return
       }
 
       // Step 2. Get information about applicant and contracts
       const applicantContact = await getContactForPnr(
         ctx.request.body.contactId
       )
+
+      if (!applicantContact) {
+        ctx.status = 400
+        ctx.body = {
+          message: 'The applicant could not be retrieved.',
+        }
+
+        return
+      }
 
       let creditCheck = false
 
@@ -155,28 +178,41 @@ export const routes = (router: KoaRouter) => {
         creditCheck = true
       } else {
         // Step 3B. Internal credit check if applicant is a tenant
+        creditCheck = true
       }
+
+      console.log(parkingSpace, applicantContact)
 
       if (creditCheck) {
         // Step 4A. Create lease
-        //createLease()
+        const lease = await createLease(
+          parkingSpace.parkingSpaceId,
+          applicantContact.contactId,
+          '2024-01-01',
+          '001'
+        )
+
+        console.log('lease', lease)
         // Step 5A. Notify of success
+        ctx.body = {
+          status: 'Success',
+          message: 'Parking space lease created.',
+          lease: lease,
+        }
       } else {
         // Step 5B. Notify of rejection
-      }
-      console.log(parkingSpace, applicantContact)
-
-      // Step 4. Create lease or reject application.
-      // Step 5. Communicate result to applicant.
-      // Step 6. Communicate result to leasing department.
-
-      ctx.body = {
-        status: 1,
-        message: 'Parking space lease created.',
-        lease: {},
+        ctx.body = {
+          status: 'Failure',
+          message: 'The parking space lease application has been rejected',
+        }
       }
     } catch (error) {
       // Step 6: Communicate error to dev team and customer service
+      console.log('Error', error)
+      ctx.status = 400
+      ctx.body = {
+        message: 'A technical error has occured',
+      }
     }
   })
 }

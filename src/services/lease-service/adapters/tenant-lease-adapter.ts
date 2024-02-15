@@ -40,4 +40,25 @@ const getContact = async (contactId: string) => {
   return contactResponse.data.data
 }
 
-export { getLease, getLeasesForPnr, getContactForPnr, getContact }
+const createLease = async (
+  objectId: string,
+  contactId: string,
+  fromDate: string,
+  companyCode: string
+) => {
+  const axiosOptions = {
+    method: 'POST',
+    data: {
+      parkingSpaceId: objectId,
+      contactCode: contactId,
+      fromDate,
+      companyCode,
+    },
+  }
+
+  const result = await axios(tenantsLeasesServiceUrl + '/leases', axiosOptions)
+
+  return result.data
+}
+
+export { getLease, getLeasesForPnr, getContactForPnr, getContact, createLease }
