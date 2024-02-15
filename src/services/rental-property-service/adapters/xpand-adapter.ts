@@ -31,8 +31,6 @@ const getParkingSpaceApplicationCategory = (waitingListType: string) => {
 const getStreet = (streetAndNumber: string) => {
   const matches = streetAndNumber.split(/([^0-9]+) ([0-9].*)/)
 
-  console.log('matches', matches)
-
   return matches[1]
 }
 

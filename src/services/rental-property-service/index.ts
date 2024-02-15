@@ -19,11 +19,10 @@ import { getFloorPlanStream } from './adapters/document-adapter'
 import {
   createLease,
   getContact,
-  getContactForPnr,
+  getCreditInformation,
 } from '../lease-service/adapters/tenant-lease-adapter'
 import { getParkingSpace } from './adapters/xpand-adapter'
 import { ParkingSpaceApplicationCategory } from '../../common/types'
-import app from '../../app'
 
 export const routes = (router: KoaRouter) => {
   router.get('(.*)/rentalproperties/:id/floorplan', async (ctx) => {
@@ -181,10 +180,21 @@ export const routes = (router: KoaRouter) => {
 
       let creditCheck = false
 
-      if (!applicantContact.leaseIds || applicantContact.leaseIds.length == 0) {
+      if (
+        !applicantContact.leaseIds ||
+        applicantContact.leaseIds.length == 0 ||
+        true // testing
+      ) {
         // Step 3A. External credit check if applicant is not a tenant.
-        creditCheck = true
-        log.push(`External credit check performed, result: ${creditCheck}`)
+        /*const creditInformation = getCreditInformation(
+          applicantContact.nationalRegistrationNumber
+        )*/
+        const creditInformation = await getCreditInformation('198001045775')
+        creditCheck = creditInformation.status === '1'
+        console.log('creditInformation', creditInformation)
+        log.push(
+          `Extern kreditupplysning genomförd. Resultat: ${creditInformation.status_text}`
+        )
       } else {
         // Step 3B. Internal credit check if applicant is a tenant
         creditCheck = true
