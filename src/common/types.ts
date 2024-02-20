@@ -1,28 +1,7 @@
-import { Address, RentInfo } from 'onecore-types'
-
-export enum ParkingSpaceType {
-  WarmGarage,
-  ColdGarage,
-  ThermalGarage,
-  CentralGarage,
-  MotorcycleGarage,
-  ParkingSpaceWithoutElectricity,
-  ParkingSpaceWithElectricity,
-  CaravanParkingSpace,
-  MotorcycleParkingSpace,
-  ParkingDeck,
-  Carport,
-  Garage,
-  ColdGarageWithElectricity,
-  CollectiveParkingSpace,
-  FreeParkingSpace,
-  ParkingSpaceWithElectricityWEBEL,
-  VisitorParkingSpace,
-  CentralFacilityParkingSpace,
-  DisabledParkingPlace,
-  ParkingSpaceWithChargingBox,
-  CarportWithChargingBox,
-}
+import {
+  ParkingSpaceApplicationCategory,
+  ParkingSpaceType,
+} from 'onecore-types'
 
 export const parkingSpaceTypeTranslation: Record<string, ParkingSpaceType> = {
   VARMG: ParkingSpaceType.WarmGarage,
@@ -48,26 +27,12 @@ export const parkingSpaceTypeTranslation: Record<string, ParkingSpaceType> = {
   CPORTMBOX: ParkingSpaceType.CarportWithChargingBox,
 }
 
-export enum ParkingSpaceApplicationCategory {
-  internal = 0,
-  external = 1,
-}
-
 export const parkingSpaceApplicationCategoryTranslation: Record<
   string,
   ParkingSpaceApplicationCategory
 > = {
   'Bilplats (extern)': ParkingSpaceApplicationCategory.external,
   'Bilplats (intern)': ParkingSpaceApplicationCategory.internal,
-}
-
-export interface ParkingSpace {
-  parkingSpaceId: string
-  address: Address
-  rent: RentInfo
-  vacantFrom: Date
-  type: ParkingSpaceType
-  applicationCategory: ParkingSpaceApplicationCategory
 }
 
 export enum ProcessStatus {
