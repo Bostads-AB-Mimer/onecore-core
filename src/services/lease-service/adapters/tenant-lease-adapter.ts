@@ -32,4 +32,12 @@ const getContactForPnr = async (
   return contactResponse.data.data
 }
 
-export { getLease, getLeasesForPnr, getContactForPnr }
+const getTenantStatusForPnr = async (
+  nationalRegistrationNumber: string
+): Promise<{ isTenant: boolean, address?: string, leaseIds?: string[] }> => {
+  const tenantStatusResponse = await axios(tenantsLeasesServiceUrl + '/leases/tenant-status/' + nationalRegistrationNumber);
+  return tenantStatusResponse.data.data;
+};
+
+
+export { getLease, getLeasesForPnr, getContactForPnr, getTenantStatusForPnr }

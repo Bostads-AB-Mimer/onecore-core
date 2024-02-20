@@ -10,6 +10,7 @@ import {
   getContactForPnr,
   getLease,
   getLeasesForPnr,
+  getTenantStatusForPnr
 } from './adapters/tenant-lease-adapter'
 
 const getLeaseWithRelatedEntities = async (rentalId: string) => {
@@ -53,6 +54,17 @@ export const routes = (router: KoaRouter) => {
    */
   router.get('(.*)/leases/:id', async (ctx) => {
     const responseData = await getLeaseWithRelatedEntities(ctx.params.id)
+
+    ctx.body = {
+      data: responseData,
+    }
+  })
+
+  /**
+   * Returns a lease with populated sub objects
+   */
+  router.get('(.*)/leases/tenant-status/:id', async (ctx) => {
+    const responseData = await getTenantStatusForPnr(ctx.params.id)
 
     ctx.body = {
       data: responseData,
