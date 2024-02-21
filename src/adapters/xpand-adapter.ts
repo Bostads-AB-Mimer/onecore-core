@@ -81,6 +81,7 @@ const getParkingSpace = async (parkingSpaceId: string) => {
 
     return parkingSpace
   } catch (error) {
+    console.error('Error getting parking space', error)
     return null
   }
 }

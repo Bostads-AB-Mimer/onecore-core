@@ -20,6 +20,9 @@ export interface Config {
   xpandService: {
     url: string
   }
+  communicationService: {
+    url: string
+  }
   auth: {
     secret: string
     expiresIn: string
@@ -44,6 +47,9 @@ const config = configPackage({
     documentsService: {
       url: 'https://mim-shared-apim-apim01-t.azure-api.net/document',
     },
+    communicationService: {
+      url: 'http://localhost:5040',
+    },
     auth: {
       secret: 'very secret. replace this',
       expiresIn: '3h', // format allowed by https://github.com/zeit/ms
@@ -58,5 +64,6 @@ export default {
   propertyInfoService: config.get('propertyInfoService'),
   documentsService: config.get('documentsService'),
   xpandService: config.get('xpandService'),
+  communicationService: config.get('communicationService'),
   auth: config.get('auth'),
 } as Config
