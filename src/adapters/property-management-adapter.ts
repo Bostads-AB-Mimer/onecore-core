@@ -1,5 +1,10 @@
 import axios from 'axios'
-import { MaterialChoice, MaterialOption, RentalProperty } from 'onecore-types'
+import {
+  MaterialChoice,
+  MaterialOption,
+  ParkingSpace,
+  RentalProperty,
+} from 'onecore-types'
 import config from '../common/config'
 
 const propertyManagementServiceUrl = config.propertyInfoService.url
@@ -77,12 +82,18 @@ const saveMaterialChoice = async (
   })
 }
 
-const getParkingSpace = async (parkingSpaceId: string) => {
-  const parkingSpaceResponse = await axios(
-    `${propertyManagementServiceUrl}/parkingspaces/${parkingSpaceId}`
-  )
+const getParkingSpace = async (
+  parkingSpaceId: string
+): Promise<ParkingSpace | undefined> => {
+  try {
+    const parkingSpaceResponse = await axios(
+      `${propertyManagementServiceUrl}/parkingspaces/${parkingSpaceId}`
+    )
 
-  return parkingSpaceResponse.data
+    return parkingSpaceResponse.data
+  } catch (error) {
+    return undefined
+  }
 }
 
 export {

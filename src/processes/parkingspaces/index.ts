@@ -12,7 +12,7 @@ import {
   createLease,
   getContact,
   getCreditInformation,
-} from '../../services/lease-service/adapters/tenant-lease-adapter'
+} from '../../adapters/tenant-lease-adapter'
 
 //
 // PROCESS (Create lease for external parking space)
@@ -162,7 +162,6 @@ export const createLeaseForExternalParkingSpace = async (
       }
     }
   } catch (error: any) {
-    console.log(log.join('\n'))
     return {
       processStatus: ProcessStatus.failed,
       httpStatus: 500,
