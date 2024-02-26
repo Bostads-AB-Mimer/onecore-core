@@ -17,9 +17,6 @@ export interface Config {
   documentsService: {
     url: string
   }
-  xpandService: {
-    url: string
-  }
   communicationService: {
     url: string
   }
@@ -41,9 +38,6 @@ const config = configPackage({
     propertyInfoService: {
       url: 'http://localhost:5030',
     },
-    xpandService: {
-      url: 'https://mypages-wapp-t.azurewebsites.net/api',
-    },
     documentsService: {
       url: 'https://mim-shared-apim-apim01-t.azure-api.net/document',
     },
@@ -63,7 +57,6 @@ export default {
   tenantsLeasesService: config.get('tenantsLeasesService'),
   propertyInfoService: config.get('propertyInfoService'),
   documentsService: config.get('documentsService'),
-  xpandService: config.get('xpandService'),
   communicationService: config.get('communicationService'),
   auth: config.get('auth'),
 } as Config

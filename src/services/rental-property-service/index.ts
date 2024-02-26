@@ -14,7 +14,7 @@ import {
   saveMaterialChoice,
   getMaterialChoiceStatuses,
   getRoomsWithMaterialChoices,
-} from './adapters/rental-property-adapter'
+} from '../../adapters/property-management-adapter'
 import { getFloorPlanStream } from './adapters/document-adapter'
 import { createLeaseForExternalParkingSpace } from '../../processes/parkingspaces'
 

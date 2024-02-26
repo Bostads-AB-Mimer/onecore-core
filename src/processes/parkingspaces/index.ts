@@ -1,14 +1,13 @@
-import { ParkingSpaceApplicationCategory } from 'onecore-types'
+import {
+  ParkingSpaceApplicationCategory,
+  parkingSpaceApplicationCategoryTranslation,
+} from 'onecore-types'
 import {
   sendNotificationToContact,
   sendNotificationToRole,
 } from '../../adapters/communication-adapter'
-import { getParkingSpace } from '../../adapters/xpand-adapter'
-import {
-  ProcessResult,
-  ProcessStatus,
-  parkingSpaceApplicationCategoryTranslation,
-} from '../../common/types'
+import { getParkingSpace } from '../../adapters/property-management-adapter'
+import { ProcessResult, ProcessStatus } from '../../common/types'
 import {
   createLease,
   getContact,
@@ -44,7 +43,6 @@ export const createLeaseForExternalParkingSpace = async (
   ]
 
   try {
-    // Step 1. Get parking space, choose process according to type (internal/external)
     const parkingSpace = await getParkingSpace(parkingSpaceId)
 
     if (!parkingSpace) {
@@ -85,14 +83,9 @@ export const createLeaseForExternalParkingSpace = async (
 
     let creditCheck = false
 
-    if (
-      !applicantContact.leaseIds ||
-      applicantContact.leaseIds.length == 0 ||
-      true // testing
-    ) {
-      // Step 3A. External credit check if applicant is not a tenant.
+    if (!applicantContact.leaseIds || applicantContact.leaseIds.length == 0) {
       if (process.env.NODE_ENV !== 'production') {
-        //applicantContact.nationalRegistrationNumber = '198001045775'
+        applicantContact.nationalRegistrationNumber = '198001045775'
       }
       const creditInformation = await getCreditInformation(
         applicantContact.nationalRegistrationNumber
@@ -104,7 +97,6 @@ export const createLeaseForExternalParkingSpace = async (
         } ${creditInformation.errorList?.[0]?.Reject_text ?? ''}`
       )
     } else {
-      // Step 3B. Internal credit check if applicant is a tenant
       creditCheck = true
       log.push(`Internal credit check performed, result: ${creditCheck}`)
     }
@@ -126,7 +118,6 @@ export const createLeaseForExternalParkingSpace = async (
         )
       }
 
-      // Step 5A. Notify of success
       await sendNotificationToContact(
         applicantContact,
         'Godkänd ansökan om extern bilplats',
@@ -147,8 +138,6 @@ export const createLeaseForExternalParkingSpace = async (
         httpStatus: 200,
       }
     } else {
-      // Step 5B. Notify of rejection
-
       log.push(
         `Ansökan kunde inte beviljas på grund av ouppfyllda kreditkrav (se ovan).`
       )
