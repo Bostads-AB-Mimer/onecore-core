@@ -4,7 +4,7 @@ import {
   ParkingSpaceType,
 } from 'onecore-types'
 import * as propertyManagementAdapter from '../../../adapters/property-management-adapter'
-import * as tenantLeaseAdapter from '../../../adapters/'
+import * as leasingAdapter from '../../../adapters/leasing-adapter'
 import { ProcessStatus } from '../../../common/types'
 import * as parkingProcesses from '../index'
 
@@ -81,9 +81,11 @@ describe('parkingspaces', () => {
         .spyOn(propertyManagementAdapter, 'getParkingSpace')
         .mockResolvedValue(mockedParkingSpace)
 
-      const jest.spyOn()
+      const getContactSpy = jest.spyOn(leasingAdapter, 'getContact')
 
       await parkingProcesses.createLeaseForExternalParkingSpace('foo', 'bar')
+
+      expect(getContactSpy).toHaveBeenCalledWith('bar')
     })
   })
 })

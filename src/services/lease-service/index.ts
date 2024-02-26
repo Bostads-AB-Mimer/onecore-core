@@ -11,7 +11,7 @@ import {
   getLease,
   getLeasesForPnr,
   getCreditInformation,
-} from '../../adapters/tenant-lease-adapter'
+} from '../../adapters/leasing-adapter'
 
 const getLeaseWithRelatedEntities = async (rentalId: string) => {
   const lease = await getLease(rentalId)

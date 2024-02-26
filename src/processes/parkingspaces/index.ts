@@ -12,7 +12,7 @@ import {
   createLease,
   getContact,
   getCreditInformation,
-} from '../../adapters/tenant-lease-adapter'
+} from '../../adapters/leasing-adapter'
 
 //
 // PROCESS (Create lease for external parking space)

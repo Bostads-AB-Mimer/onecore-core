@@ -3,7 +3,7 @@ import Koa from 'koa'
 import KoaRouter from '@koa/router'
 import bodyParser from 'koa-bodyparser'
 import { routes } from '../index'
-import * as tenantLeaseAdapter from '../../../adapters/tenant-lease-adapter'
+import * as tenantLeaseAdapter from '../../../adapters/leasing-adapter'
 import { Contact, Lease, ConsumerReport } from 'onecore-types'
 
 const app = new Koa()
