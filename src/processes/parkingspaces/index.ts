@@ -84,9 +84,6 @@ export const createLeaseForExternalParkingSpace = async (
     let creditCheck = false
 
     if (!applicantContact.leaseIds || applicantContact.leaseIds.length == 0) {
-      if (process.env.NODE_ENV !== 'production') {
-        applicantContact.nationalRegistrationNumber = '198001045775'
-      }
       const creditInformation = await getCreditInformation(
         applicantContact.nationalRegistrationNumber
       )
@@ -106,7 +103,7 @@ export const createLeaseForExternalParkingSpace = async (
       const lease = await createLease(
         parkingSpace.parkingSpaceId,
         applicantContact.contactCode,
-        '2024-01-01',
+        new Date().toISOString(),
         '001'
       )
 
@@ -155,7 +152,7 @@ export const createLeaseForExternalParkingSpace = async (
 
       return {
         processStatus: ProcessStatus.failed,
-        httpStatus: 200,
+        httpStatus: 400,
         response: {
           message: 'The parking space lease application has been rejected',
         },

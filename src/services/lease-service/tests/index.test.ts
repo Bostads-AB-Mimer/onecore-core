@@ -22,7 +22,7 @@ describe('lease-service', () => {
       leaseStartDate: new Date('2023-06-01T09:57:53.144Z'),
       leaseEndDate: new Date('2023-06-01T09:57:53.144Z'),
       status: 0,
-      tenantContactIds: ['4417', '5602'],
+      tenantContactIds: ['P4417', 'P5602'],
       address: undefined,
       noticeGivenBy: undefined,
       noticeDate: undefined,
@@ -200,7 +200,7 @@ describe('lease-service', () => {
     it('responds with a credit information', async () => {
       const getCreditInformationSpy = jest
         .spyOn(tenantLeaseAdapter, 'getCreditInformation')
-        .mockResolvedValue({ consumerReportMock })
+        .mockResolvedValue(consumerReportMock)
 
       const res = await request(app.callback()).get(
         '/cas/getConsumerReport/194512121122'
@@ -209,7 +209,7 @@ describe('lease-service', () => {
       expect(res.status).toBe(200)
       expect(getCreditInformationSpy).toHaveBeenCalled()
       expect(JSON.stringify(res.body.data)).toEqual(
-        JSON.stringify({ consumerReportMock })
+        JSON.stringify(consumerReportMock)
       )
     })
   })
