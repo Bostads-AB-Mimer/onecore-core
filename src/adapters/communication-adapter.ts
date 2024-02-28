@@ -19,12 +19,6 @@ export const sendNotificationToContact = async (
     },
   }
 
-  console.log(
-    'Sending',
-    `${config.communicationService.url}/sendMessage`,
-    axiosOptions
-  )
-
   const result = await axios(
     `${config.communicationService.url}/sendMessage`,
     axiosOptions
@@ -38,10 +32,22 @@ export const sendNotificationToRole = async (
   subject: string,
   message: string
 ) => {
+  const recipientEmailAddress = (
+    config.emailAddresses as Record<string, string>
+  )[recipientRole]
+
+  if (!recipientEmailAddress) {
+    throw new Error(
+      `Error sending notification to ${recipientRole}. No email address specified for role.`
+    )
+  }
+
+  console.log('Sending to', recipientEmailAddress)
+
   const axiosOptions = {
     method: 'POST',
     data: {
-      to: `anders+${recipientRole}@bornholm.se`,
+      to: recipientEmailAddress,
       subject,
       text: message,
     },

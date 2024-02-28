@@ -1,4 +1,6 @@
 import configPackage from '@iteam/config'
+import dotenv from 'dotenv'
+dotenv.config()
 
 interface Account {
   userName: string
@@ -26,6 +28,9 @@ export interface Config {
     maxFailedLoginAttempts: number
     testAccount: Account
   }
+  emailAddresses: {
+    leasing: string
+  }
 }
 
 const config = configPackage({
@@ -49,6 +54,9 @@ const config = configPackage({
       expiresIn: '3h', // format allowed by https://github.com/zeit/ms
       maxFailedLoginAttempts: 3,
     },
+    emailAddresses: {
+      leasing: 'uthyrning@mimer.nu',
+    },
   },
 })
 
@@ -58,5 +66,6 @@ export default {
   propertyInfoService: config.get('propertyInfoService'),
   documentsService: config.get('documentsService'),
   communicationService: config.get('communicationService'),
+  emailAddresses: config.get('emailAddresses'),
   auth: config.get('auth'),
 } as Config

@@ -25,7 +25,7 @@ import {
 // 3b. If applicant has contracts, perform internal credit check by fetching payment history from onecore-leasing
 // 4. If credit check is approved, create contract by calling Xpand soap service
 // 5a. If contract is created successfully, notify applicant and role uthyrning using onecore-communication
-// 5b. If contract could not be created, notify applicant and role uthyrning using onecore-communication (not implemented)
+// 5b. If contract could not be created, notify applicant and role uthyrning using onecore-communication
 // 6. If credit check is rejected, notify applicant and role uthyrning using onecore-communication
 // 7. If a technical error occurs, return error code.
 //
@@ -95,7 +95,7 @@ export const createLeaseForExternalParkingSpace = async (
       )
     } else {
       creditCheck = true
-      log.push(`Internal credit check performed, result: ${creditCheck}`)
+      log.push(`Intern kreditkontroll genomförd, resultat: ${creditCheck}`)
     }
 
     if (creditCheck) {
@@ -121,7 +121,7 @@ export const createLeaseForExternalParkingSpace = async (
         `Din ansökan om bilplats har godkänts. Du kommer inom kort att få ett kontrakt att skriva under digitalt.\nKontraktet har nummer ${lease.LeaseId} om du behöver referera till det i kontakt med kundcenter.\n\nMed vänlig hälsning,\nBostads Mimer AB`
       )
       await sendNotificationToRole(
-        'uthyrning',
+        'leasing',
         'Godkänd ansökan om extern bilplats',
         log.join('\n')
       )
@@ -145,7 +145,7 @@ export const createLeaseForExternalParkingSpace = async (
         'Din ansökan om bilplats kunde tyvärr inte godkännas på grund av ouppfyllda kreditkrav.\n\nOm du har frågor kring din ansökan, kontakta Mimers kundcenter. Du hittar kontaktuppgifter på https://www.mimer.nu/kontakta-oss/.\n\nMed vänlig hälsning,\nBostads Mimer AB'
       )
       await sendNotificationToRole(
-        'uthyrning',
+        'leasing',
         'Nekad ansökan om extern bilplats',
         log.join('\n')
       )
