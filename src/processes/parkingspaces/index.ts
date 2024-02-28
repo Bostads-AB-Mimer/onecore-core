@@ -1,8 +1,4 @@
 import {
-  ParkingSpaceApplicationCategory,
-  parkingSpaceApplicationCategoryTranslation,
-} from 'onecore-types'
-import {
   sendNotificationToContact,
   sendNotificationToRole,
 } from '../../adapters/communication-adapter'
@@ -13,6 +9,10 @@ import {
   getContact,
   getCreditInformation,
 } from '../../adapters/leasing-adapter'
+import {
+  ParkingSpaceApplicationCategory,
+  parkingSpaceApplicationCategoryTranslation,
+} from 'onecore-types'
 
 //
 // PROCESS (Create lease for external parking space)
