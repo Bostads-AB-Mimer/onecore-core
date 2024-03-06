@@ -86,6 +86,8 @@ describe('parkingspaces', () => {
     })
 
     it('gets the parking space', async () => {
+      getParkingSpaceSpy.mockReset()
+
       await parkingProcesses.createLeaseForExternalParkingSpace('foo', 'bar')
 
       expect(getParkingSpaceSpy).toHaveBeenCalledWith('foo')
@@ -144,8 +146,8 @@ describe('parkingspaces', () => {
       getParkingSpaceSpy.mockResolvedValue(mockedParkingSpace)
       getContactSpy.mockResolvedValue(mockedApplicantWithoutLeases)
 
-      const getCreditInformationSpy = jest
-        .spyOn(leasingAdapter, 'getCreditInformation')
+      getCreditInformationSpy
+        .mockReset()
         .mockResolvedValue(successfulConsumerReport)
 
       await parkingProcesses.createLeaseForExternalParkingSpace('foo', 'bar')
@@ -169,6 +171,7 @@ describe('parkingspaces', () => {
     it('sends a notification to the applicant if external credit check fails', async () => {
       getParkingSpaceSpy.mockResolvedValue(mockedParkingSpace)
       getCreditInformationSpy.mockResolvedValue(failedConsumerReport)
+      sendNotificationToContactSpy.mockReset()
 
       await parkingProcesses.createLeaseForExternalParkingSpace('foo', 'bar')
 
@@ -182,6 +185,7 @@ describe('parkingspaces', () => {
     it('sends a notification to the role leasing if external credit check fails', async () => {
       getParkingSpaceSpy.mockResolvedValue(mockedParkingSpace)
       getCreditInformationSpy.mockResolvedValue(failedConsumerReport)
+      sendNotificationToRoleSpy.mockReset()
 
       await parkingProcesses.createLeaseForExternalParkingSpace('foo', 'bar')
 
@@ -194,17 +198,20 @@ describe('parkingspaces', () => {
 
     it('performs an internal credit check if applicant has leases', async () => {
       getContactSpy.mockResolvedValue(mockedApplicantWithLeases)
+      getInternalCreditInformationSpy.mockReset()
+      getCreditInformationSpy.mockReset()
 
       await parkingProcesses.createLeaseForExternalParkingSpace('foo', 'bar')
 
       expect(getInternalCreditInformationSpy).toHaveBeenCalledWith(
         mockedApplicantWithLeases.contactCode
       )
+      expect(getCreditInformationSpy).not.toHaveBeenCalled()
     })
 
     it('fails lease creation if internal credit check fails', async () => {
       getContactSpy.mockResolvedValue(mockedApplicantWithLeases)
-      getInternalCreditInformationSpy.mockResolvedValue(true)
+      getInternalCreditInformationSpy.mockResolvedValue(false)
 
       const result = await parkingProcesses.createLeaseForExternalParkingSpace(
         'foo',
@@ -216,6 +223,8 @@ describe('parkingspaces', () => {
     })
 
     it('creates a contract if external credit check succeeds', async () => {
+      createContractSpy.mockReset()
+
       await parkingProcesses.createLeaseForExternalParkingSpace('foo', 'bar')
 
       expect(createContractSpy).toHaveBeenCalledWith(
@@ -224,6 +233,44 @@ describe('parkingspaces', () => {
         expect.any(String),
         '001'
       )
+    })
+
+    it('does not create a contract if external credit check fails', async () => {
+      createContractSpy.mockReset()
+      getContactSpy.mockReset().mockResolvedValue(mockedApplicantWithoutLeases)
+      getCreditInformationSpy
+        .mockReset()
+        .mockResolvedValue(failedConsumerReport)
+      await parkingProcesses.createLeaseForExternalParkingSpace('foo', 'bar')
+
+      expect(createContractSpy).not.toHaveBeenCalledWith()
+    })
+
+    it('creates a contract if internal credit check succeeds', async () => {
+      createContractSpy.mockReset()
+
+      getContactSpy.mockResolvedValue(mockedApplicantWithLeases)
+      getInternalCreditInformationSpy.mockReset().mockResolvedValue(true)
+      getCreditInformationSpy.mockReset()
+
+      await parkingProcesses.createLeaseForExternalParkingSpace('foo', 'bar')
+
+      expect(createContractSpy).toHaveBeenCalledWith(
+        mockedParkingSpace.parkingSpaceId,
+        mockedApplicantWithLeases.contactCode,
+        expect.any(String),
+        '001'
+      )
+    })
+
+    it('does not create a contract if internal credit check fails', async () => {
+      createContractSpy.mockReset()
+      getContactSpy.mockResolvedValue(mockedApplicantWithLeases)
+      getInternalCreditInformationSpy.mockReset().mockResolvedValue(false)
+
+      await parkingProcesses.createLeaseForExternalParkingSpace('foo', 'bar')
+
+      expect(createContractSpy).not.toHaveBeenCalledWith()
     })
   })
 })

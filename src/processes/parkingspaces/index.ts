@@ -95,7 +95,7 @@ export const createLeaseForExternalParkingSpace = async (
         } ${creditInformation.errorList?.[0]?.Reject_text ?? ''}`
       )
     } else {
-      const creditCheck = await getInternalCreditInformation(
+      creditCheck = await getInternalCreditInformation(
         applicantContact.contactCode
       )
 
