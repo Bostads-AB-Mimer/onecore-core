@@ -7,7 +7,7 @@ import { ProcessResult, ProcessStatus } from '../../../common/types'
 import {
   createLease,
   getContact,
-  getCreditInformation,
+  getCreditInformation, getLeasesForPnr,
 } from '../../../adapters/leasing-adapter'
 import {
   ParkingSpaceApplicationCategory,
@@ -21,7 +21,8 @@ import {
 // Steps:
 // 1.  Get parking space from mimer.nu API via onecore-property-management
 // 2.  Get applicant from onecore-leasing
-// 3.  Check that applicant is a tenant (note: is this safeguard needed?)
+// 3.a Check that applicant is a tenant (note: is this safeguard needed?)
+// 3.b Check if applicant is in queue for parking spaces, if not add to queue
 // 4.a Pass parking space ad and applicant data to onecore-leasing for further processing. onoecore-leasing has tables for keeping track of ads and applicants.
 // 4.b onecore-leasing adds the parking space to internal db if not already existing.
 // 4.c onecore-leasing adds applicants to the list of applicants for this particular ad
@@ -62,13 +63,11 @@ export const createLeaseForInternalParkingSpace = async (
         },
       }
     }
-    console.log("parking space: ", parkingSpace.applicationCategory, ParkingSpaceApplicationCategory.internal )
 
     if (
       parkingSpace.applicationCategory !=
       ParkingSpaceApplicationCategory.internal
     ) {
-      console.log("failing")
       return {
         processStatus: ProcessStatus.failed,
         httpStatus: 400,
@@ -91,7 +90,21 @@ export const createLeaseForInternalParkingSpace = async (
       }
     }
 
-    //todo: check if applicant is tenant to safeguard?
+    //step 3a. Check if applicant is tenant
+    const leases = await getLeasesForPnr(applicantContact.nationalRegistrationNumber)
+    if(leases.length < 1){
+      return {
+        processStatus: ProcessStatus.failed,
+        httpStatus: 403,
+        response: {
+          message: "Applicant is not a tenant",
+        },
+      }
+    }
+
+    //todo step 3.b Check if applicant is in queue for parking spaces, if not add to queue
+
+    //todo: validation is now done, continue to pass application data to onecore-leasing
 
     return {
       processStatus: ProcessStatus.inProgress,

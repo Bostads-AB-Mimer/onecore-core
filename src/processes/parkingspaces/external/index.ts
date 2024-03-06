@@ -1,14 +1,14 @@
 import {
   sendNotificationToContact,
   sendNotificationToRole,
-} from '../../adapters/communication-adapter'
-import { getParkingSpace } from '../../adapters/property-management-adapter'
-import { ProcessResult, ProcessStatus } from '../../common/types'
+} from '../../../adapters/communication-adapter'
+import { getParkingSpace } from '../../../adapters/property-management-adapter'
+import { ProcessResult, ProcessStatus } from '../../../common/types'
 import {
   createLease,
   getContact,
   getCreditInformation,
-} from '../../adapters/leasing-adapter'
+} from '../../../adapters/leasing-adapter'
 import {
   ParkingSpaceApplicationCategory,
   parkingSpaceApplicationCategoryTranslation,

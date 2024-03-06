@@ -1,20 +1,19 @@
 import {
-  ConsumerReport,
-  Contact,
+  Contact, Lease,
   ParkingSpace,
   ParkingSpaceApplicationCategory,
 } from 'onecore-types'
 import * as propertyManagementAdapter from '../../../../adapters/property-management-adapter'
 import * as leasingAdapter from '../../../../adapters/leasing-adapter'
-import * as communcationAdapter from '../../../../adapters/communication-adapter'
 import { ProcessStatus } from '../../../../common/types'
 import * as parkingProcesses from '../index'
 import {
   mockedApplicant,
   mockedParkingSpace,
-  mockedLease,
+  mockedLeases,
 } from './index.mocks'
 import { create } from 'domain'
+import { getLeasesForPnr } from '../../../../adapters/leasing-adapter'
 
 describe('parkingspaces', () => {
   describe('createLeaseForExternalParkingSpace', () => {
@@ -27,8 +26,12 @@ describe('parkingspaces', () => {
       Promise<Contact | undefined>,
       [contactId: string],
       any
+      >
+    let getLeasesForPnrSpy: jest.SpyInstance<
+      Promise<Lease[] | undefined>,
+      [nationalRegistrationNumber: string],
+      any
     >
-
 
     beforeEach(() => {
       getParkingSpaceSpy = jest
@@ -37,6 +40,9 @@ describe('parkingspaces', () => {
       getContactSpy = jest
         .spyOn(leasingAdapter, 'getContact')
         .mockResolvedValue(mockedApplicant)
+      getLeasesForPnrSpy = jest
+        .spyOn(leasingAdapter, 'getLeasesForPnr')
+        .mockResolvedValue(mockedLeases)
     })
 
     it('gets the parking space', async () => {
@@ -57,8 +63,14 @@ describe('parkingspaces', () => {
       expect(result.httpStatus).toBe(404)
     })
 
-    it('returns an error if the applicant is not a tenant', () => {
-      console.log("implement")
+    it('returns an forbidden if the applicant is not a tenant', async() => {
+      getLeasesForPnrSpy.mockResolvedValue([])
+      const result = await parkingProcesses.createLeaseForInternalParkingSpace(
+        'foo',
+        'bar'
+      )
+      expect(result.processStatus).toBe(ProcessStatus.failed)
+      expect(result.httpStatus).toBe(403)
     })
 
     it('returns an error if parking space is not internal', async () => {
