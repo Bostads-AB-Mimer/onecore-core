@@ -46,7 +46,7 @@ describe('parkingspaces', () => {
     })
 
     it('gets the parking space', async () => {
-      await parkingProcesses.createLeaseForInternalParkingSpace('foo', 'bar')
+      await parkingProcesses.createNoteOfInterestForInternalParkingSpace('foo', 'bar')
 
       expect(getParkingSpaceSpy).toHaveBeenCalledWith('foo')
     })
@@ -54,7 +54,7 @@ describe('parkingspaces', () => {
     it('returns an error if parking space is could not be found', async () => {
       getParkingSpaceSpy.mockResolvedValue(undefined)
 
-      const result = await parkingProcesses.createLeaseForInternalParkingSpace(
+      const result = await parkingProcesses.createNoteOfInterestForInternalParkingSpace(
         'foo',
         'bar'
       )
@@ -65,7 +65,7 @@ describe('parkingspaces', () => {
 
     it('returns an forbidden if the applicant is not a tenant', async() => {
       getLeasesForPnrSpy.mockResolvedValue([])
-      const result = await parkingProcesses.createLeaseForInternalParkingSpace(
+      const result = await parkingProcesses.createNoteOfInterestForInternalParkingSpace(
         'foo',
         'bar'
       )
@@ -80,7 +80,7 @@ describe('parkingspaces', () => {
       }
       getParkingSpaceSpy.mockResolvedValue(internalParkingSpace)
 
-      const result = await parkingProcesses.createLeaseForInternalParkingSpace(
+      const result = await parkingProcesses.createNoteOfInterestForInternalParkingSpace(
         'foo',
         'bar'
       )
@@ -92,7 +92,7 @@ describe('parkingspaces', () => {
     it('gets the applicant contact', async () => {
       getParkingSpaceSpy.mockResolvedValue(mockedParkingSpace)
 
-      await parkingProcesses.createLeaseForInternalParkingSpace('foo', 'bar')
+      await parkingProcesses.createNoteOfInterestForInternalParkingSpace('foo', 'bar')
 
       expect(getContactSpy).toHaveBeenCalledWith('bar')
     })
@@ -101,7 +101,7 @@ describe('parkingspaces', () => {
       getParkingSpaceSpy.mockResolvedValue(mockedParkingSpace)
       getContactSpy.mockResolvedValue(undefined)
 
-      const result = await parkingProcesses.createLeaseForInternalParkingSpace(
+      const result = await parkingProcesses.createNoteOfInterestForInternalParkingSpace(
         'foo',
         'bar'
       )

@@ -17,7 +17,7 @@ import {
 } from '../../adapters/property-management-adapter'
 import { getFloorPlanStream } from './adapters/document-adapter'
 import { createLeaseForExternalParkingSpace } from '../../processes/parkingspaces/external'
-import { createLeaseForInternalParkingSpace } from '../../processes/parkingspaces/internal'
+import { createNoteOfInterestForInternalParkingSpace } from '../../processes/parkingspaces/internal'
 
 export const routes = (router: KoaRouter) => {
   router.get('(.*)/rentalproperties/:id/floorplan', async (ctx) => {
@@ -148,7 +148,7 @@ export const routes = (router: KoaRouter) => {
     }
   })
 
-  router.post('(.*)/parkingspaces/:parkingSpaceId/noteOfInterest', async (ctx) => {
+  router.post('(.*)/parkingspaces/:parkingSpaceId/createNoteOfInterestForInternalParkingSpace', async (ctx) => {
     const parkingSpaceId = ctx.params.parkingSpaceId
     //todo: refactor and share query param validation between this and /leases
     if (!parkingSpaceId) {
@@ -173,7 +173,7 @@ export const routes = (router: KoaRouter) => {
     }
 
     try {
-      const result = await createLeaseForInternalParkingSpace(
+      const result = await createNoteOfInterestForInternalParkingSpace(
         parkingSpaceId,
         contactId
       )
