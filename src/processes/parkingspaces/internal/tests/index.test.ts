@@ -35,7 +35,7 @@ describe('parkingspaces', () => {
 
     beforeEach(() => {
       getParkingSpaceSpy = jest
-        .spyOn(propertyManagementAdapter, 'getParkingSpace')
+        .spyOn(propertyManagementAdapter, 'getPublishedParkingSpace')
         .mockResolvedValue(mockedParkingSpace)
       getContactSpy = jest
         .spyOn(leasingAdapter, 'getContact')

@@ -1,13 +1,8 @@
-import {
-  sendNotificationToContact,
-  sendNotificationToRole,
-} from '../../../adapters/communication-adapter'
-import { getParkingSpace } from '../../../adapters/property-management-adapter'
+import { getPublishedParkingSpace } from '../../../adapters/property-management-adapter'
 import { ProcessResult, ProcessStatus } from '../../../common/types'
 import {
-  createLease,
   getContact,
-  getCreditInformation, getLeasesForPnr,
+  getLeasesForPnr,
 } from '../../../adapters/leasing-adapter'
 import {
   ParkingSpaceApplicationCategory,
@@ -41,7 +36,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
   ]
 
   try {
-    const parkingSpace = await getParkingSpace(parkingSpaceId)
+    const parkingSpace = await getPublishedParkingSpace(parkingSpaceId)
 
     // step 1 - get parking space
     if (!parkingSpace) {
@@ -69,7 +64,6 @@ export const createNoteOfInterestForInternalParkingSpace = async (
 
     // Step 2. Get information about applicant and contracts
     const applicantContact = await getContact(contactId)
-
     if (!applicantContact) {
       return {
         processStatus: ProcessStatus.failed,
@@ -79,7 +73,6 @@ export const createNoteOfInterestForInternalParkingSpace = async (
         },
       }
     }
-
     //step 3a. Check if applicant is tenant
     const leases = await getLeasesForPnr(applicantContact.nationalRegistrationNumber)
     if(leases.length < 1){
@@ -95,12 +88,11 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     //todo step 3.b Check if applicant is in queue for parking spaces, if not add to queue
 
     //todo: validation is now done, continue to pass application data to onecore-leasing
-
     return {
       processStatus: ProcessStatus.inProgress,
       httpStatus: 500,
       response: {
-        message: "todo",
+        message: "implement passing application data to onecore-leasing",
       },
     }
   } catch (error: any) {

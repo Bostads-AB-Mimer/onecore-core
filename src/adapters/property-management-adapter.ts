@@ -96,6 +96,21 @@ const getParkingSpace = async (
   }
 }
 
+//todo: rename?
+const getPublishedParkingSpace = async (
+  parkingSpaceId: string
+): Promise<ParkingSpace | undefined> => {
+  try {
+    const parkingSpaceResponse = await axios(
+      `${propertyManagementServiceUrl}/publishedParkingSpaces/${parkingSpaceId}`
+    )
+
+    return parkingSpaceResponse.data
+  } catch (error) {
+    return undefined
+  }
+}
+
 export {
   getRentalProperty,
   getRoomTypeWithMaterialOptions,
@@ -105,4 +120,5 @@ export {
   saveMaterialChoice,
   getRoomsWithMaterialChoices,
   getParkingSpace,
+  getPublishedParkingSpace
 }
