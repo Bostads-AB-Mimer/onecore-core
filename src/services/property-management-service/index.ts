@@ -150,7 +150,6 @@ export const routes = (router: KoaRouter) => {
 
   router.post('(.*)/parkingspaces/:parkingSpaceId/noteofinterests', async (ctx) => {
     const parkingSpaceId = ctx.params.parkingSpaceId
-    //todo: refactor and share query param validation between this and /leases
     if (!parkingSpaceId) {
       ctx.status = 400
       ctx.body = {

@@ -82,6 +82,9 @@ const saveMaterialChoice = async (
   })
 }
 
+//todo: refactor the subsequent requests to use same data source (soap api)
+//todo: getParkingSpace uses the mimer.nu api
+//todo: getPublishedParkingSpace uses the soap service
 const getParkingSpace = async (
   parkingSpaceId: string
 ): Promise<ParkingSpace | undefined> => {
@@ -96,7 +99,6 @@ const getParkingSpace = async (
   }
 }
 
-//todo: rename?
 const getPublishedParkingSpace = async (
   parkingSpaceId: string
 ): Promise<ParkingSpace | undefined> => {
