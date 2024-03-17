@@ -1,4 +1,9 @@
-import { Invoice, InvoiceTransactionType, PaymentStatus } from 'onecore-types'
+import {
+  Invoice,
+  InvoiceTransactionType,
+  PaymentStatus,
+  WaitingList,
+} from 'onecore-types'
 
 const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000
 const sizMonthsMs = 182 * 24 * 60 * 60 * 1000
@@ -53,5 +58,35 @@ export const mockedOldProblematicInvoices: Invoice[] = [
     ...mockedInvoices[1],
     transactionType: InvoiceTransactionType.DebtCollection,
     expirationDate: new Date(Date.now() - sizMonthsMs - thirtyDaysMs),
+  },
+]
+
+export const mockedWaitingList: WaitingList[] = [
+  {
+    ApplicantCaption: 'Foo Bar',
+    ContactCode: 'P12345',
+    ContractFromApartment: new Date('2024-02-29T23:00:00.000Z'),
+    QueuePoints: 45,
+    QueuePointsSocialConnection: 0,
+    WaitingListFrom: new Date('2024-01-31T23:00:00.000Z'),
+    WaitingListTypeCaption: 'Bostad',
+  },
+  {
+    ApplicantCaption: 'Foo Bar',
+    ContactCode: 'P12345',
+    ContractFromApartment: new Date('2024-02-29T23:00:00.000Z'),
+    QueuePoints: 45,
+    QueuePointsSocialConnection: 0,
+    WaitingListFrom: new Date('2024-01-31T23:00:00.000Z'),
+    WaitingListTypeCaption: 'Bilplats (intern)',
+  },
+  {
+    ApplicantCaption: 'Foo Bar',
+    ContactCode: 'P12345',
+    ContractFromApartment: new Date('2024-02-29T23:00:00.000Z'),
+    QueuePoints: 45,
+    QueuePointsSocialConnection: 0,
+    WaitingListFrom: new Date('2024-01-31T23:00:00.000Z'),
+    WaitingListTypeCaption: 'Bilplats (extern)',
   },
 ]

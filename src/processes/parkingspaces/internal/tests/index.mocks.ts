@@ -6,6 +6,7 @@ import {
   ParkingSpace,
   ParkingSpaceApplicationCategory,
   ParkingSpaceType,
+  WaitingList,
 } from 'onecore-types'
 
 export const mockedParkingSpace: ParkingSpace = {
@@ -87,5 +88,35 @@ export const mockedLeases: Lease[] = [
     tenants: undefined,
     terminationDate: undefined,
     type: '',
+  },
+]
+
+export const mockedWaitingList: WaitingList[] = [
+  {
+    ApplicantCaption: 'Foo Bar',
+    ContactCode: 'P12345',
+    ContractFromApartment: new Date('2024-02-29T23:00:00.000Z'),
+    QueuePoints: 45,
+    QueuePointsSocialConnection: 0,
+    WaitingListFrom: new Date('2024-01-31T23:00:00.000Z'),
+    WaitingListTypeCaption: 'Bostad',
+  },
+  {
+    ApplicantCaption: 'Foo Bar',
+    ContactCode: 'P12345',
+    ContractFromApartment: new Date('2024-02-29T23:00:00.000Z'),
+    QueuePoints: 45,
+    QueuePointsSocialConnection: 0,
+    WaitingListFrom: new Date('2024-01-31T23:00:00.000Z'),
+    WaitingListTypeCaption: 'Bilplats (intern)',
+  },
+  {
+    ApplicantCaption: 'Foo Bar',
+    ContactCode: 'P12345',
+    ContractFromApartment: new Date('2024-02-29T23:00:00.000Z'),
+    QueuePoints: 45,
+    QueuePointsSocialConnection: 0,
+    WaitingListFrom: new Date('2024-01-31T23:00:00.000Z'),
+    WaitingListTypeCaption: 'Bilplats (extern)',
   },
 ]

@@ -5,12 +5,13 @@ import {
   Invoice,
   InvoiceTransactionType,
   Lease,
+  WaitingList,
 } from 'onecore-types'
 import config from '../common/config'
 import dayjs from 'dayjs'
 import { serialize } from 'v8'
 
-const tenantsLeasesServiceUrl = config.tenantsLeasesService.url
+const tenantsLeasesServiceUrl = config.tenantsLeasesService.url //todo: refactor name
 
 const getLease = async (leaseId: string): Promise<Lease> => {
   const leaseResponse = await axios(
@@ -24,7 +25,9 @@ const getLeasesForPnr = async (
   nationalRegistrationNumber: string
 ): Promise<Lease[]> => {
   const leasesResponse = await axios(
-    tenantsLeasesServiceUrl + '/leases/for/nationalRegistrationNumber/' + nationalRegistrationNumber
+    tenantsLeasesServiceUrl +
+      '/leases/for/nationalRegistrationNumber/' +
+      nationalRegistrationNumber
   )
   return leasesResponse.data.data
 }
@@ -109,6 +112,17 @@ const getInternalCreditInformation = async (
   return !hasDebtCollection
 }
 
+const getWaitingList = async (
+  nationalRegistrationNumber: string
+): Promise<WaitingList[]> => {
+  const waitingList = await axios(
+    tenantsLeasesServiceUrl +
+      '/contact/waitingList/' +
+      nationalRegistrationNumber
+  )
+  return waitingList.data.data
+}
+
 export {
   getLease,
   getLeasesForPnr,
@@ -117,4 +131,5 @@ export {
   createLease,
   getCreditInformation,
   getInternalCreditInformation,
+  getWaitingList,
 }
