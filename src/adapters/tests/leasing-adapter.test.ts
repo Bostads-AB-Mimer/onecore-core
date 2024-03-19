@@ -64,7 +64,7 @@ describe('leasing-adapter', () => {
   })
 
   describe('addApplicantToWaitingList', () => {
-    it('should add applicant ', async () => {
+    it('should add applicant to waiting list', async () => {
       mockAxios.mockResolvedValue({
         data: {},
         status: 209,
