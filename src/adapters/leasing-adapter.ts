@@ -123,6 +123,26 @@ const getWaitingList = async (
   return waitingList.data.data
 }
 
+const addApplicantToWaitingList = async (
+  nationalRegistrationNumber: string,
+  contactCode: string,
+  waitingListTypeCaption: string
+) => {
+  const axiosOptions = {
+    method: 'POST',
+    data: {
+      contactCode: contactCode,
+      waitingListTypeCaption: waitingListTypeCaption,
+    },
+  }
+  return axios(
+    tenantsLeasesServiceUrl +
+      '/contact/waitingList/' +
+      nationalRegistrationNumber,
+    axiosOptions
+  )
+}
+
 export {
   getLease,
   getLeasesForPnr,
@@ -132,4 +152,5 @@ export {
   getCreditInformation,
   getInternalCreditInformation,
   getWaitingList,
+  addApplicantToWaitingList,
 }

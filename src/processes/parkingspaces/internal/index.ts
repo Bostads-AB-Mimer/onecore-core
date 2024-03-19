@@ -1,6 +1,7 @@
 import { getPublishedParkingSpace } from '../../../adapters/property-management-adapter'
 import { ProcessResult, ProcessStatus } from '../../../common/types'
 import {
+  addApplicantToWaitingList,
   getContact,
   getLeasesForPnr,
   getWaitingList,
@@ -9,6 +10,7 @@ import {
   ParkingSpaceApplicationCategory,
   parkingSpaceApplicationCategoryTranslation,
 } from 'onecore-types'
+import { HttpStatusCode } from 'axios'
 
 //
 // PROCESS part 1 (Create note of interest for internal parking space)
@@ -88,25 +90,37 @@ export const createNoteOfInterestForInternalParkingSpace = async (
       }
     }
 
-    //todo step 3.b Check if applicant is in queue for parking spaces, if not add to queue
+    //step 3.b Check if applicant is in queue for parking spaces, if not add to queue
     const waitingList = await getWaitingList(
       applicantContact.nationalRegistrationNumber
     )
 
+    let shouldAddApplicantToWaitingList = false
     if (waitingList.length > 0) {
-      if (
-        !waitingList.some(
-          (obj) => obj.WaitingListTypeCaption === 'Bilplats (intern)'
-        )
-      ) {
-        //todo: implement
-        console.log(
-          'applicant is not in waiting list for internal parking spaces'
-        )
+      const isInWaitingListForInternalParking = waitingList.some(
+        (o) => o.WaitingListTypeCaption === 'Bilplats (intern)'
+      )
+      if (!isInWaitingListForInternalParking) {
+        shouldAddApplicantToWaitingList = true
       }
     } else {
-      //todo: implement
-      console.log('applicant does not belong to any waiting list')
+      shouldAddApplicantToWaitingList = true
+    }
+
+    if (shouldAddApplicantToWaitingList) {
+      log.push(`Sökande saknas i kö för intern parkeringsplats.`)
+
+      const result = await addApplicantToWaitingList(
+        applicantContact.nationalRegistrationNumber,
+        applicantContact.contactCode,
+        'Bilplats (intern)'
+      )
+      //todo: write test case
+      if (result.status == HttpStatusCode.Created) {
+        log.push(`Sökande placerad i kö för intern parkeringsplats`)
+      } else {
+        throw Error(result.statusText)
+      }
     }
 
     log.push(
