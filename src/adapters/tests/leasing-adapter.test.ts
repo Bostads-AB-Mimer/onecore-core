@@ -1,4 +1,4 @@
-import axios, { AxiosStatic } from 'axios'
+import axios, { AxiosStatic, HttpStatusCode } from 'axios'
 
 interface AxiosMock extends AxiosStatic {
   mockResolvedValue: Function
@@ -60,6 +60,22 @@ describe('leasing-adapter', () => {
 
       const result = await leasingAdapter.getWaitingList('P123456')
       expect(result).toEqual(mockedWaitingList)
+    })
+  })
+
+  describe('addApplicantToWaitingList', () => {
+    it('should add applicant ', async () => {
+      mockAxios.mockResolvedValue({
+        data: {},
+        status: 209,
+      })
+      const result = await leasingAdapter.addApplicantToWaitingList(
+        '´196709226789',
+        'P123456',
+        'Bilplats (intern)'
+      )
+      expect(result)
+      expect(result.status).toEqual(HttpStatusCode.Created)
     })
   })
 })

@@ -16,11 +16,10 @@ import {
   mockedWaitingList,
 } from './index.mocks'
 import { create } from 'domain'
-import { getLeasesForPnr } from '../../../../adapters/leasing-adapter'
 import exp from 'constants'
 
 describe('parkingspaces', () => {
-  describe('createLeaseForExternalParkingSpace', () => {
+  describe('createNoteOfInterestForInternalParkingSpace', () => {
     let getParkingSpaceSpy: jest.SpyInstance<
       Promise<ParkingSpace | undefined>,
       [parkingSpaceId: string],
@@ -41,6 +40,9 @@ describe('parkingspaces', () => {
       [nationalRegistrationNumber: string],
       any
     >
+
+    // Mock out all top level functions, such as get, put, delete and post:
+    jest.mock('axios')
 
     beforeEach(() => {
       getParkingSpaceSpy = jest
@@ -142,11 +144,6 @@ describe('parkingspaces', () => {
       expect(logSpy.mock.calls[0][0][3]).toEqual(
         'Validering genomförd. Sökande godkänd för att anmäla intresse på bilplats foo'
       )
-    })
-
-    it('places applicant in waiting list for internal parking space if applicant does not belong to waiting list', async () => {
-      //todo: implement
-      console.log('implement')
     })
   })
 })

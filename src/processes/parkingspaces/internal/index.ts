@@ -115,7 +115,6 @@ export const createNoteOfInterestForInternalParkingSpace = async (
         applicantContact.contactCode,
         'Bilplats (intern)'
       )
-      //todo: write test case
       if (result.status == HttpStatusCode.Created) {
         log.push(`Sökande placerad i kö för intern parkeringsplats`)
       } else {
@@ -126,8 +125,6 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     log.push(
       `Validering genomförd. Sökande godkänd för att anmäla intresse på bilplats ${parkingSpaceId}`
     )
-
-    console.log(log)
 
     //todo: validation is now done, continue to pass application data to onecore-leasing
     return {

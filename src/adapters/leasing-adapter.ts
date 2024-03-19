@@ -11,7 +11,7 @@ import config from '../common/config'
 import dayjs from 'dayjs'
 import { serialize } from 'v8'
 
-const tenantsLeasesServiceUrl = config.tenantsLeasesService.url //todo: refactor name
+const tenantsLeasesServiceUrl = config.tenantsLeasesService.url
 
 const getLease = async (leaseId: string): Promise<Lease> => {
   const leaseResponse = await axios(
