@@ -96,36 +96,59 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     )
 
     let shouldAddApplicantToWaitingList = false
+    let isInWaitingListForInternalParking = false
+    let isInWaitingListForExternalParking = false
     if (waitingList.length > 0) {
-      const isInWaitingListForInternalParking = waitingList.some(
+      isInWaitingListForInternalParking = waitingList.some(
         (o) => o.WaitingListTypeCaption === 'Bilplats (intern)'
       )
-      if (!isInWaitingListForInternalParking) {
+      isInWaitingListForExternalParking = waitingList.some(
+        (o) => o.WaitingListTypeCaption === 'Bilplats (extern)'
+      )
+      if (
+        !isInWaitingListForInternalParking ||
+        !isInWaitingListForExternalParking
+      ) {
         shouldAddApplicantToWaitingList = true
       }
     } else {
       shouldAddApplicantToWaitingList = true
     }
 
+    //xpand handles internal and external waiting list synonymously
+    //a user should therefore always be placed in both waiting list
     if (shouldAddApplicantToWaitingList) {
-      log.push(`Sökande saknas i kö för intern parkeringsplats.`)
-
-      const result = await addApplicantToWaitingList(
-        applicantContact.nationalRegistrationNumber,
-        applicantContact.contactCode,
-        'Bilplats (intern)'
-      )
-      if (result.status == HttpStatusCode.Created) {
-        log.push(`Sökande placerad i kö för intern parkeringsplats`)
-      } else {
-        throw Error(result.statusText)
+      if (!isInWaitingListForInternalParking) {
+        log.push(`Sökande saknas i kö för intern parkeringsplats.`)
+        const result = await addApplicantToWaitingList(
+          applicantContact.nationalRegistrationNumber,
+          applicantContact.contactCode,
+          'Bilplats (intern)'
+        )
+        if (result.status == HttpStatusCode.Created) {
+          log.push(`Sökande placerad i kö för intern parkeringsplats`)
+        } else {
+          throw Error(result.statusText)
+        }
+      }
+      if (!isInWaitingListForExternalParking) {
+        log.push(`Sökande saknas i kö för extern parkeringsplats.`)
+        const result = await addApplicantToWaitingList(
+          applicantContact.nationalRegistrationNumber,
+          applicantContact.contactCode,
+          'Bilplats (extern)'
+        )
+        if (result.status == HttpStatusCode.Created) {
+          log.push(`Sökande placerad i kö för extern parkeringsplats`)
+        } else {
+          throw Error(result.statusText)
+        }
       }
     }
 
     log.push(
       `Validering genomförd. Sökande godkänd för att anmäla intresse på bilplats ${parkingSpaceId}`
     )
-
     //todo: validation is now done, continue to pass application data to onecore-leasing
     return {
       processStatus: ProcessStatus.inProgress,
