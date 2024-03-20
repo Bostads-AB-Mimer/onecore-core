@@ -100,10 +100,10 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     let isInWaitingListForExternalParking = false
     if (waitingList.length > 0) {
       isInWaitingListForInternalParking = waitingList.some(
-        (o) => o.WaitingListTypeCaption === 'Bilplats (intern)'
+        (o) => o.waitingListTypeCaption === 'Bilplats (intern)'
       )
       isInWaitingListForExternalParking = waitingList.some(
-        (o) => o.WaitingListTypeCaption === 'Bilplats (extern)'
+        (o) => o.waitingListTypeCaption === 'Bilplats (extern)'
       )
       if (
         !isInWaitingListForInternalParking ||
@@ -114,7 +114,6 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     } else {
       shouldAddApplicantToWaitingList = true
     }
-
     //xpand handles internal and external waiting list synonymously
     //a user should therefore always be placed in both waiting list
     if (shouldAddApplicantToWaitingList) {
@@ -149,6 +148,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     log.push(
       `Validering genomförd. Sökande godkänd för att anmäla intresse på bilplats ${parkingSpaceId}`
     )
+    console.log(log) //log output up to this point for historic reasons and for test cases
     //todo: validation is now done, continue to pass application data to onecore-leasing
     return {
       processStatus: ProcessStatus.inProgress,

@@ -67,7 +67,7 @@ describe('leasing-adapter', () => {
     it('should add applicant to waiting list', async () => {
       mockAxios.mockResolvedValue({
         data: {},
-        status: 209,
+        status: 201,
       })
       const result = await leasingAdapter.addApplicantToWaitingList(
         '´196709226789',
