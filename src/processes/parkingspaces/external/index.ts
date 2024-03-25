@@ -84,8 +84,10 @@ export const createLeaseForExternalParkingSpace = async (
     }
 
     let creditCheck = false
+    const applicantHasNoLease =
+      !applicantContact.leaseIds || applicantContact.leaseIds.length == 0
 
-    if (!applicantContact.leaseIds || applicantContact.leaseIds.length == 0) {
+    if (applicantHasNoLease) {
       const creditInformation = await getCreditInformation(
         applicantContact.nationalRegistrationNumber
       )
@@ -163,8 +165,10 @@ export const createLeaseForExternalParkingSpace = async (
         processStatus: ProcessStatus.failed,
         httpStatus: 400,
         response: {
-          message:
-            'Din ansökan om bilplats kunde tyvärr inte godkännas på grund av ouppfyllda kreditkrav. Om du har frågor kring din ansökan, kontakta Mimers kundcenter.',
+          reason: applicantHasNoLease
+            ? 'External check failed'
+            : 'Internal check failed',
+          message: 'The parking space lease application has been rejected',
         },
       }
     }
