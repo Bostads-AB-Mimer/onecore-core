@@ -11,6 +11,11 @@ import {
   getLease,
   getLeasesForPnr,
   getCreditInformation,
+  createNewListing,
+  applyForListing,
+  getListingsWithApplicants,
+  getApplicantsByContactCode,
+  getApplicantByContactCodeAndRentalObjectCode,
 } from '../../adapters/leasing-adapter'
 
 const getLeaseWithRelatedEntities = async (rentalId: string) => {
@@ -70,4 +75,62 @@ export const routes = (router: KoaRouter) => {
       data: responseData,
     }
   })
+
+  /**
+   * Post a new Listing
+   */
+  router.post('/listings', async (ctx: any) => {
+    const listingData = ctx.request.body; 
+    const responseData = await createNewListing(listingData);
+  
+    ctx.body = {
+      data: responseData,
+    };
+  });
+
+  /**
+   * Post a new Applicant
+   */
+  router.post('/listings/apply', async (ctx: any) => {
+    const responseData = await applyForListing( ctx.request.body);
+  
+    ctx.body = {
+      data: responseData,
+    };
+  });
+
+  /**
+   * Get all Listings with Applicants
+   */
+  router.get('/listings-with-applicants', async (ctx: any) => {
+    const responseData = await getListingsWithApplicants();
+  
+    ctx.body = {
+      data: responseData,
+    };
+  });
+
+  /**
+   * Get all Applicants by contact code
+   */
+  router.get('/applicants/:contactCode', async (ctx: any) => {
+    const responseData = await getApplicantsByContactCode(ctx.params.contactCode);
+  
+    ctx.body = {
+      data: responseData,
+    };
+  })
+  
+  /**
+   * Get Applicant by contact code and rental object code
+   */
+  router.get('/applicants/:contactCode/:rentalObjectCode', async (ctx: any) => {
+    const { contactCode, rentalObjectCode } = ctx.params;
+    const responseData = await getApplicantByContactCodeAndRentalObjectCode(contactCode, rentalObjectCode);
+  
+    ctx.body = {
+      data: responseData,
+    };
+  });
+
 }
