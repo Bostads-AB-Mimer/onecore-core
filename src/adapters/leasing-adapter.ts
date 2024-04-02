@@ -9,7 +9,6 @@ import {
 } from 'onecore-types'
 import config from '../common/config'
 import dayjs from 'dayjs'
-import { serialize } from 'v8'
 
 const tenantsLeasesServiceUrl = config.tenantsLeasesService.url
 
