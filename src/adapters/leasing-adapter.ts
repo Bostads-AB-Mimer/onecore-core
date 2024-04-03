@@ -13,6 +13,11 @@ import config from '../common/config'
 import dayjs from 'dayjs'
 import { serialize } from 'v8'
 
+//todo: move to global config or handle error statuses in middleware
+axios.defaults.validateStatus = function (status) {
+  return status >= 200 && status < 500 // override Axios throwing errors so that we can handle errors manually
+}
+
 const tenantsLeasesServiceUrl = config.tenantsLeasesService.url
 
 const getLease = async (leaseId: string): Promise<Lease> => {
@@ -150,30 +155,16 @@ const createNewListing = async (listingData: Listing) => {
 }
 
 const applyForListing = async (applicantData: Applicant) => {
-  try {
-    const response = await axios.post(
-      `${tenantsLeasesServiceUrl}/listings/apply`,
-      applicantData
-    )
-    return response
-  } catch (error) {
-    console.error('Error applying for a listing:', error)
-    return undefined
-  }
+  return await axios.post(
+    `${tenantsLeasesServiceUrl}/listings/apply`,
+    applicantData
+  )
 }
 
-const getListingByRentalObjectCode = async (
-  rentalObjectCode: string
-): Promise<Listing | undefined> => {
-  try {
-    const response = await axios.get(
-      `${tenantsLeasesServiceUrl}/listings/${rentalObjectCode}`
-    )
-    return response.data
-  } catch (error) {
-    console.error('Error fetching listings with applicants:', error)
-    return undefined
-  }
+const getListingByRentalObjectCode = async (rentalObjectCode: string) => {
+  return await axios.get(
+    `${tenantsLeasesServiceUrl}/listings/${rentalObjectCode}`
+  )
 }
 
 const getListingsWithApplicants = async (): Promise<any[] | undefined> => {

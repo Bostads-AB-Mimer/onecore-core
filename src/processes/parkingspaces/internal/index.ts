@@ -47,9 +47,9 @@ export const createNoteOfInterestForInternalParkingSpace = async (
   ]
 
   try {
-    const listing = await getPublishedParkingSpace(parkingSpaceId)
+    const parkingSpace = await getPublishedParkingSpace(parkingSpaceId)
     // step 1 - get parking space
-    if (!listing) {
+    if (!parkingSpace) {
       return {
         processStatus: ProcessStatus.failed,
         httpStatus: 404,
@@ -60,13 +60,14 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     }
 
     if (
-      listing.applicationCategory != ParkingSpaceApplicationCategory.internal
+      parkingSpace.applicationCategory !=
+      ParkingSpaceApplicationCategory.internal
     ) {
       return {
         processStatus: ProcessStatus.failed,
         httpStatus: 400,
         response: {
-          message: `This process currently only handles internal parking spaces. The parking space provided is not internal (it is ${listing.applicationCategory}, ${parkingSpaceApplicationCategoryTranslation.internal}).`,
+          message: `This process currently only handles internal parking spaces. The parking space provided is not internal (it is ${parkingSpace.applicationCategory}, ${parkingSpaceApplicationCategoryTranslation.internal}).`,
         },
       }
     }
@@ -157,21 +158,18 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     console.log(log) //log output up to this point for historic reasons and for test cases
 
     //step 4.b Add parking space listing to onecore-leases database
-    //todo: decide on which way forward:
-    //todo: 1. do check in core if listing exists
-    //todo: 2  do check in leasing POST endpoint if listing exists
-    //todo: if 1, the error code below could be removed
-    const existingListing = await getListingByRentalObjectCode(parkingSpaceId)
+    let listing = await getListingByRentalObjectCode(parkingSpaceId)
 
-    if (existingListing == undefined) {
+    if (listing.status == HttpStatusCode.NotFound) {
       try {
-        const createListingResult = await createNewListing(listing)
+        log.push(`Annons existerar inte i onecore-leasing, skapar annons`)
+        const createListingResult = await createNewListing(parkingSpace)
         if (createListingResult.status == HttpStatusCode.Created) {
-          //todo: add log entry for successful create
-          console.log(createListingResult)
+          log.push(`Annons skapad i onecore-leasing`)
+          listing = createListingResult //todo make sure that we get the listing here
         }
+        //todo: below is redundant?
       } catch (error) {
-        //check if the listing already exists
         if (axios.isAxiosError(error)) {
           const axiosError = error as AxiosError
 
@@ -199,10 +197,9 @@ export const createNoteOfInterestForInternalParkingSpace = async (
       }
     }
 
-    console.log(log)
-
     //step 4.c Add applicant to onecore-leasing database
-    if (existingListing != undefined) {
+
+    if (listing.data != undefined) {
       const applicant: Applicant = {
         id: 0, //should not be passed
         name: applicantContact.fullName,
@@ -210,31 +207,33 @@ export const createNoteOfInterestForInternalParkingSpace = async (
         applicationDate: new Date(),
         applicationType: applicationType,
         status: ListingStatus.Active,
-        listingId: existingListing?.id,
+        listingId: listing.data?.id, //todo: fix schema in leasing, null should not be allowed
       }
 
+      log.push(`Annons existerar inte i onecore-leasing, skapar annons`)
       const applyForListingResult = await applyForListing(applicant)
-      console.log('applyForListingResult', applyForListingResult)
 
-      if (
-        applyForListingResult != undefined &&
-        applyForListingResult.status == HttpStatusCode.Created
-      ) {
-        //todo: better log message?
-        log.push(`Sökande placerad i kö. Process avslutad`)
-
+      if (applyForListingResult?.status == HttpStatusCode.Created) {
+        log.push(`Sökande skapad i onecore-leasing`)
         return {
           processStatus: ProcessStatus.successful,
-          httpStatus: 200,
+          httpStatus: 200, //what status to return?
           response: {
-            message: `Applicant ${contactCode} placed in listing for parking space ${parkingSpaceId}`,
+            message: `Applicant ${contactCode} successfully applied to parking space ${parkingSpaceId}`,
           },
         }
       }
-
-      //todo: add error clauses
+      if (applyForListingResult.status == HttpStatusCode.Conflict) {
+        log.push(`Sökande existerar redan i onecore-leasing, avslutar process`)
+        return {
+          processStatus: ProcessStatus.inProgress,
+          httpStatus: 200, //what status to return?
+          response: {
+            message: 'Applicant already exists in listing',
+          },
+        }
+      }
     }
-    console.log(log)
 
     return {
       processStatus: ProcessStatus.failed,

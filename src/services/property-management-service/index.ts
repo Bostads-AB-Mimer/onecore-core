@@ -190,7 +190,6 @@ export const routes = (router: KoaRouter) => {
           contactCode,
           applicationType
         )
-
         ctx.status = result.httpStatus
         ctx.body = result.response
       } catch (error) {
