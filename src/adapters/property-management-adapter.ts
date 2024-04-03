@@ -1,5 +1,6 @@
 import axios from 'axios'
 import {
+  Listing,
   MaterialChoice,
   MaterialOption,
   ParkingSpace,
@@ -102,7 +103,7 @@ const getParkingSpace = async (
 
 const getPublishedParkingSpace = async (
   parkingSpaceId: string
-): Promise<ParkingSpace | undefined> => {
+): Promise<Listing | undefined> => {
   try {
     const parkingSpaceResponse = await axios(
       `${propertyManagementServiceUrl}/publishedParkingSpaces/${parkingSpaceId}`
@@ -123,5 +124,5 @@ export {
   saveMaterialChoice,
   getRoomsWithMaterialChoices,
   getParkingSpace,
-  getPublishedParkingSpace
+  getPublishedParkingSpace,
 }

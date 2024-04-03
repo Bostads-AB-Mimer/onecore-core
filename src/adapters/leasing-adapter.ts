@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { AxiosError, HttpStatusCode } from 'axios'
 import {
   ConsumerReport,
   Contact,
@@ -7,7 +7,7 @@ import {
   Lease,
   WaitingList,
   Listing,
-  Applicant
+  Applicant,
 } from 'onecore-types'
 import config from '../common/config'
 import dayjs from 'dayjs'
@@ -145,56 +145,79 @@ const addApplicantToWaitingList = async (
   )
 }
 
-const createNewListing = async (listingData: Listing): Promise<{ listingId: number } | undefined> => {
-  try {
-    const response = await axios.post(`${tenantsLeasesServiceUrl}/listings`, listingData);
-    return response.data;
-  } catch (error) {
-    console.error('Error creating a new listing:', error);
-    return undefined;
-  }
-};
+const createNewListing = async (listingData: Listing) => {
+  return await axios.post(`${tenantsLeasesServiceUrl}/listings`, listingData)
+}
 
-const applyForListing = async (applicantData: Applicant): Promise<{ applicationId: number } | undefined> => {
+const applyForListing = async (applicantData: Applicant) => {
   try {
-    const response = await axios.post(`${tenantsLeasesServiceUrl}/listings/apply`, applicantData);
-    return response.data;
+    const response = await axios.post(
+      `${tenantsLeasesServiceUrl}/listings/apply`,
+      applicantData
+    )
+    return response
   } catch (error) {
-    console.error('Error applying for a listing:', error);
-    return undefined;
+    console.error('Error applying for a listing:', error)
+    return undefined
   }
-};
+}
+
+const getListingByRentalObjectCode = async (
+  rentalObjectCode: string
+): Promise<Listing | undefined> => {
+  try {
+    const response = await axios.get(
+      `${tenantsLeasesServiceUrl}/listings/${rentalObjectCode}`
+    )
+    return response.data
+  } catch (error) {
+    console.error('Error fetching listings with applicants:', error)
+    return undefined
+  }
+}
+
 const getListingsWithApplicants = async (): Promise<any[] | undefined> => {
   try {
-    const response = await axios.get(`${tenantsLeasesServiceUrl}/listings-with-applicants`);
-    return response.data;
+    const response = await axios.get(
+      `${tenantsLeasesServiceUrl}/listings-with-applicants`
+    )
+    return response.data
   } catch (error) {
-    console.error('Error fetching listings with applicants:', error);
-    return undefined;
+    console.error('Error fetching listings with applicants:', error)
+    return undefined
   }
-};
+}
 
-
-const getApplicantsByContactCode = async (contactCode: string): Promise<any[] | undefined> => {
+const getApplicantsByContactCode = async (
+  contactCode: string
+): Promise<any[] | undefined> => {
   try {
-    const response = await axios.get(`${tenantsLeasesServiceUrl}/applicants/${contactCode}/`);
-    return response.data;
+    const response = await axios.get(
+      `${tenantsLeasesServiceUrl}/applicants/${contactCode}/`
+    )
+    return response.data
   } catch (error) {
-    console.error('Error fetching applicants by contact code:', error);
-    return undefined;
+    console.error('Error fetching applicants by contact code:', error)
+    return undefined
   }
-};
-const getApplicantByContactCodeAndRentalObjectCode = async (contactCode: string, rentalObjectCode: string): Promise<any | undefined> => {
+}
+const getApplicantByContactCodeAndRentalObjectCode = async (
+  contactCode: string,
+  rentalObjectCode: string
+): Promise<any | undefined> => {
   try {
-    const response = await axios.get(`${tenantsLeasesServiceUrl}/applicants/${contactCode}/${rentalObjectCode}`);
-    return response.data;
+    const response = await axios.get(
+      `${tenantsLeasesServiceUrl}/applicants/${contactCode}/${rentalObjectCode}`
+    )
+    return response.data
   } catch (error) {
-    console.error('Error fetching applicant by contact code and rental object code:', error);
-    return undefined;
+    console.error(
+      'Error fetching applicant by contact code and rental object code:',
+      error
+    )
+    return undefined
   }
-};
-
-
+}
 
 export {
   getLease,
@@ -207,8 +230,9 @@ export {
   getWaitingList,
   addApplicantToWaitingList,
   createNewListing,
+  getListingByRentalObjectCode,
   applyForListing,
   getListingsWithApplicants,
   getApplicantsByContactCode,
-  getApplicantByContactCodeAndRentalObjectCode
+  getApplicantByContactCodeAndRentalObjectCode,
 }
