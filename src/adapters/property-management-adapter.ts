@@ -8,6 +8,17 @@ import {
 } from 'onecore-types'
 import config from '../common/config'
 
+// Temporary interface to be replaced by the one from onecore-types when propertyInfo is fetched from xpand
+export interface RentalPropertyInfo {
+  id: string
+  address: string
+  type: string
+  size: string
+  estateCode: string
+  estateName: string
+  blockCode: string
+}
+
 const propertyManagementServiceUrl = config.propertyInfoService.url
 
 const getRentalProperty = async (
@@ -15,6 +26,16 @@ const getRentalProperty = async (
 ): Promise<RentalProperty> => {
   const propertyResponse = await axios(
     propertyManagementServiceUrl + '/rentalproperties/' + rentalPropertyId
+  )
+
+  return propertyResponse.data
+}
+
+const getRentalPropertyInfo = async (
+  propertyId: string
+): Promise<RentalPropertyInfo> => {
+  const propertyResponse = await axios(
+    propertyManagementServiceUrl + '/rentalPropertyInfo/' + propertyId
   )
 
   return propertyResponse.data
@@ -117,6 +138,7 @@ const getPublishedParkingSpace = async (
 
 export {
   getRentalProperty,
+  getRentalPropertyInfo,
   getRoomTypeWithMaterialOptions,
   getMaterialOption,
   getMaterialChoices,

@@ -32,7 +32,8 @@ import {
 //
 export const createLeaseForExternalParkingSpace = async (
   parkingSpaceId: string,
-  contactId: string
+  contactId: string,
+  startDate: string | undefined
 ): Promise<ProcessResult> => {
   const log: string[] = [
     `Ansökan om extern bilplats`,
@@ -62,7 +63,7 @@ export const createLeaseForExternalParkingSpace = async (
     ) {
       return {
         processStatus: ProcessStatus.failed,
-        httpStatus: 400,
+        httpStatus: 404,
         response: {
           message: `This process currently only handles external parking spaces. The parking space provided is not external (it is ${parkingSpace.applicationCategory}, ${parkingSpaceApplicationCategoryTranslation.external}).`,
         },
@@ -83,8 +84,10 @@ export const createLeaseForExternalParkingSpace = async (
     }
 
     let creditCheck = false
+    const applicantHasNoLease =
+      !applicantContact.leaseIds || applicantContact.leaseIds.length == 0
 
-    if (!applicantContact.leaseIds || applicantContact.leaseIds.length == 0) {
+    if (applicantHasNoLease) {
       const creditInformation = await getCreditInformation(
         applicantContact.nationalRegistrationNumber
       )
@@ -111,22 +114,20 @@ export const createLeaseForExternalParkingSpace = async (
       const lease = await createLease(
         parkingSpace.parkingSpaceId,
         applicantContact.contactCode,
-        new Date().toISOString(),
+        startDate != undefined ? startDate : new Date().toISOString(),
         '001'
       )
 
       log.push(`Kontrakt skapat: ${lease.LeaseId}`)
 
-      if (parkingSpace.rent.currentRent.vat) {
-        log.push(
-          'OBS: Moms ska läggas på kontraktet. Detta måste göras manuellt innan det skickas för påskrift.'
-        )
-      }
+      log.push(
+        'Kontrollera om moms ska läggas på kontraktet. Detta måste göras manuellt innan det skickas för påskrift.'
+      )
 
       await sendNotificationToContact(
         applicantContact,
         'Godkänd ansökan om extern bilplats',
-        `Din ansökan om bilplats har godkänts. Du kommer inom kort att få ett kontrakt att skriva under digitalt.\nKontraktet har nummer ${lease.LeaseId} om du behöver referera till det i kontakt med kundcenter.\n\nMed vänlig hälsning,\nBostads Mimer AB`
+    `Din ansökan om bilplats har godkänts. Du kommer inom kort få ett kontrakt att skriva under digitalt.\nKontraktet har nummer ${lease.LeaseId} om du behöver referera till det i kontakt med kundcenter.\n\n**Din första faktura för din bilplats kan du se på Mina sidor. Logga in och klicka på Mina fakturor så ser du sista betalningsdag. Glöm inte att betala den i tid för att undvika förseningsavgifter.**\n\n**Eventuella nycklar hämtar du på Mimers kundcenter på Gasverksgatan 7 efter klockan 12 dagen då ditt hyreskontrakt börjar gälla. Om den dagen inträffar på en lördag, söndag eller en helgdag är du välkommen att hämta nycklarna efter klockan 12 den första vardagen därefter.**\n\nMed vänlig hälsning,\nBostads Mimer AB`
       )
       await sendNotificationToRole(
         'leasing',
@@ -162,6 +163,9 @@ export const createLeaseForExternalParkingSpace = async (
         processStatus: ProcessStatus.failed,
         httpStatus: 400,
         response: {
+          reason: applicantHasNoLease
+            ? 'External check failed'
+            : 'Internal check failed',
           message: 'The parking space lease application has been rejected',
         },
       }

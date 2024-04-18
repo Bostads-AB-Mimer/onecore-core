@@ -11,7 +11,6 @@ import {
 } from 'onecore-types'
 import config from '../common/config'
 import dayjs from 'dayjs'
-import { serialize } from 'v8'
 
 //todo: move to global config or handle error statuses in middleware
 axios.defaults.validateStatus = function (status) {
@@ -39,6 +38,13 @@ const getLeasesForPnr = async (
   return leasesResponse.data.data
 }
 
+const getLeasesForPropertyId = async (propertyId: string): Promise<Lease[]> => {
+  const leasesResponse = await axios(
+    tenantsLeasesServiceUrl + '/leases/for/propertyId/' + propertyId
+  )
+  return leasesResponse.data.data
+}
+
 const getContactForPnr = async (
   nationalRegistrationNumber: string
 ): Promise<Contact> => {
@@ -53,6 +59,20 @@ const getContact = async (contactId: string): Promise<Contact | undefined> => {
   try {
     const contactResponse = await axios(
       tenantsLeasesServiceUrl + '/contact/contactCode/' + contactId
+    )
+
+    return contactResponse.data.data
+  } catch (error) {
+    return undefined
+  }
+}
+
+const getContactForPhoneNumber = async (
+  phoneNumber: string
+): Promise<Contact | undefined> => {
+  try {
+    const contactResponse = await axios(
+      tenantsLeasesServiceUrl + '/contact/phoneNumber/' + phoneNumber
     )
 
     return contactResponse.data.data
@@ -101,16 +121,16 @@ const getInternalCreditInformation = async (
   )
 
   const invoices = result.data.data as Invoice[] | undefined
-  const sixMonthsMs = 1000 * 60 * 60 * 24 * 182
+  const oneDayMs = 24 * 60 * 60 * 1000
+  const sixMonthsMs = 182 * oneDayMs
 
   let hasDebtCollection = false
 
   if (invoices) {
-    hasDebtCollection ||= invoices.some((invoice: Invoice) => {
+    hasDebtCollection = invoices.some((invoice: Invoice) => {
       return (
-        invoice.transactionType ===
-          (InvoiceTransactionType.Reminder ||
-            InvoiceTransactionType.DebtCollection) &&
+        (invoice.transactionType === InvoiceTransactionType.Reminder ||
+          invoice.transactionType === InvoiceTransactionType.DebtCollection) &&
         -dayjs(invoice.expirationDate).diff() < sixMonthsMs
       )
     })
@@ -213,8 +233,10 @@ const getApplicantByContactCodeAndRentalObjectCode = async (
 export {
   getLease,
   getLeasesForPnr,
+  getLeasesForPropertyId,
   getContactForPnr,
   getContact,
+  getContactForPhoneNumber,
   createLease,
   getCreditInformation,
   getInternalCreditInformation,

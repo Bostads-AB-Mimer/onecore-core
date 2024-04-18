@@ -131,10 +131,13 @@ export const routes = (router: KoaRouter) => {
       return
     }
 
+    const startDate = ctx.request.body.startDate
+
     try {
       const result = await createLeaseForExternalParkingSpace(
         parkingSpaceId,
-        contactId
+        contactId,
+        startDate
       )
 
       ctx.status = result.httpStatus
@@ -190,6 +193,7 @@ export const routes = (router: KoaRouter) => {
           contactCode,
           applicationType
         )
+
         ctx.status = result.httpStatus
         ctx.body = result.response
       } catch (error) {
