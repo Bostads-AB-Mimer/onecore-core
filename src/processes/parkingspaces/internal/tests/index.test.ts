@@ -19,7 +19,7 @@ import {
 import { create } from 'domain'
 import exp from 'constants'
 
-//todo: mock database
+//todo: mock database since actual inserts are happening in the real db
 
 describe('parkingspaces', () => {
   describe('createNoteOfInterestForInternalParkingSpace', () => {
@@ -180,4 +180,8 @@ describe('parkingspaces', () => {
       )
     })
   })
+
+  //todo: write tests for step 4.b Add parking space listing to onecore-leases
+
+  // todo: write tests for step 4.c Add applicant to onecore-leasing database
 })
