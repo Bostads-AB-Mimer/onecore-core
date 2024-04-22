@@ -132,6 +132,7 @@ const getPublishedParkingSpace = async (
 
     return parkingSpaceResponse.data
   } catch (error) {
+    console.error('Error retrieving parking space', error)
     return undefined
   }
 }

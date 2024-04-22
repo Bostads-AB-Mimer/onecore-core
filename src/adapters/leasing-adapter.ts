@@ -171,20 +171,35 @@ const addApplicantToWaitingList = async (
 }
 
 const createNewListing = async (listingData: Listing) => {
-  return await axios.post(`${tenantsLeasesServiceUrl}/listings`, listingData)
+  try {
+    return await axios.post(`${tenantsLeasesServiceUrl}/listings`, listingData)
+  } catch (error) {
+    console.error('Error creating new listing:', error)
+    return undefined
+  }
 }
 
 const applyForListing = async (applicantData: Applicant) => {
-  return await axios.post(
-    `${tenantsLeasesServiceUrl}/listings/apply`,
-    applicantData
-  )
+  try {
+    return await axios.post(
+      `${tenantsLeasesServiceUrl}/listings/apply`,
+      applicantData
+    )
+  } catch (error) {
+    console.error('Error applying for listing:', error)
+    return undefined
+  }
 }
 
 const getListingByRentalObjectCode = async (rentalObjectCode: string) => {
-  return await axios.get(
-    `${tenantsLeasesServiceUrl}/listings/${rentalObjectCode}`
-  )
+  try {
+    return await axios.get(
+      `${tenantsLeasesServiceUrl}/listings/${rentalObjectCode}`
+    )
+  } catch (error) {
+    console.error('Error fetching listing by rental object code:', error)
+    return undefined
+  }
 }
 
 const getListingsWithApplicants = async (): Promise<any[] | undefined> => {

@@ -92,9 +92,7 @@ export const routes = (router: KoaRouter) => {
   router.get('/listings-with-applicants', async (ctx: any) => {
     const responseData = await getListingsWithApplicants()
 
-    ctx.body = {
-      data: responseData,
-    }
+    ctx.body = responseData
   })
 
   /**
@@ -105,9 +103,7 @@ export const routes = (router: KoaRouter) => {
       ctx.params.contactCode
     )
 
-    ctx.body = {
-      data: responseData,
-    }
+    ctx.body = responseData
   })
 
   /**
@@ -120,8 +116,6 @@ export const routes = (router: KoaRouter) => {
       rentalObjectCode
     )
 
-    ctx.body = {
-      data: responseData,
-    }
+    ctx.body = responseData
   })
 }
