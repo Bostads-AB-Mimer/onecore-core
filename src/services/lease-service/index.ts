@@ -133,8 +133,6 @@ export const routes = (router: KoaRouter) => {
       ctx.params.contactCode
     )
 
-    console.log('responseData', responseData)
-
     ctx.body = responseData
   })
 
