@@ -100,9 +100,7 @@ export const routes = (router: KoaRouter) => {
   router.get('(.*)/listing/:id', async (ctx) => {
     const responseData = await getListingByListingId(ctx.params.id)
 
-    ctx.body = {
-      data: responseData,
-    }
+    ctx.body = responseData
   })
 
   /**

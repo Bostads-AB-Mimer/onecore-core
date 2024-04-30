@@ -12,7 +12,6 @@ import {
 import {
   Applicant,
   ApplicantStatus,
-  ListingStatus,
   ParkingSpaceApplicationCategory,
   parkingSpaceApplicationCategoryTranslation,
 } from 'onecore-types'

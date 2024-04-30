@@ -211,9 +211,10 @@ const applyForListing = async (applicantData: Applicant) => {
 
 const getListingByListingId = async (listingId: string) => {
   try {
-    return await axios.get(
+    const result = await axios.get(
       `${tenantsLeasesServiceUrl}/listings/by-id/${listingId}`
     )
+    return result.data
   } catch (error) {
     console.error('Error fetching listing by rental object code:', error)
     return undefined
@@ -270,7 +271,7 @@ const getApplicantsAndListingByContactCode = async (
         applicant.listingId.toString()
       )
       if (listingResponse) {
-        applicantsAndListings.push({ applicant, listing: listingResponse.data })
+        applicantsAndListings.push({ applicant, listing: listingResponse })
       }
     }
     return applicantsAndListings
@@ -311,8 +312,8 @@ const withdrawApplicantByManager = async (
     )
     return response.data
   } catch (error) {
-    console.error('Error withdrawing applicant by manager:', error)
-    return undefined
+    console.error('Error patching applicant status:', error)
+    throw new Error(`Failed to update status for applicant ${applicantId}`)
   }
 }
 
