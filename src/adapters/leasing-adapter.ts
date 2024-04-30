@@ -273,7 +273,6 @@ const getApplicantsAndListingByContactCode = async (
         applicantsAndListings.push({ applicant, listing: listingResponse.data })
       }
     }
-    console.log('applicantsAndListings', applicantsAndListings)
     return applicantsAndListings
   } catch (error) {
     console.error(
