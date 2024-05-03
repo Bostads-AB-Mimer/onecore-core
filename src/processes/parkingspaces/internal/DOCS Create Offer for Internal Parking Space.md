@@ -8,7 +8,8 @@ A[Start] -->B(Get Listing)
 B --> C{Is Listing Published<br/>and Ready for Offering?}
 C --> |Yes| O
 C --> |No| D[Get Applicants incl<br/>Contracts and Queue Points]
-D --> E[Sort Applicant by Rental Criteria]
+D --> K[Update Listing status]
+K --> E[Sort Applicant by Rental Criteria]
 E --> F{Valid Applicant<br/>Found?}
 F --> |No| G[TODO:Re-Publish Parking Space<br/>as External]
 G --> O[End]
@@ -32,15 +33,11 @@ sequenceDiagram
     participant XPand DB as XPand SOAP Database
     participant XPand SOAP as XPand SOAP Service
 
-    Note over System,XPand SOAP: Check for unpub. Parking Spaces ready for Offering
-    Core -->> Property Mgmt: Get unpub. Parking Spaces
-    Property Mgmt -->> XPand SOAP: Get unpub. Parking Spaces
-    XPand SOAP -->> Property Mgmt: Get unpub. Parking Spaces
-    Property Mgmt -->> Core: Get unpub. Parking Spaces
-
-    Core -->> Leasing: Update Listing Status
-    Leasing -->> OneCore DB: Update Listing Status
-
+    Note over System,XPand SOAP: Check for unpub. Listrings ready for Offering
+    Core -->> Property Mgmt: Get unpub. Listings
+    Property Mgmt -->> OneCore DB: Get unpub. Listings
+    OneCore DB -->> Property Mgmt: Get unpub. Listings
+    Property Mgmt -->> Core: Get unpub. Listings
     Core ->> Core: Create Offer for each Parking Space
 
     loop for each Listing Ready for Offering
@@ -49,6 +46,8 @@ sequenceDiagram
         Leasing -->>OneCore DB: Get Listing and Applicants
         OneCore DB --> Leasing: Listings and Applicants
         Leasing -->> Core: Listing and Applicants
+        Core -->> Leasing: Update Listing Status
+        Leasing -->> OneCore DB: Update Listing Status
         Core -->> Leasing: Get Contracts and Queue Points for each Applicant
         Leasing -->> XPand DB: Get Contracts
         XPand DB -->> Leasing:Contracts
