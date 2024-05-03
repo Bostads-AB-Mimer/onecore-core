@@ -272,7 +272,6 @@ describe('lease-service', () => {
 
       expect(res.status).toBe(200)
       expect(getListingByIdWithDetailedApplicantsSpy).toHaveBeenCalled()
-      console.log(res.body)
       expect(JSON.stringify(res.body)).toEqual(
         JSON.stringify(listingWithDetailedApplicantsMock)
       )
