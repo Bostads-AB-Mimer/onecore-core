@@ -42,27 +42,30 @@ sequenceDiagram
     Leasing -->> OneCore DB: Update Listing Status
 
     Core ->> Core: Create Offer for each Parking Space
-    Note over System,XPand SOAP: Create Offer for Internal Parking Space
-    Core -->>Leasing: Get Listing and Applicants
-    Leasing -->>OneCore DB: Get Listing and Applicants
-    OneCore DB --> Leasing: Listings and Applicants
-    Leasing -->> Core: Listing and Applicants
-    Core -->> Leasing: Get Contracts and Queue Points for each Applicant
-    Leasing -->> XPand DB: Get Contracts
-    XPand DB -->> Leasing:Contracts
-    Leasing -->> XPand SOAP: Get Queue Points
-    XPand SOAP -->> Leasing: Queue Points
-    Leasing -->> Core:Contracts and Queue Points for each Applicant
-    Core -->> Leasing:Sort Applicants by Rental Criteria
-    Leasing -->> Core: Sorted Applicants
-    alt No Valid Applicant Found
-        Core-->>Leasing: TODO Re-Publish Listing in External Queue
-    else Valid Applicant Found
-        Core -->> Leasing: Create Offer
-        Leasing -->> OneCore DB:Create Offer
-        Core -->> Leasing: Update Status of Winning Applicant
-        Leasing -->> OneCore DB: Update Status of Winning Applicant
-        Core -->> Communication: Notify Winning Applicant
-        Communication -->> User: Email/SMS Winning Applicant
+
+    loop for each Listing Ready for Offering
+        Note over System,XPand SOAP: Create Offer for Internal Parking Space
+        Core -->>Leasing: Get Listing and Applicants
+        Leasing -->>OneCore DB: Get Listing and Applicants
+        OneCore DB --> Leasing: Listings and Applicants
+        Leasing -->> Core: Listing and Applicants
+        Core -->> Leasing: Get Contracts and Queue Points for each Applicant
+        Leasing -->> XPand DB: Get Contracts
+        XPand DB -->> Leasing:Contracts
+        Leasing -->> XPand SOAP: Get Queue Points
+        XPand SOAP -->> Leasing: Queue Points
+        Leasing -->> Core:Contracts and Queue Points for each Applicant
+        Core -->> Leasing:Sort Applicants by Rental Criteria
+        Leasing -->> Core: Sorted Applicants
+        alt No Valid Applicant Found
+            Core-->>Leasing: TODO Re-Publish Listing in External Queue
+        else Valid Applicant Found
+            Core -->> Leasing: Create Offer
+            Leasing -->> OneCore DB:Create Offer
+            Core -->> Leasing: Update Status of Winning Applicant
+            Leasing -->> OneCore DB: Update Status of Winning Applicant
+            Core -->> Communication: Notify Winning Applicant
+            Communication -->> User: Email/SMS Winning Applicant
+        end
     end
 ```
