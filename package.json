@@ -1,5 +1,5 @@
 {
-  "version": "1.0.44",
+  "version": "1.0.46",
   "description": "",
   "main": "./src/index.ts",
   "private": "true",
@@ -8,6 +8,7 @@
   },
   "scripts": {
     "test": "jest",
+    "test:watch": "jest --watch",
     "build": "tsc",
     "start": "ts-node ./src/index.ts",
     "dev": "nodemon -e ts,js --exec npm run start",
