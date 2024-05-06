@@ -48,7 +48,9 @@ sequenceDiagram
         Leasing -->> Core: Listing and Applicants
         Core -->> Leasing: Update Listing Status
         Leasing -->> OneCore DB: Update Listing Status
-        Core -->> Leasing: Get Contracts and Queue Points for each Applicant
+        Core -->> Leasing: Get detailed Contact data, Contracts and Queue Points for each Applicant
+        Leasing -->> XPand DB: Get Contact
+        XPand DB -->> Leasing:Contact
         Leasing -->> XPand DB: Get Contracts
         XPand DB -->> Leasing:Contracts
         Leasing -->> XPand SOAP: Get Queue Points
