@@ -9,7 +9,6 @@ import {
   mockedWaitingList,
 } from './index.mocks'
 import { HttpStatusCode, InternalAxiosRequestConfig } from 'axios'
-import exp from 'constants'
 
 describe('parkingspaces', () => {
   describe('createNoteOfInterestForInternalParkingSpace', () => {
