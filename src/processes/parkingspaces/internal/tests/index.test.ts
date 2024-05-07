@@ -9,6 +9,7 @@ import {
   mockedWaitingList,
 } from './index.mocks'
 import { HttpStatusCode, InternalAxiosRequestConfig } from 'axios'
+import exp from 'constants'
 
 describe('parkingspaces', () => {
   describe('createNoteOfInterestForInternalParkingSpace', () => {
@@ -48,7 +49,7 @@ describe('parkingspaces', () => {
       expect(getParkingSpaceSpy).toHaveBeenCalledWith('foo')
     })
 
-    it('returns an error if parking space is could not be found', async () => {
+    it('returns an error if parking space could not be found', async () => {
       getParkingSpaceSpy.mockResolvedValueOnce(undefined)
 
       const result =
@@ -123,7 +124,7 @@ describe('parkingspaces', () => {
     })
 
     it('adds applicant to internal waiting list if not in it already', async () => {
-      getContactSpy.mockResolvedValue(mockedApplicant)
+      getContactSpy.mockResolvedValueOnce(mockedApplicant)
       getParkingSpaceSpy.mockResolvedValueOnce(mockedParkingSpace)
       getLeasesForPnrSpy.mockResolvedValueOnce(mockedLeases)
       getWaitingListSpy.mockResolvedValueOnce([
@@ -154,7 +155,7 @@ describe('parkingspaces', () => {
     })
 
     it('adds applicant to external waiting list if not in it already', async () => {
-      getContactSpy.mockResolvedValue(mockedApplicant)
+      getContactSpy.mockResolvedValueOnce(mockedApplicant)
       getParkingSpaceSpy.mockResolvedValueOnce(mockedParkingSpace)
       getLeasesForPnrSpy.mockResolvedValueOnce(mockedLeases)
       getWaitingListSpy.mockResolvedValueOnce([
@@ -193,8 +194,8 @@ describe('parkingspaces', () => {
       )
     })
 
-    it('calls getListingByRentalObjectCode if applicant passes validation', async () => {
-      getContactSpy.mockResolvedValue(mockedApplicant)
+    it('gets existing listing if applicant passes validation', async () => {
+      getContactSpy.mockResolvedValueOnce(mockedApplicant)
       getParkingSpaceSpy.mockResolvedValueOnce(mockedParkingSpace)
       getLeasesForPnrSpy.mockResolvedValueOnce(mockedLeases)
       getWaitingListSpy.mockResolvedValueOnce(mockedWaitingList)
@@ -209,8 +210,8 @@ describe('parkingspaces', () => {
       expect(getListingByRentalObjectCodeSpy).toHaveBeenCalledWith('foo')
     })
 
-    it('calls createNewListing if listing not added already', async () => {
-      getContactSpy.mockResolvedValue(mockedApplicant)
+    it("creates new listing if it hasn't been added already", async () => {
+      getContactSpy.mockResolvedValueOnce(mockedApplicant)
       getParkingSpaceSpy.mockResolvedValueOnce(mockedParkingSpace)
       getLeasesForPnrSpy.mockResolvedValueOnce(mockedLeases)
       getWaitingListSpy.mockResolvedValueOnce(mockedWaitingList)
@@ -250,8 +251,8 @@ describe('parkingspaces', () => {
       })
     })
 
-    it('calls applyForListing if applicant passes validation', async () => {
-      getContactSpy.mockResolvedValue(mockedApplicant)
+    it('adds the applicant if the contact/applicant passes validation', async () => {
+      getContactSpy.mockResolvedValueOnce(mockedApplicant)
       getParkingSpaceSpy.mockResolvedValueOnce(mockedParkingSpace)
       getLeasesForPnrSpy.mockResolvedValueOnce(mockedLeases)
       getWaitingListSpy.mockResolvedValueOnce(mockedWaitingList)
@@ -282,8 +283,8 @@ describe('parkingspaces', () => {
       )
     })
 
-    it('returns ProcessStatus.successful when applicant has been created', async () => {
-      getContactSpy.mockResolvedValue(mockedApplicant)
+    it('returns a successful response when applicant has been added', async () => {
+      getContactSpy.mockResolvedValueOnce(mockedApplicant)
       getParkingSpaceSpy.mockResolvedValueOnce(mockedParkingSpace)
       getLeasesForPnrSpy.mockResolvedValueOnce(mockedLeases)
       getWaitingListSpy.mockResolvedValueOnce(mockedWaitingList)
@@ -304,10 +305,11 @@ describe('parkingspaces', () => {
         )
 
       expect(response.processStatus).toBe(ProcessStatus.successful)
+      expect(response.httpStatus).toBe(200)
     })
 
-    it('returns ProcessStatus.inProgress if applicant has an application already', async () => {
-      getContactSpy.mockResolvedValue(mockedApplicant)
+    it('returns ProcessStatus.inProgress if applicant has an application to this listing already', async () => {
+      getContactSpy.mockResolvedValueOnce(mockedApplicant)
       getParkingSpaceSpy.mockResolvedValueOnce(mockedParkingSpace)
       getLeasesForPnrSpy.mockResolvedValueOnce(mockedLeases)
       getWaitingListSpy.mockResolvedValueOnce(mockedWaitingList)
