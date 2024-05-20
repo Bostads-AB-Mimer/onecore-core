@@ -34,6 +34,7 @@ sequenceDiagram
     participant XPand SOAP as XPand SOAP Service
 
     Note over System,XPand SOAP: Check for unpub. Listrings ready for Offering
+    System -->> Core: Start Process
     Core -->> Property Mgmt: Get unpub. Listings
     Property Mgmt -->> OneCore DB: Get unpub. Listings
     OneCore DB -->> Property Mgmt: Get unpub. Listings
