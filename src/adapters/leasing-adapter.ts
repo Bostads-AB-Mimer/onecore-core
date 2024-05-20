@@ -10,6 +10,7 @@ import {
   Applicant,
   ApplicantStatus,
   ApplicantWithListing,
+  Offer,
 } from 'onecore-types'
 import config from '../common/config'
 import dayjs from 'dayjs'
@@ -347,25 +348,6 @@ const withdrawApplicantByUser = async (
   }
 }
 
-// TODO: Move to onecore-types
-export enum OfferStatus {
-  Active,
-  Accepted,
-  Declined,
-  Expired,
-}
-
-// TODO: Move to onecore-types
-export type Offer = {
-  id: number
-  sentAt: Date | null
-  expiresAt: Date
-  answeredAt: Date | null
-  selectedApplicants: Array<Applicant>
-  status: OfferStatus
-  listingId: number
-  offeredApplicant: number
-}
 type CreateOfferParams = Omit<Offer, 'id' | 'sentAt' | 'answeredAt'>
 
 const createOffer = async (params: CreateOfferParams): Promise<Offer> => {
