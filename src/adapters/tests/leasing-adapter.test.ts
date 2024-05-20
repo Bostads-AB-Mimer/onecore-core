@@ -1,6 +1,5 @@
 import { HttpStatusCode } from 'axios'
 import nock from 'nock'
-import { ApplicantStatus } from 'onecore-types'
 
 import config from '../../common/config'
 import * as leasingAdapter from '../leasing-adapter'
@@ -104,16 +103,7 @@ describe('leasing-adapter', () => {
       const result = await leasingAdapter.createOffer({
         expiresAt: new Date(),
         listingId: 1,
-        offeredApplicant: {
-          id: 1,
-          applicationDate: new Date(),
-          contactCode: 'foo',
-          listingId: 1,
-          name: 'Foo Bar',
-          nationalRegistrationNumber: 'foobar123',
-          status: ApplicantStatus.Active,
-          applicationType: 'foo',
-        },
+        applicantId: 1,
         selectedApplicants: [],
         status: 1,
       })
