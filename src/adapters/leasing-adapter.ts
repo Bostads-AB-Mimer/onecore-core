@@ -1,4 +1,4 @@
-import axios, { AxiosError, HttpStatusCode } from 'axios'
+import axios from 'axios'
 import {
   ConsumerReport,
   Contact,
@@ -347,6 +347,41 @@ const withdrawApplicantByUser = async (
   }
 }
 
+// TODO: Move to onecore-types
+export enum OfferStatus {
+  Active,
+  Accepted,
+  Declined,
+  Expired,
+}
+
+// TODO: Move to onecore-types
+export type Offer = {
+  id: number
+  sentAt: Date | null
+  expiresAt: Date
+  answeredAt: Date | null
+  selectedApplicants: Array<Applicant>
+  status: OfferStatus
+  listingId: number
+  offeredApplicant: number
+}
+type CreateOfferParams = Omit<Offer, 'id' | 'sentAt' | 'answeredAt'>
+
+const createOffer = async (params: CreateOfferParams): Promise<Offer> => {
+  try {
+    const response = await axios.post<{ data: Offer }>(
+      `${tenantsLeasesServiceUrl}/offer`,
+      params
+    )
+
+    return response.data.data
+  } catch (err) {
+    console.error('Error creating offer:', err)
+    throw err
+  }
+}
+
 export {
   getLease,
   getLeasesForPnr,
@@ -370,4 +405,5 @@ export {
   getListingByIdWithDetailedApplicants,
   withdrawApplicantByManager,
   withdrawApplicantByUser,
+  createOffer,
 }
