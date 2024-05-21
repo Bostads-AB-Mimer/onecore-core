@@ -350,7 +350,7 @@ const withdrawApplicantByUser = async (
 
 type CreateOfferParams = Omit<
   Offer,
-  'id' | 'sentAt' | 'answeredAt' | 'offeredApplicant'
+  'id' | 'sentAt' | 'answeredAt' | 'offeredApplicant' | 'createdAt'
 > & { applicantId: number }
 
 const createOffer = async (params: CreateOfferParams): Promise<Offer> => {
