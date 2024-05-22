@@ -1,4 +1,4 @@
-# Create Offer for Internal Parking Space
+# Create Offer for Scored Parking Space
 
 ## Flowchart
 
@@ -11,7 +11,7 @@ C --> |No| D[Get Applicants incl<br/>Contracts and Queue Points]
 D --> K[Update Listing status]
 K --> E[Sort Applicant by Rental Criteria]
 E --> F{Valid Applicant<br/>Found?}
-F --> |No| G[TODO:Re-Publish Parking Space<br/>as External]
+F --> |No| G[TODO:Re-Publish Parking Space<br/>as None Scored]
 G --> O[End]
 F --> |Yes| H[Create Offer]
 H --> I[Udate Status<br/>on Winning Applicant]
@@ -42,7 +42,7 @@ sequenceDiagram
     Core ->> Core: Create Offer for each Parking Space
 
     loop for each Listing Ready for Offering
-        Note over System,XPand SOAP: Create Offer for Internal Parking Space
+        Note over System,XPand SOAP: Create Offer for Scored Parking Space
         Core ->>Leasing: Get Listing and Applicants
         Leasing ->>OneCore DB: Get Listing and Applicants
         OneCore DB --> Leasing: Listings and Applicants
@@ -60,7 +60,7 @@ sequenceDiagram
         Core ->> Leasing:Sort Applicants by Rental Criteria
         Leasing -->> Core: Sorted Applicants
         alt No Valid Applicant Found
-            Core ->>Leasing: TODO Re-Publish Listing in External Queue
+            Core ->>Leasing: TODO Re-Publish Listing in None Scored Queue
         else Valid Applicant Found
             Core ->> Leasing: Create Offer
             Leasing ->> OneCore DB:Create Offer

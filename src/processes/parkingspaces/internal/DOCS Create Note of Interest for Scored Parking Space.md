@@ -1,11 +1,11 @@
-# Create Note of Interest for Internal Parking Space
+# Create Note of Interest for Scored Parking Space
 
 ## Flowchart
 
 ```mermaid
 flowchart LR
 A[Start] -->B(Get Parking Space)
-B --> C{Is the Parking<br/>Space Internal?}
+B --> C{Is the Parking<br/>Space Scored?}
 C --> |No| O
 C --> |Yes| D[Get Contact]
 D --> F{Is Contact<br/>a Tenant?}
@@ -29,8 +29,8 @@ sequenceDiagram
     participant Property Mgmt as Property Management
     participant Communication as Communication
     participant OneCore DB as OneCore Database
-    participant XPand DB as XPand SOAP Database
     participant XPand SOAP as XPand SOAP Service
+    participant XPand DB as XPand Database
 
     User ->> Core: Create Note Of Interest
 
@@ -38,7 +38,7 @@ sequenceDiagram
     Property Mgmt ->> XPand SOAP: Get Publ. Parking Space
     XPand SOAP -->> Property Mgmt:Publ. Parking Space
     Property Mgmt -->> Core: Publ. Parking Space
-    break when Parking Space is not internal/poängfri
+    break when Parking Space is None Scored
         Core-->User: show error message
     end
 
@@ -63,5 +63,5 @@ sequenceDiagram
     Core ->> Leasing: Create Applicant
     Leasing ->> OneCore DB: Create Applicant
 
-    Core ->> User: Msg: Note of Interest Created
+    Core ->> User: Note of Interest Created
 ```
