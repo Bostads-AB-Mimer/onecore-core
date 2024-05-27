@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken'
 import createHttpError from 'http-errors'
+import logger from '../../common/logger'
 
 import hash from './hash'
 import config from '../../common/config'

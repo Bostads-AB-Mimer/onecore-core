@@ -9,15 +9,31 @@ import api from './api'
 import { routes as authRoutes } from './services/auth-service'
 import { routes as healthRoutes } from './services/health-service'
 
+import logger from './common/logger'
+
 const app = new Koa()
 
 app.use(cors())
 
 app.on('error', (err) => {
-  console.error(err)
+  logger.error(err)
 })
 
 app.use(bodyParser())
+app.use((ctx, next) => {
+  logger.info(
+    {
+      request: {
+        path: ctx.path,
+        user: ctx.state?.user,
+        status: ctx.status,
+      },
+    },
+    'Incoming request',
+    ctx
+  )
+  return next()
+})
 
 const publicRouter = new KoaRouter()
 
