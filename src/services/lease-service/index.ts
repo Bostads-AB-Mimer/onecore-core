@@ -14,7 +14,7 @@ import {
   getListingByListingId,
   getListingsWithApplicants,
   getApplicantsByContactCode,
-  getApplicantByContactCodeAndRentalObjectCode,
+  getApplicantByContactCodeAndListingId,
   getContactForPhoneNumber,
   withdrawApplicantByManager,
   withdrawApplicantByUser,
@@ -179,9 +179,10 @@ export const routes = (router: KoaRouter) => {
   /**
    * Get Applicant by contact code and rental object code
    */
+  //todo: rewrite this query
   router.get('/applicants/:contactCode/:rentalObjectCode', async (ctx) => {
     const { contactCode, rentalObjectCode } = ctx.params
-    const responseData = await getApplicantByContactCodeAndRentalObjectCode(
+    const responseData = await getApplicantByContactCodeAndListingId(
       contactCode,
       rentalObjectCode
     )
