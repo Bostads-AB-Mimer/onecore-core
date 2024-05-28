@@ -332,7 +332,7 @@ const setApplicantStatusActive = async (
       `Error setting applicantStatus active on user with contactcode ${contactCode}:`,
       error
     )
-    return undefined
+    throw new Error(`Failed to update status for applicant ${applicantId}`)
   }
 }
 

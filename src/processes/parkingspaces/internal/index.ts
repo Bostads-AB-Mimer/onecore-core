@@ -5,7 +5,6 @@ import {
   applyForListing,
   createNewListing,
   getApplicantByContactCodeAndListingId,
-  getApplicantsAndListingByContactCode,
   getContact,
   getLeasesForPnr,
   getListingByRentalObjectCode,
@@ -199,7 +198,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
       )
 
       //create new applicant if applicant does not exist
-      //todo: use response type
+      //todo: use request type
       if (applicantResponse.status == HttpStatusCode.NotFound) {
         const applicantRequestBody: Applicant = {
           id: 0, //should not be passed
@@ -244,15 +243,12 @@ export const createNoteOfInterestForInternalParkingSpace = async (
         log.push(
           `Sökande har tidigare ansökt bilplats ${parkingSpaceId} men återkallat sin ansökan. Skapar ny ansökan.`
         )
-        console.log(log)
-        const result = await setApplicantStatusActive(
+
+        await setApplicantStatusActive(
           applicantResponse.data.id,
           applicantResponse.data.contactCode
         )
 
-        //todo: handle error
-
-        console.log('res: ', result)
         console.log(log)
         return successResponse(
           `Applicant ${contactCode} successfully applied to parking space ${parkingSpaceId}`
@@ -278,7 +274,6 @@ export const createNoteOfInterestForInternalParkingSpace = async (
   }
 }
 
-//todo: dump log?
 function successResponse(message: string) {
   return {
     processStatus: ProcessStatus.successful,
@@ -289,7 +284,6 @@ function successResponse(message: string) {
   }
 }
 
-//todo: dump log?
 function errorResponse(statusCode: number, message: string) {
   return {
     processStatus: ProcessStatus.failed,
