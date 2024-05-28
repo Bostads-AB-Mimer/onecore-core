@@ -45,7 +45,7 @@ export const createOfferForInternalParkingSpace = async (
     await leasingAdapter.updateApplicantStatus({
       applicantId: applicant.id,
       contactCode: applicant.contactCode,
-      status: ApplicantStatus.Active,
+      status: 6, // TODO: Update to ApplicantStatus.Offered once available
     })
 
     // step 5 - notify winning applicant

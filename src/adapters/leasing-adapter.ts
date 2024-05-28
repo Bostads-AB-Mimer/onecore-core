@@ -371,10 +371,17 @@ const createOffer = async (params: CreateOfferParams): Promise<Offer> => {
   }
 }
 
+// TODO: Remove when these are added to onecore-types ApplicantStatus
+enum ApplicantWIPStatus {
+  Offered = 6,
+  OfferAccepted = 7,
+  OfferDeclined = 8,
+}
+
 const updateApplicantStatus = async (params: {
   contactCode: string
   applicantId: number
-  status: ApplicantStatus
+  status: ApplicantStatus | ApplicantWIPStatus
 }) => {
   try {
     const response = await axios.patch(
