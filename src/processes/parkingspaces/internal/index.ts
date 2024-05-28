@@ -48,17 +48,13 @@ export const createNoteOfInterestForInternalParkingSpace = async (
   ]
 
   try {
-    console.log('beginning process!')
     const parkingSpace = await getPublishedParkingSpace(parkingSpaceId)
     // step 1 - get parking space
     if (!parkingSpace) {
-      return {
-        processStatus: ProcessStatus.failed,
-        httpStatus: 404,
-        response: {
-          message: `The parking space ${parkingSpaceId} does not exist or is no longer available.`,
-        },
-      }
+      return errorResponse(
+        404,
+        `The parking space ${parkingSpaceId} does not exist or is no longer available.`
+      )
     }
 
     const parkingSpaceApplicationType = parkingSpace.waitingListType
@@ -68,41 +64,30 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     if (
       parkingSpaceApplicationType != ParkingSpaceApplicationCategory.internal
     ) {
-      return {
-        processStatus: ProcessStatus.failed,
-        httpStatus: 400,
-        response: {
-          message: `This process currently only handles internal parking spaces. The parking space provided is not internal (it is ${parkingSpaceApplicationType}, ${parkingSpaceApplicationCategoryTranslation.internal}).`,
-        },
-      }
+      return errorResponse(
+        400,
+        `This process currently only handles internal parking spaces. The parking space provided is not internal (it is ${parkingSpaceApplicationType}, ${parkingSpaceApplicationCategoryTranslation.internal}).`
+      )
     }
 
     // Step 2. Get information about applicant and contracts
     const applicantContact = await getContact(contactCode)
     if (!applicantContact) {
-      return {
-        processStatus: ProcessStatus.failed,
-        httpStatus: 404,
-        response: {
-          message: `Applicant ${contactCode} could not be retrieved.`,
-        },
-      }
+      return errorResponse(
+        404,
+        `Applicant ${contactCode} could not be retrieved.`
+      )
     }
 
     //step 3a. Check if applicant is tenant
+    //todo: explicit check for housing contract needed?
     const leases = await getLeasesForPnr(
       applicantContact.nationalRegistrationNumber,
       undefined,
       undefined
     )
     if (leases.length < 1) {
-      return {
-        processStatus: ProcessStatus.failed,
-        httpStatus: 403,
-        response: {
-          message: 'Applicant is not a tenant',
-        },
-      }
+      return errorResponse(403, `Applicant ${contactCode} is not a tenant.`)
     }
 
     //step 3.b Check if applicant is in queue for parking spaces, if not add to queue
@@ -130,7 +115,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
       shouldAddApplicantToWaitingList = true
     }
     //xpand handles internal and external waiting list synonymously
-    //a user should therefore always be placed in both waiting list
+    //a user should therefore always be placed in both waiting lists
     if (shouldAddApplicantToWaitingList) {
       if (!isInWaitingListForInternalParking) {
         log.push(`Sökande saknas i kö för intern parkeringsplats.`)
@@ -180,25 +165,19 @@ export const createNoteOfInterestForInternalParkingSpace = async (
         listing = createListingResult
       }
     }
-    console.log(log)
+
     //step 4.c Add applicant to onecore-leasing database
     //todo: fix schema for listingId in leasing, null should not be allowed
     //todo: or add a request type with only required fields
     if (listing?.data != undefined) {
-      //todo: data is redudant?
-
-      //todo: check if applicant with listing data exists
-      //todo: if applicant row exists check applicantStatus (4-5 is allowed)
-      //todo: if applicantStatus 4 or 5, do a put request and set status to 1
       const applicantResponse = await getApplicantByContactCodeAndListingId(
         contactCode,
         listing.data.id
       )
 
-      console.log('applicant: ', applicantResponse)
-
+      //create new applicant if applicant does not exist
+      //todo: use response type
       if (applicantResponse.status == HttpStatusCode.NotFound) {
-        //applicant should not exist previously
         const applicantRequestBody: Applicant = {
           id: 0, //should not be passed
           name: applicantContact.fullName,
@@ -217,30 +196,22 @@ export const createNoteOfInterestForInternalParkingSpace = async (
         if (applyForListingResult?.status == HttpStatusCode.Created) {
           log.push(`Sökande skapad i onecore-leasing. Process avslutad.`)
           console.log(log)
-          return {
-            processStatus: ProcessStatus.successful,
-            httpStatus: 200,
-            response: {
-              message: `Applicant ${contactCode} successfully applied to parking space ${parkingSpaceId}`,
-            },
-          }
+          return successResponse(
+            `Applicant ${contactCode} successfully applied to parking space ${parkingSpaceId}`
+          )
         }
 
-        //todo: this can be removed?
         if (applyForListingResult?.status == HttpStatusCode.Conflict) {
           log.push(
             `Sökande existerar redan i onecore-leasing. Process avslutad`
           )
           console.log(log)
-          return {
-            processStatus: ProcessStatus.inProgress,
-            httpStatus: 200, //return other status
-            response: {
-              message: 'Applicant already exists in listing',
-            },
-          }
+          return successResponse(
+            `Applicant ${contactCode} already has application for ${parkingSpaceId}`
+          )
         }
       }
+
       //if applicant has previously applied and withdrawn application, allow for subsequent application
       else if (
         applicantResponse.data &&
@@ -256,16 +227,13 @@ export const createNoteOfInterestForInternalParkingSpace = async (
           applicantResponse.data.contactCode
         )
 
-        console.log('res: ')
-        console.log(result)
+        //todo: handle error
+
+        console.log('res: ', result)
         console.log(log)
-        return {
-          processStatus: ProcessStatus.successful,
-          httpStatus: 200,
-          response: {
-            message: `Applicant ${contactCode} successfully applied to parking space ${parkingSpaceId}`,
-          },
-        }
+        return successResponse(
+          `Applicant ${contactCode} successfully applied to parking space ${parkingSpaceId}`
+        )
       }
     }
 
@@ -284,6 +252,28 @@ export const createNoteOfInterestForInternalParkingSpace = async (
         message: error.message,
       },
     }
+  }
+}
+
+//todo: dump log?
+function successResponse(message: string) {
+  return {
+    processStatus: ProcessStatus.successful,
+    httpStatus: 200,
+    response: {
+      message: message,
+    },
+  }
+}
+
+//todo: dump log?
+function errorResponse(statusCode: number, message: string) {
+  return {
+    processStatus: ProcessStatus.failed,
+    httpStatus: statusCode,
+    response: {
+      message: message,
+    },
   }
 }
 

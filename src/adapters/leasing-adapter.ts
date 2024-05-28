@@ -291,14 +291,6 @@ const getApplicantByContactCodeAndListingId = async (
   listingId: string
 ): Promise<any | undefined> => {
   try {
-    console.log('getApplicantByContactCodeAndListingId')
-    console.log(
-      `${tenantsLeasesServiceUrl}/listings/${listingId}/applicants/${contactCode}/`
-    )
-    /*        return await axios.get(
-      `${tenantsLeasesServiceUrl}/listings/${listingId}/applicants/${contactCode}`
-    )*/
-    //;('/applicants/:contactCode/:listingId')
     return await axios.get(
       `${tenantsLeasesServiceUrl}/applicants/${contactCode}/${listingId}}`
     )
