@@ -1,4 +1,4 @@
-import { ApplicantStatus, OfferStatus } from 'onecore-types'
+import { ListingStatus, OfferStatus } from 'onecore-types'
 
 import { ProcessResult, ProcessStatus } from '../../../common/types'
 import * as leasingAdapter from '../../../adapters/leasing-adapter'
@@ -17,9 +17,8 @@ export const createOfferForInternalParkingSpace = async (
     const listing = await leasingAdapter.getListingByListingId(listingId)
     if (!listing) throw new Error('no listing')
     // What is ListingStatus?
-    // What is AdvertisementEnded?
-    if (new Date(listing.publishedTo) > new Date())
-      throw new Error('listing still published')
+    if (listing.status !== ListingStatus.Expired)
+      throw new Error('listing not expired')
 
     // step 1 - get list of applicants
     // step 2 - sort applicants by rental criteria
