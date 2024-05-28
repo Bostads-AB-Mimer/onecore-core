@@ -11,6 +11,7 @@ import {
   getListingByRentalObjectCode,
   getWaitingList,
   setApplicantStatusActive,
+  getInternalCreditInformation,
 } from '../../../adapters/leasing-adapter'
 import {
   Applicant,
@@ -88,6 +89,28 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     )
     if (leases.length < 1) {
       return errorResponse(403, `Applicant ${contactCode} is not a tenant.`)
+    }
+
+    //step 3.a.1. Perform credit check
+    const creditCheck = await getInternalCreditInformation(
+      applicantContact.contactCode
+    )
+
+    log.push(
+      `Intern kreditkontroll genomförd, resultat: ${
+        creditCheck ? 'inga anmärkningar' : 'hyresfakturor hos inkasso'
+      }`
+    )
+
+    if (!creditCheck) {
+      log.push(
+        `Ansökan kunde inte beviljas på grund av ouppfyllda kreditkrav (se ovan).`
+      )
+
+      return errorResponse(
+        400,
+        `Internal credit check failed for Applicant ${contactCode}`
+      )
     }
 
     //step 3.b Check if applicant is in queue for parking spaces, if not add to queue
@@ -272,6 +295,7 @@ function errorResponse(statusCode: number, message: string) {
     processStatus: ProcessStatus.failed,
     httpStatus: statusCode,
     response: {
+      //reason: "",
       message: message,
     },
   }
