@@ -132,7 +132,6 @@ export const routes = (router: KoaRouter) => {
       const result = await createOfferForInternalParkingSpace(listingId)
 
       ctx.status = result.httpStatus
-      ctx.body = result.response
     } catch (error) {
       // Step 6: Communicate error to dev team and customer service
       console.log('Error', error)

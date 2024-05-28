@@ -1,11 +1,28 @@
-import { ListingStatus, OfferStatus } from 'onecore-types'
+import { ListingStatus, Offer, OfferStatus } from 'onecore-types'
 
-import { ProcessResult, ProcessStatus } from '../../../common/types'
+import { ProcessError, ProcessResult2 } from '../../../common/types'
 import * as leasingAdapter from '../../../adapters/leasing-adapter'
+
+type CreateOfferError =
+  | 'no-listing'
+  | 'listing-not-expired'
+  | 'no-applicants'
+  | 'create-offer'
+  | 'update-applicant-status'
+  | 'unknown'
+
+const makeProcessError = (
+  reason: CreateOfferError,
+  httpStatus: number
+): ProcessError => ({
+  status: 'error',
+  reason,
+  httpStatus,
+})
 
 export const createOfferForInternalParkingSpace = async (
   listingId: string
-): Promise<ProcessResult> => {
+): Promise<ProcessResult2<null, CreateOfferError>> => {
   const log: string[] = [
     `Skapa erbjudande för intern bilplats`,
     `Tidpunkt: ${new Date().toISOString().substring(0, 16).replace('T', ' ')}`,
@@ -13,56 +30,52 @@ export const createOfferForInternalParkingSpace = async (
   ]
 
   try {
-    // step 0 - validation: listing is no longer published and status is AdvertisementEnded
     const listing = await leasingAdapter.getListingByListingId(listingId)
-    if (!listing) throw new Error('no listing')
-    // What is ListingStatus?
+    if (!listing) return makeProcessError('no-listing', 500)
     if (listing.status !== ListingStatus.Expired)
-      throw new Error('listing not expired')
+      return makeProcessError('listing-not-expired', 500)
 
-    // step 1 - get list of applicants
-    // step 2 - sort applicants by rental criteria
-    // step 3 - check for valid applicants
     const applicants =
-      (await leasingAdapter.getListingByIdWithDetailedApplicants(
+      await leasingAdapter.getListingByIdWithDetailedApplicants(
         String(listing.id)
-      )) ?? []
+      )
 
+    if (!applicants?.length) return makeProcessError('no-applicants', 500)
     const [applicant] = applicants
-    if (!applicant) throw new Error('no applicant')
 
-    // step 3a - create offer
-    await leasingAdapter.createOffer({
-      applicantId: applicant.id,
-      expiresAt: new Date(),
-      listingId: listing.id,
-      selectedApplicants: applicants,
-      status: OfferStatus.Active,
-    })
+    try {
+      await leasingAdapter.updateApplicantStatus({
+        applicantId: applicant.id,
+        contactCode: applicant.contactCode,
+        status: 6, // TODO: Update to ApplicantStatus.Offered once available
+      })
+      log.push(`Updated status for applicant ${applicant.id}`)
+    } catch (_err) {
+      return makeProcessError('update-applicant-status', 500)
+    }
 
-    // step 4 - update status of winning applicant
-    await leasingAdapter.updateApplicantStatus({
-      applicantId: applicant.id,
-      contactCode: applicant.contactCode,
-      status: 6, // TODO: Update to ApplicantStatus.Offered once available
-    })
+    try {
+      const offer = await leasingAdapter.createOffer({
+        applicantId: applicant.id,
+        expiresAt: new Date(),
+        listingId: listing.id,
+        selectedApplicants: applicants,
+        status: OfferStatus.Active,
+      })
+      log.push(`Created offer ${offer.id}`)
+      console.log(log)
+
+      return {
+        status: 'success',
+        httpStatus: 200,
+        data: null,
+      }
+    } catch (_err) {
+      return makeProcessError('create-offer', 500)
+    }
 
     // step 5 - notify winning applicant
-
-    return {
-      processStatus: ProcessStatus.inProgress,
-      httpStatus: 500,
-      response: {
-        message: 'WIP',
-      },
-    }
-  } catch (error: any) {
-    return {
-      processStatus: ProcessStatus.failed,
-      httpStatus: 500,
-      response: {
-        message: error.message,
-      },
-    }
+  } catch (err) {
+    return makeProcessError('unknown', 500)
   }
 }
