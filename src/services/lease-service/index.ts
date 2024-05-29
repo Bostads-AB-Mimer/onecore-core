@@ -177,14 +177,13 @@ export const routes = (router: KoaRouter) => {
   })
 
   /**
-   * Get Applicant by contact code and rental object code
+   * Get Applicant by contact code and listing id
    */
-  //todo: rewrite this query
-  router.get('/applicants/:contactCode/:rentalObjectCode', async (ctx) => {
-    const { contactCode, rentalObjectCode } = ctx.params
+  router.get('/applicants/:contactCode/:listingId', async (ctx) => {
+    const { contactCode, listingId } = ctx.params
     const responseData = await getApplicantByContactCodeAndListingId(
       contactCode,
-      rentalObjectCode
+      listingId
     )
 
     ctx.body = responseData

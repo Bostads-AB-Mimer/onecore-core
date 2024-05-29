@@ -235,24 +235,27 @@ export const createNoteOfInterestForInternalParkingSpace = async (
       }
 
       //if applicant has previously applied and withdrawn application, allow for subsequent application
-      else if (
-        applicantResponse.data &&
-        (applicantResponse.data.status == ApplicantStatus.WithdrawnByUser ||
-          applicantResponse.data.status == ApplicantStatus.WithdrawnByManager)
-      ) {
-        log.push(
-          `Sökande har tidigare ansökt bilplats ${parkingSpaceId} men återkallat sin ansökan. Skapar ny ansökan.`
-        )
+      else if (applicantResponse.data) {
+        const applicationWithDrawnByUser =
+          applicantResponse.data.status == ApplicantStatus.WithdrawnByUser
+        const applicationWithDrawnByManager =
+          applicantResponse.data.status == ApplicantStatus.WithdrawnByManager
 
-        await setApplicantStatusActive(
-          applicantResponse.data.id,
-          applicantResponse.data.contactCode
-        )
+        if (applicationWithDrawnByUser || applicationWithDrawnByManager) {
+          log.push(
+            `Sökande har tidigare ansökt bilplats ${parkingSpaceId} men återkallat sin ansökan. Skapar ny ansökan.`
+          )
 
-        console.log(log)
-        return successResponse(
-          `Applicant ${contactCode} successfully applied to parking space ${parkingSpaceId}`
-        )
+          await setApplicantStatusActive(
+            applicantResponse.data.id,
+            applicantResponse.data.contactCode
+          )
+
+          console.log(log)
+          return successResponse(
+            `Applicant ${contactCode} successfully applied to parking space ${parkingSpaceId}`
+          )
+        }
       }
     }
 
