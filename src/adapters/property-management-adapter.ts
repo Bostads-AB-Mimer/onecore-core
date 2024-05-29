@@ -1,4 +1,4 @@
-import axios from 'axios'
+import { loggedAxios as axios } from 'onecore-utilities'
 import {
   Listing,
   MaintenanceUnitInfo,
@@ -9,6 +9,7 @@ import {
   RentalPropertyInfo,
 } from 'onecore-types'
 import config from '../common/config'
+import { logger } from 'onecore-utilities'
 
 // Temporary interface to be replaced by the one from onecore-types when propertyInfo is fetched from xpand
 
@@ -119,7 +120,7 @@ const getParkingSpace = async (
 
     return parkingSpaceResponse.data
   } catch (error) {
-    console.error('Error retrieving parking space', error)
+    logger.error(error, 'Error retrieving parking space')
     return undefined
   }
 }
@@ -134,7 +135,7 @@ const getPublishedParkingSpace = async (
 
     return parkingSpaceResponse.data
   } catch (error) {
-    console.error('Error retrieving parking space', error)
+    logger.error(error, 'Error retrieving parking space')
     return undefined
   }
 }

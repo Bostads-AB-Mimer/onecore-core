@@ -22,6 +22,7 @@ import {
   getListingByIdWithDetailedApplicants,
 } from '../../adapters/leasing-adapter'
 import { createOfferForInternalParkingSpace } from '../../processes/parkingspaces/internal'
+import { logger } from 'onecore-utilities'
 
 const getLeaseWithRelatedEntities = async (rentalId: string) => {
   const lease = await getLease(rentalId, 'true')
@@ -135,7 +136,7 @@ export const routes = (router: KoaRouter) => {
       ctx.body = result.response
     } catch (error) {
       // Step 6: Communicate error to dev team and customer service
-      console.log('Error', error)
+      logger.error(error, 'Error')
       ctx.status = 500
       ctx.body = {
         message: 'A technical error has occured',

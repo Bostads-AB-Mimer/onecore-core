@@ -9,7 +9,7 @@ import api from './api'
 import { routes as authRoutes } from './services/auth-service'
 import { routes as healthRoutes } from './services/health-service'
 
-import logger from './common/logger'
+import { logger, loggerMiddlewares } from 'onecore-utilities'
 
 const app = new Koa()
 
@@ -20,20 +20,10 @@ app.on('error', (err) => {
 })
 
 app.use(bodyParser())
-app.use((ctx, next) => {
-  logger.info(
-    {
-      request: {
-        path: ctx.path,
-        user: ctx.state?.user,
-        status: ctx.status,
-      },
-    },
-    'Incoming request',
-    ctx
-  )
-  return next()
-})
+
+// Log the start and completion of all incoming requests
+app.use(loggerMiddlewares.pre)
+app.use(loggerMiddlewares.post)
 
 const publicRouter = new KoaRouter()
 

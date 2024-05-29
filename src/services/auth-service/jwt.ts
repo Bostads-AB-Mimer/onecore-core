@@ -1,9 +1,9 @@
 import jwt from 'jsonwebtoken'
 import createHttpError from 'http-errors'
-import logger from '../../common/logger'
 
 import hash from './hash'
 import config from '../../common/config'
+import { logger } from 'onecore-utilities'
 
 const getUser = async (username: string) => {
   const user = {
@@ -71,7 +71,7 @@ export const createToken = async (username: string, password: string) => {
 
     return { token }
   } catch (error) {
-    console.error(error)
+    logger.error(error)
     throw error
   }
 }

@@ -16,6 +16,7 @@ import {
   parkingSpaceApplicationCategoryTranslation,
 } from 'onecore-types'
 import { HttpStatusCode } from 'axios'
+import { logger } from 'onecore-utilities'
 
 //
 // PROCESS Part 1 - Create note of interest for internal parking space
@@ -196,7 +197,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
 
       if (applyForListingResult?.status == HttpStatusCode.Created) {
         log.push(`Sökande skapad i onecore-leasing. Process avslutad.`)
-        console.log(log)
+        logger.info(log)
         return {
           processStatus: ProcessStatus.successful,
           httpStatus: 200,
@@ -207,7 +208,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
       }
       if (applyForListingResult?.status == HttpStatusCode.Conflict) {
         log.push(`Sökande existerar redan i onecore-leasing. Process avslutad`)
-        console.log(log)
+        logger.info(log)
         return {
           processStatus: ProcessStatus.inProgress,
           httpStatus: 200, //return other status

@@ -46,7 +46,8 @@
     "@iteam/config": "^12.1.2",
     "@koa/cors": "^5.0.0",
     "@koa/router": "^12.0.1",
-    "axios": "^1.6.5",
+    "axios": "^1.7.2",
+    "axios-logger": "^2.8.0",
     "dayjs": "^1.11.10",
     "dotenv": "^16.4.5",
     "jsonwebtoken": "^9.0.2",
@@ -57,9 +58,10 @@
     "koa-pino-logger": "^4.0.0",
     "odoo-await": "^3.4.1",
     "onecore-types": "^1.18.0",
+    "onecore-utilities": "0.0.1",
     "pino": "^9.1.0",
     "pino-elasticsearch": "^8.0.0",
-    "pino-pretty": "^11.0.0",
-    "pino-multi-stream": "^6.0.0"
+    "pino-multi-stream": "^6.0.0",
+    "pino-pretty": "^11.0.0"
   }
 }
