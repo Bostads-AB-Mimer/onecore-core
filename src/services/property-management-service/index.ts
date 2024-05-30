@@ -18,7 +18,6 @@ import {
 import { getFloorPlanStream } from './adapters/document-adapter'
 import { createLeaseForExternalParkingSpace } from '../../processes/parkingspaces/external'
 import { createNoteOfInterestForInternalParkingSpace } from '../../processes/parkingspaces/internal'
-import App from '../../app'
 import { logger } from 'onecore-utilities'
 
 export const routes = (router: KoaRouter) => {

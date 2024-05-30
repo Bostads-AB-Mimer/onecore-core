@@ -11,8 +11,6 @@ import {
 import config from '../common/config'
 import { logger } from 'onecore-utilities'
 
-// Temporary interface to be replaced by the one from onecore-types when propertyInfo is fetched from xpand
-
 const propertyManagementServiceUrl = config.propertyInfoService.url
 
 const getRentalProperty = async (

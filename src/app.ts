@@ -23,6 +23,7 @@ app.use(bodyParser())
 
 // Log the start and completion of all incoming requests
 app.use(loggerMiddlewares.pre)
+//app.use(loggerMiddlewares.pre)
 app.use(loggerMiddlewares.post)
 
 const publicRouter = new KoaRouter()
