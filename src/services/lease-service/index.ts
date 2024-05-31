@@ -20,6 +20,7 @@ import {
   withdrawApplicantByUser,
   getApplicantsAndListingByContactCode,
   getListingByIdWithDetailedApplicants,
+  getOffersForContact,
 } from '../../adapters/leasing-adapter'
 import { createOfferForInternalParkingSpace } from '../../processes/parkingspaces/internal'
 
@@ -68,6 +69,17 @@ export const routes = (router: KoaRouter) => {
    */
   router.get('(.*)/contact/:pnr', async (ctx) => {
     const responseData = await getContactForPnr(ctx.params.pnr)
+
+    ctx.body = {
+      data: responseData,
+    }
+  })
+
+  /**
+   * Returns all offers for a contact by contactCode
+   */
+  router.get('(.*)/contacts/:contactCode/offers', async (ctx) => {
+    const responseData = await getOffersForContact(ctx.params.contactCode)
 
     ctx.body = {
       data: responseData,

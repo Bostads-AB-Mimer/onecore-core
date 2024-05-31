@@ -367,6 +367,21 @@ const createOffer = async (params: CreateOfferParams): Promise<Offer> => {
   }
 }
 
+const getOffersForContact = async (
+  contactCode: string
+): Promise<Array<any>> => {
+  try {
+    const response = await axios(
+      `${tenantsLeasesServiceUrl}/contacts/${contactCode}/offers`
+    )
+
+    return response.data.data
+  } catch (err) {
+    console.error('Error fetching offers for contact', err)
+    throw err
+  }
+}
+
 export {
   getLease,
   getLeasesForPnr,
@@ -391,4 +406,5 @@ export {
   withdrawApplicantByManager,
   withdrawApplicantByUser,
   createOffer,
+  getOffersForContact,
 }
