@@ -225,9 +225,11 @@ const getListingByListingId = async (listingId: string) => {
 
 const getListingByRentalObjectCode = async (rentalObjectCode: string) => {
   try {
-    return await axios.get(
+    const response = await axios.get(
       `${tenantsLeasesServiceUrl}/listings/by-code/${rentalObjectCode}`
     )
+
+    return response
   } catch (error) {
     logger.error(error, 'Error fetching listing by rental object code:', error)
     return undefined

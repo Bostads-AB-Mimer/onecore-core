@@ -50,11 +50,13 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     const parkingSpace = await getPublishedParkingSpace(parkingSpaceId)
     // step 1 - get parking space
     if (!parkingSpace) {
+      const message = `The parking space ${parkingSpaceId} does not exist or is no longer available.`
+      logger.error(message)
       return {
         processStatus: ProcessStatus.failed,
         httpStatus: 404,
         response: {
-          message: `The parking space ${parkingSpaceId} does not exist or is no longer available.`,
+          message,
         },
       }
     }
@@ -66,11 +68,13 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     if (
       parkingSpaceApplicationType != ParkingSpaceApplicationCategory.internal
     ) {
+      const message = `This process currently only handles internal parking spaces. The parking space provided is not internal (it is ${parkingSpaceApplicationType}, ${parkingSpaceApplicationCategoryTranslation.internal}).`
+      logger.error(message)
       return {
         processStatus: ProcessStatus.failed,
         httpStatus: 400,
         response: {
-          message: `This process currently only handles internal parking spaces. The parking space provided is not internal (it is ${parkingSpaceApplicationType}, ${parkingSpaceApplicationCategoryTranslation.internal}).`,
+          message,
         },
       }
     }
@@ -78,11 +82,13 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     // Step 2. Get information about applicant and contracts
     const applicantContact = await getContact(contactCode)
     if (!applicantContact) {
+      const message = `Applicant ${contactCode} could not be retrieved.`
+      logger.error(message)
       return {
         processStatus: ProcessStatus.failed,
         httpStatus: 404,
         response: {
-          message: `Applicant ${contactCode} could not be retrieved.`,
+          message,
         },
       }
     }
@@ -94,11 +100,13 @@ export const createNoteOfInterestForInternalParkingSpace = async (
       undefined
     )
     if (leases.length < 1) {
+      const message = 'Applicant is not a tenant'
+      logger.error(message)
       return {
         processStatus: ProcessStatus.failed,
         httpStatus: 403,
         response: {
-          message: 'Applicant is not a tenant',
+          message,
         },
       }
     }
@@ -117,6 +125,10 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     if (!creditCheck) {
       log.push(
         `Ansökan kunde inte beviljas på grund av ouppfyllda kreditkrav (se ovan).`
+      )
+
+      logger.error(
+        `The parking space lease application has been rejected because the internal credit check failed for applicant ${applicantContact.contactCode}`
       )
 
       return {
@@ -166,6 +178,9 @@ export const createNoteOfInterestForInternalParkingSpace = async (
         if (result.status == HttpStatusCode.Created) {
           log.push(`Sökande placerad i kö för intern parkeringsplats`)
         } else {
+          logger.error(
+            `Could not add applicant to internal queue ${result.statusText}`
+          )
           throw Error(result.statusText)
         }
       }
@@ -179,6 +194,9 @@ export const createNoteOfInterestForInternalParkingSpace = async (
         if (result.status == HttpStatusCode.Created) {
           log.push(`Sökande placerad i kö för extern parkeringsplats`)
         } else {
+          logger.error(
+            `Could not add applicant to external queue ${result.statusText}`
+          )
           throw Error(result.statusText)
         }
       }
@@ -246,6 +264,9 @@ export const createNoteOfInterestForInternalParkingSpace = async (
       }
     }
 
+    logger.error(
+      'createNoteofInterestForInternalParkingSpace failed due to an unknown error'
+    )
     return {
       processStatus: ProcessStatus.failed,
       httpStatus: 500,
@@ -254,6 +275,10 @@ export const createNoteOfInterestForInternalParkingSpace = async (
       },
     }
   } catch (error: any) {
+    logger.error(
+      error,
+      'createNoteofInterestForInternalParkingSpace failed due to an unknown error'
+    )
     return {
       processStatus: ProcessStatus.failed,
       httpStatus: 500,
