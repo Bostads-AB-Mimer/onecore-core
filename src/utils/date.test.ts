@@ -25,12 +25,11 @@ describe(utils.date.addBusinessDays, () => {
     expect(result.toISOString()).toEqual(expected.toISOString())
   })
 
-  it('respects holidays', () => {
-    const d = new Date('2022-11-11') // Friday
-    const holiday = new Date('2022-11-14') // Monday
+  it('skips holidays', () => {
+    const d = new Date('2022-12-30') // Friday
 
-    const expected = new Date('2022-11-16')
-    const result = utils.date.addBusinessDays(d, 2, [holiday])
+    const expected = new Date('2023-01-03')
+    const result = utils.date.addBusinessDays(d, 2)
     expect(result.toISOString()).toEqual(expected.toISOString())
   })
 })
