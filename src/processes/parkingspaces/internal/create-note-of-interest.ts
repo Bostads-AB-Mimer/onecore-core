@@ -17,6 +17,7 @@ import {
 } from '../../../adapters/leasing-adapter'
 import { getPublishedParkingSpace } from '../../../adapters/property-management-adapter'
 import { ProcessResult, ProcessStatus } from '../../../common/types'
+import { makeProcessError } from '../utils'
 
 // PROCESS Part 1 - Create note of interest for internal parking space
 //
@@ -34,7 +35,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
   parkingSpaceId: string,
   contactCode: string,
   applicationType: string
-): Promise<ProcessResult> => {
+): Promise<ProcessResult<any, any>> => {
   const log: string[] = [
     `Ansökan om intern bilplats`,
     `Tidpunkt för ansökan: ${new Date()
@@ -50,6 +51,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     if (!parkingSpace) {
       return {
         processStatus: ProcessStatus.failed,
+        reason: 'parkingspace-not-found',
         httpStatus: 404,
         response: {
           message: `The parking space ${parkingSpaceId} does not exist or is no longer available.`,
@@ -64,25 +66,17 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     if (
       parkingSpaceApplicationType != ParkingSpaceApplicationCategory.internal
     ) {
-      return {
-        processStatus: ProcessStatus.failed,
-        httpStatus: 400,
-        response: {
-          message: `This process currently only handles internal parking spaces. The parking space provided is not internal (it is ${parkingSpaceApplicationType}, ${parkingSpaceApplicationCategoryTranslation.internal}).`,
-        },
-      }
+      return makeProcessError('parkingspace-not-internal', 400, {
+        message: `This process currently only handles internal parking spaces. The parking space provided is not internal (it is ${parkingSpaceApplicationType}, ${parkingSpaceApplicationCategoryTranslation.internal}).`,
+      })
     }
 
     // Step 2. Get information about applicant and contracts
     const applicantContact = await getContact(contactCode)
     if (!applicantContact) {
-      return {
-        processStatus: ProcessStatus.failed,
-        httpStatus: 404,
-        response: {
-          message: `Applicant ${contactCode} could not be retrieved.`,
-        },
-      }
+      return makeProcessError('applicant-not-found', 404, {
+        message: `Applicant ${contactCode} could not be retrieved.`,
+      })
     }
 
     //step 3a. Check if applicant is tenant
@@ -92,13 +86,9 @@ export const createNoteOfInterestForInternalParkingSpace = async (
       undefined
     )
     if (leases.length < 1) {
-      return {
-        processStatus: ProcessStatus.failed,
-        httpStatus: 403,
-        response: {
-          message: 'Applicant is not a tenant',
-        },
-      }
+      return makeProcessError('applicant-not-tenant', 403, {
+        message: 'Applicant is not a tenant',
+      })
     }
 
     //step 3.a.1. Perform credit check
@@ -117,14 +107,10 @@ export const createNoteOfInterestForInternalParkingSpace = async (
         `Ansökan kunde inte beviljas på grund av ouppfyllda kreditkrav (se ovan).`
       )
 
-      return {
-        processStatus: ProcessStatus.failed,
-        httpStatus: 400,
-        response: {
-          reason: 'Internal check failed',
-          message: 'The parking space lease application has been rejected',
-        },
-      }
+      return makeProcessError('application-rejected', 400, {
+        reason: 'Internal check failed',
+        message: 'The parking space lease application has been rejected',
+      })
     }
 
     //step 3.b Check if applicant is in queue for parking spaces, if not add to queue
@@ -225,6 +211,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
         console.log(log)
         return {
           processStatus: ProcessStatus.successful,
+          data: null,
           httpStatus: 200,
           response: {
             message: `Applicant ${contactCode} successfully applied to parking space ${parkingSpaceId}`,
@@ -234,30 +221,18 @@ export const createNoteOfInterestForInternalParkingSpace = async (
       if (applyForListingResult?.status == HttpStatusCode.Conflict) {
         log.push(`Sökande existerar redan i onecore-leasing. Process avslutad`)
         console.log(log)
-        return {
-          processStatus: ProcessStatus.inProgress,
-          httpStatus: 200, //return other status
-          response: {
-            message: 'Applicant already exists in listing',
-          },
-        }
+        return makeProcessError('applicant-already-exists', 200, {
+          message: 'Applicant already exists in listing',
+        })
       }
     }
 
-    return {
-      processStatus: ProcessStatus.failed,
-      httpStatus: 500,
-      response: {
-        message: 'failed due to unknown error',
-      },
-    }
+    return makeProcessError('internal-error', 500, {
+      message: 'failed due to unknown error',
+    })
   } catch (error: any) {
-    return {
-      processStatus: ProcessStatus.failed,
-      httpStatus: 500,
-      response: {
-        message: error.message,
-      },
-    }
+    return makeProcessError('internal-error', 500, {
+      message: error.message,
+    })
   }
 }

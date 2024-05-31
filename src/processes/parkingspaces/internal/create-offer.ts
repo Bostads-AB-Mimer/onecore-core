@@ -1,8 +1,9 @@
 import { ListingStatus, OfferStatus } from 'onecore-types'
 
-import { ProcessError, ProcessResult2 } from '../../../common/types'
+import { ProcessResult, ProcessStatus } from '../../../common/types'
 import * as leasingAdapter from '../../../adapters/leasing-adapter'
 import * as utils from '../../../utils'
+import { makeProcessError } from '../utils'
 
 type CreateOfferError =
   | 'no-listing'
@@ -12,18 +13,9 @@ type CreateOfferError =
   | 'update-applicant-status'
   | 'unknown'
 
-const makeProcessError = (
-  reason: CreateOfferError,
-  httpStatus: number
-): ProcessError => ({
-  status: 'error',
-  reason,
-  httpStatus,
-})
-
 export const createOfferForInternalParkingSpace = async (
   listingId: string
-): Promise<ProcessResult2<null, CreateOfferError>> => {
+): Promise<ProcessResult<null, CreateOfferError>> => {
   const log: string[] = [
     `Skapa erbjudande för intern bilplats`,
     `Tidpunkt: ${new Date().toISOString().substring(0, 16).replace('T', ' ')}`,
@@ -69,7 +61,7 @@ export const createOfferForInternalParkingSpace = async (
       console.log(log)
 
       return {
-        status: 'success',
+        processStatus: ProcessStatus.successful,
         httpStatus: 200,
         data: null,
       }

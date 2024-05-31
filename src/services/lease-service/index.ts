@@ -128,18 +128,10 @@ export const routes = (router: KoaRouter) => {
       return
     }
 
-    try {
-      const result = await createOfferForInternalParkingSpace(listingId)
+    const result = await createOfferForInternalParkingSpace(listingId)
 
-      ctx.status = result.httpStatus
-    } catch (error) {
-      // Step 6: Communicate error to dev team and customer service
-      console.log('Error', error)
-      ctx.status = 500
-      ctx.body = {
-        message: 'A technical error has occured',
-      }
-    }
+    ctx.status = result.httpStatus
+    // Step 6: Communicate error to dev team and customer service
   })
 
   /**

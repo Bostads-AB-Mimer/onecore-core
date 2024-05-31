@@ -9,13 +9,15 @@ import { ProcessResult, ProcessStatus } from '../../../common/types'
 // 5. If applicant accepts offer, contract is created and sent via email. the other applicants are notified that the parking space has been rented.
 // 6. If offer is declined, the user is removed from list of applicants, process starts over from step 6
 // 7. If no applicants are found, the ad is published as an external parking space
-export const createLeaseForInternalParkingSpace =
-  async (): Promise<ProcessResult> => {
-    return {
-      processStatus: ProcessStatus.inProgress,
-      httpStatus: 500,
-      response: {
-        message: 'todo',
-      },
-    }
+export const createLeaseForInternalParkingSpace = async (): Promise<
+  ProcessResult<any, any>
+> => {
+  return {
+    processStatus: ProcessStatus.failed,
+    reason: 'not-implemented',
+    httpStatus: 500,
+    response: {
+      message: 'todo',
+    },
   }
+}

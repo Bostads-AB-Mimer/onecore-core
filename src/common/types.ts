@@ -1,26 +1,20 @@
 export enum ProcessStatus {
   successful,
   failed,
-  inProgress,
-}
-
-export interface ProcessResult<T = string> {
-  response?: any
-  processStatus: ProcessStatus
-  reason?: T
-  httpStatus: number
 }
 
 export interface ProcessSuccess<T = any> {
-  status: 'success'
+  processStatus: ProcessStatus.successful
   data: T
   httpStatus: number
+  response?: any
 }
 
 export interface ProcessError<E = any> {
-  status: 'error'
+  processStatus: ProcessStatus.failed
   reason: E
   httpStatus: number
+  response?: any
 }
 
-export type ProcessResult2<T, E> = ProcessSuccess<T> | ProcessError<E>
+export type ProcessResult<T, E> = ProcessSuccess<T> | ProcessError<E>
