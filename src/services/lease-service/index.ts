@@ -118,17 +118,9 @@ export const routes = (router: KoaRouter) => {
    * Create Offer for a listing
    */
   router.post('(.*)/listings/:listingId/offers', async (ctx) => {
-    const listingId = ctx.params.listingId
-    if (!listingId) {
-      ctx.status = 400
-      ctx.body = {
-        message: 'Listing id is missing. It needs to be passed in the url.',
-      }
-
-      return
-    }
-
-    const result = await createOfferForInternalParkingSpace(listingId)
+    const result = await createOfferForInternalParkingSpace(
+      ctx.params.listingId
+    )
 
     ctx.status = result.httpStatus
     // Step 6: Communicate error to dev team and customer service
