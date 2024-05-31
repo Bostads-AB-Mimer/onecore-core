@@ -1,4 +1,4 @@
-import { ListingStatus, Offer, OfferStatus } from 'onecore-types'
+import { ListingStatus, OfferStatus } from 'onecore-types'
 
 import { ProcessError, ProcessResult2 } from '../../../common/types'
 import * as leasingAdapter from '../../../adapters/leasing-adapter'
@@ -34,6 +34,8 @@ export const createOfferForInternalParkingSpace = async (
     if (!listing) return makeProcessError('no-listing', 500)
     if (listing.status !== ListingStatus.Expired)
       return makeProcessError('listing-not-expired', 500)
+
+    // TODO: Maybe we want to make a credit check here?
 
     const applicants =
       await leasingAdapter.getListingByIdWithDetailedApplicants(
