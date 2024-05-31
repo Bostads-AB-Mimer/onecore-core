@@ -2,6 +2,7 @@ import { ListingStatus, OfferStatus } from 'onecore-types'
 
 import { ProcessError, ProcessResult2 } from '../../../common/types'
 import * as leasingAdapter from '../../../adapters/leasing-adapter'
+import * as utils from '../../../utils'
 
 type CreateOfferError =
   | 'no-listing'
@@ -59,7 +60,7 @@ export const createOfferForInternalParkingSpace = async (
     try {
       const offer = await leasingAdapter.createOffer({
         applicantId: applicant.id,
-        expiresAt: new Date(),
+        expiresAt: utils.date.addBusinessDays(new Date(), 2),
         listingId: listing.id,
         selectedApplicants: applicants,
         status: OfferStatus.Active,
