@@ -9,6 +9,8 @@ on:
       - staging*
 
 jobs:
+  lint-and-test:
+    uses: ./.github/workflows/lint-and-test.yml
   version:
     runs-on: ubuntu-latest
 

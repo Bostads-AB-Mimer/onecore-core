@@ -13,7 +13,9 @@
     "start": "ts-node ./src/index.ts",
     "dev": "nodemon -e ts,js --exec npm run start",
     "lint": "eslint -c .eslintrc src/",
-    "ts:watch": "tsc --watch --noEmit"
+    "ts:watch": "tsc --watch --noEmit",
+    "test:ci": "jest --silent",
+    "ts:ci": "tsc --noEmit"
   },
   "author": "",
   "license": "MIT",
