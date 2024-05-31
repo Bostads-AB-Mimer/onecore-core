@@ -31,6 +31,12 @@
         "caughtErrorsIgnorePattern": "^_"
       }
     ],
+    "node/no-extraneous-import": [
+      "warn",
+      {
+        "allowModules": ["http-errors"]
+      }
+    ]
   },
   "overrides": [{
     "files": ["src/**/*.test.ts", "test/**/*.ts"],
