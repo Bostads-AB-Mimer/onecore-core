@@ -12,7 +12,7 @@ export interface ProcessSuccess<T = any> {
 
 export interface ProcessError<E = any> {
   processStatus: ProcessStatus.failed
-  reason: E
+  error: E
   httpStatus: number
   response?: any
 }

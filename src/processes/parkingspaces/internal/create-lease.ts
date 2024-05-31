@@ -14,7 +14,7 @@ export const createLeaseForInternalParkingSpace = async (): Promise<
 > => {
   return {
     processStatus: ProcessStatus.failed,
-    reason: 'not-implemented',
+    error: 'not-implemented',
     httpStatus: 500,
     response: {
       message: 'todo',

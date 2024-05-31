@@ -50,7 +50,7 @@ export const createLeaseForExternalParkingSpace = async (
     if (!parkingSpace) {
       return {
         processStatus: ProcessStatus.failed,
-        reason: 'parking-space-not-found',
+        error: 'parking-space-not-found',
         httpStatus: 404,
         response: {
           message: `The parking space ${parkingSpaceId} does not exist or is no longer available.`,
@@ -64,7 +64,7 @@ export const createLeaseForExternalParkingSpace = async (
     ) {
       return {
         processStatus: ProcessStatus.failed,
-        reason: 'parkingspace-not-external',
+        error: 'parkingspace-not-external',
         httpStatus: 404,
         response: {
           message: `This process currently only handles external parking spaces. The parking space provided is not external (it is ${parkingSpace.applicationCategory}, ${parkingSpaceApplicationCategoryTranslation.external}).`,
@@ -78,7 +78,7 @@ export const createLeaseForExternalParkingSpace = async (
     if (!applicantContact) {
       return {
         processStatus: ProcessStatus.failed,
-        reason: 'applicant-not-found',
+        error: 'applicant-not-found',
         httpStatus: 404,
         response: {
           message: `Applicant ${contactId} could not be retrieved.`,
@@ -165,7 +165,7 @@ export const createLeaseForExternalParkingSpace = async (
 
       return {
         processStatus: ProcessStatus.failed,
-        reason: 'rejected-application',
+        error: 'rejected-application',
         httpStatus: 400,
         response: {
           reason: applicantHasNoLease
@@ -179,7 +179,7 @@ export const createLeaseForExternalParkingSpace = async (
     console.error('External parking space uncaught error', error)
     return {
       processStatus: ProcessStatus.failed,
-      reason: 'internal-error',
+      error: 'internal-error',
       httpStatus: 500,
       response: {
         message: error.message,

@@ -51,7 +51,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     if (!parkingSpace) {
       return {
         processStatus: ProcessStatus.failed,
-        reason: 'parkingspace-not-found',
+        error: 'parkingspace-not-found',
         httpStatus: 404,
         response: {
           message: `The parking space ${parkingSpaceId} does not exist or is no longer available.`,
