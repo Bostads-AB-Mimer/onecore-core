@@ -121,6 +121,7 @@ export const routes = (router: KoaRouter) => {
     const result = await createOfferForInternalParkingSpace(
       ctx.params.listingId
     )
+    console.log(result)
 
     ctx.status = result.httpStatus
     // Step 6: Communicate error to dev team and customer service
