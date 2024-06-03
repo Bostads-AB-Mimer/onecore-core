@@ -211,14 +211,16 @@ const applyForListing = async (applicantData: Applicant) => {
   }
 }
 
-const getListingByListingId = async (listingId: string) => {
+const getListingByListingId = async (
+  listingId: string
+): Promise<Listing | undefined> => {
   try {
     const result = await axios.get(
       `${tenantsLeasesServiceUrl}/listings/by-id/${listingId}`
     )
     return result.data
   } catch (error) {
-    console.error('Error fetching listing by rental object code:', error)
+    console.error('Error fetching listing by listing id:', error)
     return undefined
   }
 }
@@ -303,6 +305,7 @@ const getApplicantByContactCodeAndListingId = async (
   }
 }
 
+// TODO: This function does not actually get the listing
 const getListingByIdWithDetailedApplicants = async (
   listingId: string
 ): Promise<DetailedApplicant[] | undefined> => {
@@ -386,6 +389,23 @@ const createOffer = async (params: CreateOfferParams): Promise<Offer> => {
   }
 }
 
+const updateApplicantStatus = async (params: {
+  contactCode: string
+  applicantId: number
+  status: ApplicantStatus
+}) => {
+  try {
+    const response = await axios.patch(
+      `${tenantsLeasesServiceUrl}/applicants/${params.applicantId}/status`,
+      params
+    )
+    return response.data
+  } catch (err) {
+    console.error('Error updating applicant status:', err)
+    throw err
+  }
+}
+
 export {
   getLease,
   getLeasesForPnr,
@@ -411,4 +431,5 @@ export {
   withdrawApplicantByUser,
   setApplicantStatusActive,
   createOffer,
+  updateApplicantStatus,
 }
