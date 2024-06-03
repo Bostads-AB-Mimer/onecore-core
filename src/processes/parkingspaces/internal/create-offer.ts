@@ -1,4 +1,4 @@
-import { ListingStatus, OfferStatus } from 'onecore-types'
+import { ApplicantStatus, ListingStatus, OfferStatus } from 'onecore-types'
 
 import { ProcessResult, ProcessStatus } from '../../../common/types'
 import * as leasingAdapter from '../../../adapters/leasing-adapter'
@@ -42,7 +42,7 @@ export const createOfferForInternalParkingSpace = async (
       await leasingAdapter.updateApplicantStatus({
         applicantId: applicant.id,
         contactCode: applicant.contactCode,
-        status: 6, // TODO: Update to ApplicantStatus.Offered once available
+        status: ApplicantStatus.Offered,
       })
       log.push(`Updated status for applicant ${applicant.id}`)
     } catch (_err) {
