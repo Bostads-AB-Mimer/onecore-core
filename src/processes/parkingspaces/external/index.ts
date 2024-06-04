@@ -35,7 +35,7 @@ export const createLeaseForExternalParkingSpace = async (
   parkingSpaceId: string,
   contactId: string,
   startDate: string | undefined
-): Promise<ProcessResult> => {
+): Promise<ProcessResult<unknown, unknown>> => {
   const log: string[] = [
     `Ansökan om extern bilplats`,
     `Tidpunkt för ansökan: ${new Date()
@@ -51,6 +51,7 @@ export const createLeaseForExternalParkingSpace = async (
     if (!parkingSpace) {
       return {
         processStatus: ProcessStatus.failed,
+        error: 'parking-space-not-found',
         httpStatus: 404,
         response: {
           message: `The parking space ${parkingSpaceId} does not exist or is no longer available.`,
@@ -64,6 +65,7 @@ export const createLeaseForExternalParkingSpace = async (
     ) {
       return {
         processStatus: ProcessStatus.failed,
+        error: 'parkingspace-not-external',
         httpStatus: 404,
         response: {
           message: `This process currently only handles external parking spaces. The parking space provided is not external (it is ${parkingSpace.applicationCategory}, ${parkingSpaceApplicationCategoryTranslation.external}).`,
@@ -77,6 +79,7 @@ export const createLeaseForExternalParkingSpace = async (
     if (!applicantContact) {
       return {
         processStatus: ProcessStatus.failed,
+        error: 'applicant-not-found',
         httpStatus: 404,
         response: {
           message: `Applicant ${contactId} could not be retrieved.`,
@@ -138,6 +141,7 @@ export const createLeaseForExternalParkingSpace = async (
 
       return {
         processStatus: ProcessStatus.successful,
+        data: { lease },
         response: {
           lease,
           message: 'Parking space lease created.',
@@ -162,6 +166,7 @@ export const createLeaseForExternalParkingSpace = async (
 
       return {
         processStatus: ProcessStatus.failed,
+        error: 'rejected-application',
         httpStatus: 400,
         response: {
           reason: applicantHasNoLease
@@ -175,6 +180,7 @@ export const createLeaseForExternalParkingSpace = async (
     logger.error(error, 'External parking space uncaught error')
     return {
       processStatus: ProcessStatus.failed,
+      error: 'internal-error',
       httpStatus: 500,
       response: {
         message: error.message,
