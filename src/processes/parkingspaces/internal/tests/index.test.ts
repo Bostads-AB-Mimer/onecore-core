@@ -1,14 +1,10 @@
-import axios, {
-  AxiosResponse,
-  InternalAxiosRequestConfig,
-  HttpStatusCode,
-} from 'axios'
+import axios, { AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 jest.mock('onecore-utilities', () => {
   return {
     logger: {
-      info: () => {
+      info: console.log /*() => {
         return
-      },
+      }*/,
       error: () => {
         return
       },
@@ -73,6 +69,9 @@ describe('parkingspaces', () => {
       .mockResolvedValue(
         createAxiosResponse(axios.HttpStatusCode.Created, null)
       )
+    const getApplicantByContactCodeAndListingIdSpy = jest
+      .spyOn(leasingAdapter, 'getApplicantByContactCodeAndListingId')
+      .mockResolvedValue(createAxiosResponse(200, mockedApplicant))
     const getListingByRentalObjectCodeSpy = jest
       .spyOn(leasingAdapter, 'getListingByRentalObjectCode')
       .mockResolvedValue(
@@ -181,6 +180,9 @@ describe('parkingspaces', () => {
       getContactSpy.mockResolvedValue(mockedApplicant)
       getLeasesForPnrSpy.mockResolvedValueOnce(mockedLeases)
       getInternalCreditInformationSpy.mockResolvedValueOnce(true)
+      getApplicantByContactCodeAndListingIdSpy.mockResolvedValue(
+        createAxiosResponse(200, mockedApplicant)
+      )
 
       await parkingProcesses.createNoteOfInterestForInternalParkingSpace(
         'foo',
