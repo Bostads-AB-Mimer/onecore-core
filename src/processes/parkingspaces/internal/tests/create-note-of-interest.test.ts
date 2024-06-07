@@ -32,7 +32,6 @@ import {
   mockedListing,
   mockedListingWithDetailedApplicants,
 } from '../../../../adapters/tests/leasing-adapter.mocks'
-import { create } from 'domain'
 
 const createAxiosResponse = (status: number, data: any): AxiosResponse => {
   return {
