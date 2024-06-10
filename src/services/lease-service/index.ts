@@ -20,6 +20,7 @@ import {
   withdrawApplicantByUser,
   getApplicantsAndListingByContactCode,
   getListingByIdWithDetailedApplicants,
+  getContact,
 } from '../../adapters/leasing-adapter'
 import { createOfferForInternalParkingSpace } from '../../processes/parkingspaces/internal'
 import { logger } from 'onecore-utilities'
@@ -65,10 +66,23 @@ export const routes = (router: KoaRouter) => {
   })
 
   /**
-   * Returns a contact
+   * Returns a contact by national registration number
    */
   router.get('(.*)/contact/:pnr', async (ctx) => {
+    console.log('get by nat reg')
     const responseData = await getContactForPnr(ctx.params.pnr)
+
+    ctx.body = {
+      data: responseData,
+    }
+  })
+
+  /**
+   * Returns a contact by contact code
+   */
+  router.get('(.*)/contact/contact-code/:contactCode', async (ctx) => {
+    console.log('get by contact code')
+    const responseData = await getContact(ctx.params.contactCode)
 
     ctx.body = {
       data: responseData,
