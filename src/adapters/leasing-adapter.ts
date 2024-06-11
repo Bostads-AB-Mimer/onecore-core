@@ -200,7 +200,7 @@ const createNewListing = async (listingData: Listing) => {
   }
 }
 
-const applyForListing = async (applicantData: Applicant) => {
+const applyForListing = async (applicantData: Omit<Applicant, 'id'>) => {
   try {
     return await axios.post(
       `${tenantsLeasesServiceUrl}/listings/apply`,

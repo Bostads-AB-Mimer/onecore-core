@@ -157,15 +157,6 @@ export const routes = (router: KoaRouter) => {
     '(.*)/parkingspaces/:parkingSpaceId/noteofinterests',
     async (ctx) => {
       const parkingSpaceId = ctx.params.parkingSpaceId
-      if (!parkingSpaceId) {
-        ctx.status = 400
-        ctx.body = {
-          message:
-            'Parking space id is missing. It needs to be passed in the url.',
-        }
-
-        return
-      }
 
       const contactCode = ctx.request.body.contactCode
 
