@@ -160,7 +160,7 @@ export const routes = (router: KoaRouter) => {
 
       const contactCode = ctx.request.body.contactCode
 
-      if (contactCode && contactCode == '') {
+      if (!contactCode) {
         ctx.status = 400
         ctx.body = {
           message:
