@@ -14,6 +14,7 @@ import {
   saveMaterialChoice,
   getMaterialChoiceStatuses,
   getRoomsWithMaterialChoices,
+  getRentalPropertyInfoFromXpand,
 } from '../../adapters/property-management-adapter'
 import { getFloorPlanStream } from './adapters/document-adapter'
 import { createLeaseForExternalParkingSpace } from '../../processes/parkingspaces/external'
@@ -204,6 +205,26 @@ export const routes = (router: KoaRouter) => {
           message: 'A technical error has occured',
         }
       }
+    }
+  )
+
+  router.get(
+    '(.*)/rentalPropertyInfoFromXpand/:rentalObjectCode',
+    async (ctx) => {
+      const rentalObjectCode = ctx.params.rentalObjectCode
+
+      if (!rentalObjectCode) {
+        ctx.status = 400
+        ctx.body = {
+          message: 'Rental Object Code is missing.',
+        }
+
+        return
+      }
+
+      const res = await getRentalPropertyInfoFromXpand(rentalObjectCode)
+      ctx.status = res.status
+      ctx.body = res.data
     }
   )
 }
