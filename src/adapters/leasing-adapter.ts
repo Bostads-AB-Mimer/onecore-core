@@ -76,6 +76,27 @@ const getContactForPnr = async (
   return contactResponse.data.data
 }
 
+type AdapterResult<T, E> = { ok: true; data: T } | { ok: false; err: E }
+
+const getContactsBySearchQuery = async (
+  q: string
+): Promise<AdapterResult<Array<Contact>, unknown>> => {
+  try {
+    const response = await axios.get<{ data: Array<Contact> }>(
+      `${tenantsLeasesServiceUrl}/contacts?q=${q}`
+    )
+
+    if (response.status === 200) {
+      return { ok: true, data: response.data.data }
+    }
+
+    throw response.data
+  } catch (err) {
+    logger.error({ err }, 'leasingAdapter.getContactsBySearchQuery')
+    return { ok: false, err }
+  }
+}
+
 const getContact = async (contactId: string): Promise<Contact | undefined> => {
   try {
     const contactResponse = await axios(
@@ -95,7 +116,6 @@ const getContactForPhoneNumber = async (
     const contactResponse = await axios(
       tenantsLeasesServiceUrl + '/contact/phoneNumber/' + phoneNumber
     )
-
     return contactResponse.data.data
   } catch (error) {
     return undefined
@@ -440,4 +460,5 @@ export {
   setApplicantStatusActive,
   createOffer,
   updateApplicantStatus,
+  getContactsBySearchQuery,
 }
