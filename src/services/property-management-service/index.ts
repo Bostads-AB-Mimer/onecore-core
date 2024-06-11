@@ -208,23 +208,20 @@ export const routes = (router: KoaRouter) => {
     }
   )
 
-  router.get(
-    '(.*)/rentalPropertyInfoFromXpand/:rentalObjectCode',
-    async (ctx) => {
-      const rentalObjectCode = ctx.params.rentalObjectCode
+  router.get('(.*)/propertyInfoFromXpand/:rentalObjectCode', async (ctx) => {
+    const rentalObjectCode = ctx.params.rentalObjectCode
 
-      if (!rentalObjectCode) {
-        ctx.status = 400
-        ctx.body = {
-          message: 'Rental Object Code is missing.',
-        }
-
-        return
+    if (!rentalObjectCode) {
+      ctx.status = 400
+      ctx.body = {
+        message: 'Rental Object Code is missing.',
       }
 
-      const res = await getRentalPropertyInfoFromXpand(rentalObjectCode)
-      ctx.status = res.status
-      ctx.body = res.data
+      return
     }
-  )
+
+    const res = await getRentalPropertyInfoFromXpand(rentalObjectCode)
+    ctx.status = res.status
+    ctx.body = res.data
+  })
 }
