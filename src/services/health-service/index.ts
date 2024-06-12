@@ -1,7 +1,12 @@
 import KoaRouter from '@koa/router'
 import config from '../../common/config'
-import axios from 'axios'
-import { SystemHealth, SystemStatus } from 'onecore-types'
+import {
+  loggedAxios as axios,
+  setAxiosExclusionFilters,
+} from 'onecore-utilities'
+import { SystemHealth } from 'onecore-types'
+
+setAxiosExclusionFilters([/.*?\/health$/])
 
 const oneCoreServiceProbe = async (
   systemName: string,
@@ -75,14 +80,12 @@ export const routes = (router: KoaRouter) => {
           break
         case 'impaired':
           if (health.status !== 'failure') {
-            console.log('health.status was', health.status, ', now: impaired')
             health.status = 'impaired'
             health.statusMessage = 'Failure because of impaired subsystem(s)'
           }
           break
         case 'unknown':
           if (health.status !== 'failure' && health.status !== 'impaired') {
-            console.log('health.status was', health.status, ', now: unknown')
             health.status = 'unknown'
             health.statusMessage =
               'Unknown because subsystem(s) status is unknown'

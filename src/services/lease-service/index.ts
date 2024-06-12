@@ -14,7 +14,7 @@ import {
   getListingByListingId,
   getListingsWithApplicants,
   getApplicantsByContactCode,
-  getApplicantByContactCodeAndRentalObjectCode,
+  getApplicantByContactCodeAndListingId,
   getContactForPhoneNumber,
   withdrawApplicantByManager,
   withdrawApplicantByUser,
@@ -23,6 +23,7 @@ import {
   getOffersForContact,
 } from '../../adapters/leasing-adapter'
 import { createOfferForInternalParkingSpace } from '../../processes/parkingspaces/internal'
+import { logger } from 'onecore-utilities'
 
 const getLeaseWithRelatedEntities = async (rentalId: string) => {
   const lease = await getLease(rentalId, 'true')
@@ -130,29 +131,13 @@ export const routes = (router: KoaRouter) => {
    * Create Offer for a listing
    */
   router.post('(.*)/listings/:listingId/offers', async (ctx) => {
-    const listingId = ctx.params.listingId
-    if (!listingId) {
-      ctx.status = 400
-      ctx.body = {
-        message: 'Listing id is missing. It needs to be passed in the url.',
-      }
+    const result = await createOfferForInternalParkingSpace(
+      ctx.params.listingId
+    )
+    logger.debug(result)
 
-      return
-    }
-
-    try {
-      const result = await createOfferForInternalParkingSpace(listingId)
-
-      ctx.status = result.httpStatus
-      ctx.body = result.response
-    } catch (error) {
-      // Step 6: Communicate error to dev team and customer service
-      console.log('Error', error)
-      ctx.status = 500
-      ctx.body = {
-        message: 'A technical error has occured',
-      }
-    }
+    ctx.status = result.httpStatus
+    // Step 6: Communicate error to dev team and customer service
   })
 
   /**
@@ -189,13 +174,13 @@ export const routes = (router: KoaRouter) => {
   })
 
   /**
-   * Get Applicant by contact code and rental object code
+   * Get Applicant by contact code and listing id
    */
-  router.get('/applicants/:contactCode/:rentalObjectCode', async (ctx) => {
-    const { contactCode, rentalObjectCode } = ctx.params
-    const responseData = await getApplicantByContactCodeAndRentalObjectCode(
+  router.get('/applicants/:contactCode/:listingId', async (ctx) => {
+    const { contactCode, listingId } = ctx.params
+    const responseData = await getApplicantByContactCodeAndListingId(
       contactCode,
-      rentalObjectCode
+      listingId
     )
 
     ctx.body = responseData

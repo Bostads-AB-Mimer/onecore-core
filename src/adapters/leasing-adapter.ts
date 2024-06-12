@@ -1,4 +1,5 @@
-import axios from 'axios'
+import { loggedAxios as axios, logger } from 'onecore-utilities'
+
 import {
   ConsumerReport,
   Contact,
@@ -11,6 +12,7 @@ import {
   ApplicantStatus,
   ApplicantWithListing,
   Offer,
+  DetailedApplicant,
 } from 'onecore-types'
 import config from '../common/config'
 import dayjs from 'dayjs'
@@ -193,7 +195,7 @@ const createNewListing = async (listingData: Listing) => {
   try {
     return await axios.post(`${tenantsLeasesServiceUrl}/listings`, listingData)
   } catch (error) {
-    console.error('Error creating new listing:', error)
+    logger.error(error, 'Error creating new listing:')
     return undefined
   }
 }
@@ -205,30 +207,34 @@ const applyForListing = async (applicantData: Applicant) => {
       applicantData
     )
   } catch (error) {
-    console.error('Error applying for listing:', error)
+    logger.error(error, 'Error applying for listing:', error)
     return undefined
   }
 }
 
-const getListingByListingId = async (listingId: string) => {
+const getListingByListingId = async (
+  listingId: string
+): Promise<Listing | undefined> => {
   try {
     const result = await axios.get(
       `${tenantsLeasesServiceUrl}/listings/by-id/${listingId}`
     )
     return result.data
   } catch (error) {
-    console.error('Error fetching listing by rental object code:', error)
+    logger.error(error, 'Error fetching listing by rental object code')
     return undefined
   }
 }
 
 const getListingByRentalObjectCode = async (rentalObjectCode: string) => {
   try {
-    return await axios.get(
+    const response = await axios.get(
       `${tenantsLeasesServiceUrl}/listings/by-code/${rentalObjectCode}`
     )
+
+    return response
   } catch (error) {
-    console.error('Error fetching listing by rental object code:', error)
+    logger.error(error, 'Error fetching listing by rental object code:', error)
     return undefined
   }
 }
@@ -240,7 +246,7 @@ const getListingsWithApplicants = async (): Promise<any[] | undefined> => {
     )
     return response.data
   } catch (error) {
-    console.error('Error fetching listings with applicants:', error)
+    logger.error(error, 'Error fetching listings with applicants:')
     return undefined
   }
 }
@@ -254,7 +260,7 @@ const getApplicantsByContactCode = async (
     )
     return response.data
   } catch (error) {
-    console.error('Error fetching applicants by contact code:', error)
+    logger.error(error, 'Error fetching applicants by contact code:')
     return undefined
   }
 }
@@ -277,7 +283,8 @@ const getApplicantsAndListingByContactCode = async (
     }
     return applicantsAndListings
   } catch (error) {
-    console.error(
+    logger.error(
+      error,
       'Error fetching applicants and listings by contact code:',
       error
     )
@@ -285,35 +292,58 @@ const getApplicantsAndListingByContactCode = async (
   }
 }
 
-const getApplicantByContactCodeAndRentalObjectCode = async (
+const getApplicantByContactCodeAndListingId = async (
   contactCode: string,
-  rentalObjectCode: string
+  listingId: string
 ): Promise<any | undefined> => {
   try {
-    const response = await axios.get(
-      `${tenantsLeasesServiceUrl}/applicants/${contactCode}/${rentalObjectCode}`
+    return await axios.get(
+      `${tenantsLeasesServiceUrl}/applicants/${contactCode}/${listingId}}`
     )
-    return response.data
   } catch (error) {
-    console.error(
-      'Error fetching applicant by contact code and rental object code:',
-      error
+    logger.error(
+      error,
+      'Error fetching applicant by contact code and rental object code'
     )
     return undefined
   }
 }
 
+// TODO: This function does not actually get the listing
 const getListingByIdWithDetailedApplicants = async (
   listingId: string
-): Promise<any | undefined> => {
+): Promise<DetailedApplicant[] | undefined> => {
   try {
     const response = await axios(
       `${tenantsLeasesServiceUrl}/listing/${listingId}/applicants/details`
     )
     return response.data
   } catch (error) {
-    console.error('Error fetching listing with detailed applicant data:', error)
+    logger.error(
+      error,
+      'Error fetching listing with detailed applicant data:',
+      error
+    )
     return undefined
+  }
+}
+
+const setApplicantStatusActive = async (
+  applicantId: string,
+  contactCode: string
+): Promise<any> => {
+  try {
+    const response = await axios.patch(
+      `${tenantsLeasesServiceUrl}/applicants/${applicantId}/status`,
+      { status: ApplicantStatus.Active, contactCode: contactCode }
+    )
+    return response.data
+  } catch (error) {
+    logger.error(
+      error,
+      `Error setting applicantStatus active on user with contactcode ${contactCode}`
+    )
+    throw new Error(`Failed to update status for applicant ${applicantId}`)
   }
 }
 
@@ -327,7 +357,7 @@ const withdrawApplicantByManager = async (
     )
     return response.data
   } catch (error) {
-    console.error('Error patching applicant status:', error)
+    logger.error(error, 'Error patching applicant status:', error)
     throw new Error(`Failed to update status for applicant ${applicantId}`)
   }
 }
@@ -343,7 +373,7 @@ const withdrawApplicantByUser = async (
     )
     return response.data
   } catch (error) {
-    console.error('Error withdrawing applicant by user:', error)
+    logger.error(error, 'Error withdrawing applicant by user:', error)
     return undefined
   }
 }
@@ -362,7 +392,24 @@ const createOffer = async (params: CreateOfferParams): Promise<Offer> => {
 
     return response.data.data
   } catch (err) {
-    console.error('Error creating offer:', err)
+    logger.error(err, 'Error creating offer:')
+    throw err
+  }
+}
+
+const updateApplicantStatus = async (params: {
+  contactCode: string
+  applicantId: number
+  status: ApplicantStatus
+}) => {
+  try {
+    const response = await axios.patch(
+      `${tenantsLeasesServiceUrl}/applicants/${params.applicantId}/status`,
+      params
+    )
+    return response.data
+  } catch (err) {
+    logger.error(err, 'Error updating applicant status')
     throw err
   }
 }
@@ -401,10 +448,12 @@ export {
   getListingsWithApplicants,
   getApplicantsByContactCode,
   getApplicantsAndListingByContactCode,
-  getApplicantByContactCodeAndRentalObjectCode,
+  getApplicantByContactCodeAndListingId,
   getListingByIdWithDetailedApplicants,
   withdrawApplicantByManager,
   withdrawApplicantByUser,
+  setApplicantStatusActive,
   createOffer,
+  updateApplicantStatus,
   getOffersForContact,
 }

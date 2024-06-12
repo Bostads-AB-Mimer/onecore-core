@@ -1,4 +1,4 @@
-import axios from 'axios'
+import { loggedAxios as axios } from 'onecore-utilities'
 import {
   Listing,
   MaintenanceUnitInfo,
@@ -9,8 +9,7 @@ import {
   RentalPropertyInfo,
 } from 'onecore-types'
 import config from '../common/config'
-
-// Temporary interface to be replaced by the one from onecore-types when propertyInfo is fetched from xpand
+import { logger } from 'onecore-utilities'
 
 const propertyManagementServiceUrl = config.propertyInfoService.url
 
@@ -24,6 +23,10 @@ const getRentalProperty = async (
   return propertyResponse.data
 }
 
+//todo: this function needs to be refactored to use a pattern like "getRentalPropertyInfoFromXpand".
+//todo: body is possible null from propertyManagementServiceUrl and without a status returned
+//todo: its not possible for a caller to know what has gone wrong (or ok)
+//todo: modify calling code to use a pattern like in "getRentalPropertyInfoFromXpand"
 const getRentalPropertyInfo = async (
   rentalPropertyId: string
 ): Promise<RentalPropertyInfo> => {
@@ -32,6 +35,19 @@ const getRentalPropertyInfo = async (
   )
 
   return propertyResponse.data
+}
+
+//todo: copy of getRentalPropertyInfo above
+//todo: added because callers needs to know more about the response than just the body
+const getRentalPropertyInfoFromXpand = async (rentalPropertyId: string) => {
+  const propertyResponse = await axios(
+    propertyManagementServiceUrl + '/rentalPropertyInfo/' + rentalPropertyId
+  )
+
+  return {
+    status: propertyResponse.status,
+    data: propertyResponse.data,
+  }
 }
 
 const getMaintenanceUnitsForRentalProperty = async (
@@ -119,7 +135,7 @@ const getParkingSpace = async (
 
     return parkingSpaceResponse.data
   } catch (error) {
-    console.error('Error retrieving parking space', error)
+    logger.error(error, 'Error retrieving parking space')
     return undefined
   }
 }
@@ -134,7 +150,7 @@ const getPublishedParkingSpace = async (
 
     return parkingSpaceResponse.data
   } catch (error) {
-    console.error('Error retrieving parking space', error)
+    logger.error(error, 'Error retrieving parking space')
     return undefined
   }
 }
@@ -151,4 +167,5 @@ export {
   getRoomsWithMaterialChoices,
   getParkingSpace,
   getPublishedParkingSpace,
+  getRentalPropertyInfoFromXpand,
 }

@@ -1,5 +1,5 @@
 {
-  "version": "1.0.63",
+  "version": "1.0.74",
   "description": "",
   "main": "./src/index.ts",
   "private": "true",
@@ -8,12 +8,14 @@
   },
   "scripts": {
     "test": "jest",
-    "test:watch": "jest --watch",
-    "build": "tsc",
+    "build": "holidays2json --pick SE --min && tsc",
+    "test:watch": "TZ=UTC jest --watch",
     "start": "ts-node ./src/index.ts",
     "dev": "nodemon -e ts,js --exec npm run start",
     "lint": "eslint -c .eslintrc src/",
-    "ts:watch": "tsc --watch --noEmit"
+    "ts:watch": "tsc --watch --noEmit",
+    "test:ci": "TZ=UTC jest --silent",
+    "ts:ci": "tsc --noEmit"
   },
   "author": "",
   "license": "MIT",
@@ -26,12 +28,14 @@
     "@types/koa-bodyparser": "^4.3.12",
     "@types/koa-pino-logger": "3.0.1",
     "@types/node": "^20.11.5",
+    "@types/pino-multi-stream": "^5.1.6",
     "@types/supertest": "2.0.12",
     "@typescript-eslint/eslint-plugin": "5.59.2",
     "eslint": "8.40.0",
     "eslint-config-prettier": "8.8.0",
     "eslint-plugin-import": "2.27.5",
     "eslint-plugin-node": "11.1.0",
+    "fishery": "^2.2.2",
     "jest": "29.5.0",
     "nock": "^13.5.4",
     "nodemon": "^3.0.3",
@@ -45,9 +49,12 @@
     "@iteam/config": "^12.1.2",
     "@koa/cors": "^5.0.0",
     "@koa/router": "^12.0.1",
-    "axios": "^1.6.5",
+    "axios": "^1.7.2",
+    "axios-logger": "^2.8.0",
+    "date-holidays": "^3.23.12",
     "dayjs": "^1.11.10",
     "dotenv": "^16.4.5",
+    "http-errors": "^2.0.0",
     "jsonwebtoken": "^9.0.2",
     "koa": "^2.15.0",
     "koa-body": "^6.0.1",
@@ -55,6 +62,11 @@
     "koa-jwt": "^4.0.4",
     "koa-pino-logger": "^4.0.0",
     "odoo-await": "^3.4.1",
-    "onecore-types": "^1.18.0"
+    "onecore-types": "^1.21.0",
+    "onecore-utilities": "^1.0.3",
+    "pino": "^9.1.0",
+    "pino-elasticsearch": "^8.0.0",
+    "pino-multi-stream": "^6.0.0",
+    "pino-pretty": "^11.0.0"
   }
 }
