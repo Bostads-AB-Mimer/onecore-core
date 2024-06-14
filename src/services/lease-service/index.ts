@@ -23,6 +23,8 @@ import {
   getApplicantsAndListingByContactCode,
   getListingByIdWithDetailedApplicants,
   getContactsDataBySearchQuery,
+  getContact,
+  getContactByContactCode,
 } from '../../adapters/leasing-adapter'
 import { createOfferForInternalParkingSpace } from '../../processes/parkingspaces/internal'
 
@@ -88,10 +90,16 @@ export const routes = (router: KoaRouter) => {
   /**
    * Returns a contact by national registration number
    */
-  router.get('(.*)/contact/:pnr', async (ctx) => {
-    const responseData = await getContactForPnr(ctx.params.pnr)
+  router.get('(.*)/contact/contactCode/:contactCode', async (ctx) => {
+    const res = await getContactByContactCode(ctx.params.contactCode)
+    if (!res.ok) {
+      ctx.status = 500
+      return
+    }
+
+    ctx.status = 200
     ctx.body = {
-      data: responseData,
+      data: res.data,
     }
   })
 
