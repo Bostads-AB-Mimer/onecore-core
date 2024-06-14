@@ -22,7 +22,7 @@ import {
   withdrawApplicantByUser,
   getApplicantsAndListingByContactCode,
   getListingByIdWithDetailedApplicants,
-  getContactsBySearchQuery,
+  getContactsDataBySearchQuery,
 } from '../../adapters/leasing-adapter'
 import { createOfferForInternalParkingSpace } from '../../processes/parkingspaces/internal'
 
@@ -75,7 +75,7 @@ export const routes = (router: KoaRouter) => {
       return
     }
 
-    const result = await getContactsBySearchQuery(ctx.query.q)
+    const result = await getContactsDataBySearchQuery(ctx.query.q)
 
     if (!result.ok) {
       ctx.status = 500

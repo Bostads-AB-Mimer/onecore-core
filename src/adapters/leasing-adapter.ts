@@ -78,12 +78,14 @@ const getContactForPnr = async (
 
 type AdapterResult<T, E> = { ok: true; data: T } | { ok: false; err: E }
 
-const getContactsBySearchQuery = async (
+const getContactsDataBySearchQuery = async (
   q: string
-): Promise<AdapterResult<Array<Contact>, unknown>> => {
+): Promise<
+  AdapterResult<Array<Pick<Contact, 'fullName' | 'contactCode'>>, unknown>
+> => {
   try {
     const response = await axios.get<{ data: Array<Contact> }>(
-      `${tenantsLeasesServiceUrl}/contacts?q=${q}`
+      `${tenantsLeasesServiceUrl}/contacts/search?q=${q}`
     )
 
     if (response.status === 200) {
@@ -460,5 +462,5 @@ export {
   setApplicantStatusActive,
   createOffer,
   updateApplicantStatus,
-  getContactsBySearchQuery,
+  getContactsDataBySearchQuery,
 }
