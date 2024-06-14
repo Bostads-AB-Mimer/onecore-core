@@ -113,16 +113,18 @@ const getContact = async (contactId: string): Promise<Contact | undefined> => {
 
 const getContactByContactCode = async (
   contactCode: string
-): Promise<AdapterResult<Contact, unknown>> => {
+): Promise<AdapterResult<Contact, 'not-found' | 'unknown'>> => {
   try {
     const res = await axios.get<{ data: Contact }>(
       `${tenantsLeasesServiceUrl}/contact/contactCode/${contactCode}`
     )
 
+    if (!res.data.data) return { ok: false, err: 'not-found' }
+
     return { ok: true, data: res.data.data }
   } catch (err) {
     logger.error({ err }, 'leasing-adapter.getContactByContactCode')
-    return { ok: false, err }
+    return { ok: false, err: 'unknown' }
   }
 }
 

@@ -23,7 +23,6 @@ import {
   getApplicantsAndListingByContactCode,
   getListingByIdWithDetailedApplicants,
   getContactsDataBySearchQuery,
-  getContact,
   getContactByContactCode,
 } from '../../adapters/leasing-adapter'
 import { createOfferForInternalParkingSpace } from '../../processes/parkingspaces/internal'
@@ -93,7 +92,7 @@ export const routes = (router: KoaRouter) => {
   router.get('(.*)/contact/contactCode/:contactCode', async (ctx) => {
     const res = await getContactByContactCode(ctx.params.contactCode)
     if (!res.ok) {
-      ctx.status = 500
+      ctx.status = res.err === 'not-found' ? 404 : 500
       return
     }
 
