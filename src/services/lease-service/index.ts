@@ -23,6 +23,7 @@ import {
   getListingByIdWithDetailedApplicants,
   getContactsDataBySearchQuery,
   getContactByContactCode,
+  getContactForPnr,
 } from '../../adapters/leasing-adapter'
 import { ProcessStatus } from '../../common/types'
 import { createOfferForInternalParkingSpace } from '../../processes/parkingspaces/internal'
@@ -68,6 +69,17 @@ export const routes = (router: KoaRouter) => {
   })
 
   /**
+   * Returns a contact by national registration number
+   */
+  router.get('(.*)/contact/:pnr', async (ctx) => {
+    const responseData = await getContactForPnr(ctx.params.pnr)
+
+    ctx.body = {
+      data: responseData,
+    }
+  })
+
+  /**
    * Returns a list of contacts by search query (natregnumber or contact code)
    */
   router.get('(.*)/contacts/search', async (ctx) => {
@@ -86,9 +98,6 @@ export const routes = (router: KoaRouter) => {
     }
   })
 
-  /**
-   * Returns a contact by national registration number
-   */
   router.get('(.*)/contact/contactCode/:contactCode', async (ctx) => {
     const res = await getContactByContactCode(ctx.params.contactCode)
     if (!res.ok) {
@@ -155,6 +164,7 @@ export const routes = (router: KoaRouter) => {
       ctx.status = 201
       return
     }
+
     ctx.status = 500
 
     // Step 6: Communicate error to dev team and customer service
