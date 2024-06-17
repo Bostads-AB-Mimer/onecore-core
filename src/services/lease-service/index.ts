@@ -9,7 +9,6 @@ import KoaRouter from '@koa/router'
 import { logger } from 'onecore-utilities'
 
 import {
-  getContactForPnr,
   getLease,
   getLeasesForPnr,
   getCreditInformation,

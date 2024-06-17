@@ -164,7 +164,7 @@ export const routes = (router: KoaRouter) => {
         ctx.status = 400
         ctx.body = {
           message:
-            'Contact code is missing. It needs to be passed in the body (contactId)',
+            'Contact code is missing. It needs to be passed in the body (contactCode)',
         }
         return
       }
@@ -188,9 +188,9 @@ export const routes = (router: KoaRouter) => {
 
         ctx.status = result.httpStatus
         ctx.body = result.response
-      } catch (error) {
+      } catch (err) {
         // Step 6: Communicate error to dev team and customer service
-        logger.error(error, 'Error')
+        logger.error({ err }, 'Error when creating note of interest')
         ctx.status = 500
         ctx.body = {
           message: 'A technical error has occured',
