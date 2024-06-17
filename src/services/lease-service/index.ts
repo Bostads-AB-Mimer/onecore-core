@@ -24,6 +24,7 @@ import {
   getContactsDataBySearchQuery,
   getContactByContactCode,
 } from '../../adapters/leasing-adapter'
+import { ProcessStatus } from '../../common/types'
 import { createOfferForInternalParkingSpace } from '../../processes/parkingspaces/internal'
 
 const getLeaseWithRelatedEntities = async (rentalId: string) => {
@@ -148,9 +149,14 @@ export const routes = (router: KoaRouter) => {
     const result = await createOfferForInternalParkingSpace(
       ctx.params.listingId
     )
-    logger.debug(result)
 
-    ctx.status = result.httpStatus
+    if (result.processStatus === ProcessStatus.successful) {
+      logger.info(result)
+      ctx.status = 201
+      return
+    }
+    ctx.status = 500
+
     // Step 6: Communicate error to dev team and customer service
   })
 
