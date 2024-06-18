@@ -16,6 +16,7 @@ import {
 } from 'onecore-types'
 import config from '../common/config'
 import dayjs from 'dayjs'
+import { AdapterResult } from './types'
 
 //todo: move to global config or handle error statuses in middleware
 axios.defaults.validateStatus = function (status) {
@@ -75,8 +76,6 @@ const getContactForPnr = async (
 
   return contactResponse.data.data
 }
-
-type AdapterResult<T, E> = { ok: true; data: T } | { ok: false; err: E }
 
 const getContactsDataBySearchQuery = async (
   q: string
