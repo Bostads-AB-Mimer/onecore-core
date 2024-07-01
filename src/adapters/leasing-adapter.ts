@@ -416,6 +416,38 @@ const updateApplicantStatus = async (params: {
   }
 }
 
+const validateContactResidentialAreaRentalRules = async (params: {
+  contactCode: string
+  districtCode: string
+}) => {
+  try {
+    const response = await axios.get(
+      `${tenantsLeasesServiceUrl}/applicants/validateResidentialAreaRentalRules/${params.contactCode}/${params.districtCode}`
+    )
+
+    return { status: response.status, data: response.data }
+  } catch (err) {
+    logger.error(err, 'Error validating contact residential area rental rules')
+    throw err
+  }
+}
+
+const validateContactPropertyRentalRules = async (params: {
+  contactCode: string
+  estateCode: string
+}) => {
+  try {
+    const response = await axios.get(
+      `${tenantsLeasesServiceUrl}/applicants/validatePropertyRentalRules/${params.contactCode}/${params.estateCode}`
+    )
+
+    return { status: response.status, data: response.data }
+  } catch (err) {
+    logger.error(err, 'Error validating contact property rental rules')
+    throw err
+  }
+}
+
 export {
   getLease,
   getLeasesForPnr,
@@ -442,4 +474,6 @@ export {
   setApplicantStatusActive,
   createOffer,
   updateApplicantStatus,
+  validateContactResidentialAreaRentalRules,
+  validateContactPropertyRentalRules,
 }

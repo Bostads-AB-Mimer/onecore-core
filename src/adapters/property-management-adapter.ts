@@ -1,4 +1,4 @@
-import { loggedAxios as axios } from 'onecore-utilities'
+import { loggedAxios as axios, logger } from 'onecore-utilities'
 import {
   Listing,
   MaintenanceUnitInfo,
@@ -8,8 +8,8 @@ import {
   RentalProperty,
   RentalPropertyInfo,
 } from 'onecore-types'
+
 import config from '../common/config'
-import { logger } from 'onecore-utilities'
 
 const propertyManagementServiceUrl = config.propertyInfoService.url
 
@@ -40,7 +40,7 @@ const getRentalPropertyInfo = async (
 //todo: copy of getRentalPropertyInfo above
 //todo: added because callers needs to know more about the response than just the body
 const getRentalPropertyInfoFromXpand = async (rentalPropertyId: string) => {
-  const propertyResponse = await axios(
+  const propertyResponse = await axios<RentalPropertyInfo | undefined>(
     propertyManagementServiceUrl + '/rentalPropertyInfo/' + rentalPropertyId
   )
 

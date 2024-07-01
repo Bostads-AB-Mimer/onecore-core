@@ -20,9 +20,15 @@ import {
   withdrawApplicantByUser,
   getApplicantsAndListingByContactCode,
   getListingByIdWithDetailedApplicants,
+  validateContactResidentialAreaRentalRules,
+  validateContactPropertyRentalRules,
 } from '../../adapters/leasing-adapter'
 import { createOfferForInternalParkingSpace } from '../../processes/parkingspaces/internal'
 import { logger } from 'onecore-utilities'
+import {
+  getPublishedParkingSpace,
+  getRentalPropertyInfoFromXpand,
+} from '../../adapters/property-management-adapter'
 
 const getLeaseWithRelatedEntities = async (rentalId: string) => {
   const lease = await getLease(rentalId, 'true')
@@ -201,6 +207,72 @@ export const routes = (router: KoaRouter) => {
         ctx.status = 200 // OK
         ctx.body = { message: 'Applicant successfully withdrawn by user.' }
       }
+    }
+  )
+
+  router.get(
+    '/listings/validate-rental-rules/residential-area/:contactCode/:parkingSpaceId',
+    async (ctx) => {
+      const parkingSpace = await getPublishedParkingSpace(
+        ctx.params.parkingSpaceId
+      )
+
+      if (!parkingSpace) {
+        ctx.status = 404
+        return
+      }
+
+      if (!parkingSpace.districtCode) {
+        logger.warn(
+          parkingSpace,
+          'Got parking space without district code when validating rental rules.'
+        )
+
+        ctx.status = 422
+        return
+      }
+
+      const result = await validateContactResidentialAreaRentalRules({
+        contactCode: ctx.params.contactCode,
+        districtCode: parkingSpace.districtCode,
+      })
+
+      ctx.status = result.status
+      ctx.body = { data: result.data }
+    }
+  )
+
+  router.get(
+    '/listings/validate-rental-rules/property/:contactCode/:parkingSpaceId',
+    async (ctx) => {
+      const parkingSpace = await getPublishedParkingSpace(
+        ctx.params.parkingSpaceId
+      )
+
+      if (!parkingSpace) {
+        ctx.status = 404
+        return
+      }
+
+      const estateCode = await getRentalPropertyInfoFromXpand(
+        parkingSpace.rentalObjectCode
+      )
+
+      if (!estateCode.data) {
+        logger.error(
+          `Rental property data not found for parking space ${parkingSpace.rentalObjectCode}`
+        )
+        ctx.status = 422
+        return
+      }
+
+      const result = await validateContactPropertyRentalRules({
+        contactCode: ctx.params.contactCode,
+        estateCode: estateCode.data.property.code,
+      })
+
+      ctx.status = result.status
+      ctx.body = { data: result.data }
     }
   )
 }
