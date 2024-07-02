@@ -254,11 +254,11 @@ export const routes = (router: KoaRouter) => {
         return
       }
 
-      const estateCode = await getRentalPropertyInfoFromXpand(
+      const propertyInfo = await getRentalPropertyInfoFromXpand(
         parkingSpace.rentalObjectCode
       )
 
-      if (!estateCode.data) {
+      if (!propertyInfo.data) {
         logger.error(
           `Rental property data not found for parking space ${parkingSpace.rentalObjectCode}`
         )
@@ -268,7 +268,7 @@ export const routes = (router: KoaRouter) => {
 
       const result = await validateContactPropertyRentalRules({
         contactCode: ctx.params.contactCode,
-        estateCode: estateCode.data.property.code,
+        estateCode: propertyInfo.data.property.code,
       })
 
       ctx.status = result.status
