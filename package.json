@@ -30,7 +30,7 @@
     "@types/node": "^20.11.5",
     "@types/pino-multi-stream": "^5.1.6",
     "@types/supertest": "2.0.12",
-    "@typescript-eslint/eslint-plugin": "5.59.2",
+    "@typescript-eslint/eslint-plugin": "7.16.0",
     "eslint": "8.40.0",
     "eslint-config-prettier": "8.8.0",
     "eslint-plugin-import": "2.27.5",
