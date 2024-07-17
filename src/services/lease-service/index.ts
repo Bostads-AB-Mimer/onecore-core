@@ -83,10 +83,9 @@ export const routes = (router: KoaRouter) => {
    *         content:
    *           application/json:
    *             schema:
-   *               type: object
-   *               properties:
-   *                 data:
-   *                   type: array
+   *               type: array
+   *               items:
+   *                 type: object
    *     security:
    *       - bearerAuth: []
    */
@@ -286,7 +285,7 @@ export const routes = (router: KoaRouter) => {
    * @swagger
    * /leases/{id}:
    *   get:
-   *     summary: Get lease details by ID
+   *     summary: Get lease by ID
    *     tags:
    *       - lease-service
    *     description: Retrieves lease details along with related entities based on the provided ID.
@@ -322,7 +321,7 @@ export const routes = (router: KoaRouter) => {
    * @swagger
    * /listing/{id}:
    *   get:
-   *     summary: Get listing details by ID
+   *     summary: Get listing by ID
    *     tags:
    *       - lease-service
    *     description: Retrieves details of a listing based on the provided ID.
