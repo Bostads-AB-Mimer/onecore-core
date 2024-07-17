@@ -64,7 +64,7 @@ const subsystems = [
  * @swagger
  * openapi: 3.0.0
  * tags:
- *   - name: health
+ *   - name: Health
  *     description: Operations related to service health
  */
 export const routes = (router: KoaRouter) => {
@@ -74,7 +74,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Check system health status
    *     tags:
-   *       - health
+   *       - Health
    *     description: Retrieves the health status of the system and its subsystems.
    *     responses:
    *       '200':

@@ -32,7 +32,7 @@ interface RentalPropertyInfoWithLeases extends RentalPropertyInfo {
  * @swagger
  * openapi: 3.0.0
  * tags:
- *   - name: ticketing-service
+ *   - name: Ticketing service
  *     description: Operations related to tickets in Odoo
  * components:
  *   securitySchemes:
@@ -50,7 +50,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Get property information by different identifiers
    *     tags:
-   *       - ticketing-service
+   *       - Ticketing service
    *     description: Retrieves property information along with associated leases based on the provided identifier type.
    *     parameters:
    *       - in: path
@@ -182,7 +182,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Get tickets by contact code
    *     tags:
-   *       - ticketing-service
+   *       - Ticketing service
    *     description: Retrieves all tickets associated with a given contact code.
    *     parameters:
    *       - in: path
@@ -250,7 +250,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Get maintenance units by rental property ID
    *     tags:
-   *       - ticketing-service
+   *       - Ticketing service
    *     description: Retrieves all maintenance units associated with a given rental property ID. Optionally, filter the maintenance units by type.
    *     parameters:
    *       - in: path
@@ -336,7 +336,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Get maintenance units by contact code
    *     tags:
-   *       - ticketing-service
+   *       - Ticketing service
    *     description: Retrieves all maintenance units associated with a given contact code.
    *     parameters:
    *       - in: path
@@ -430,7 +430,7 @@ export const routes = (router: KoaRouter) => {
    *   post:
    *     summary: Create a new ticket for maintenance
    *     tags:
-   *       - ticketing-service
+   *       - Ticketing service
    *     description: Creates a new maintenance ticket based on the provided contact code and ticket details.
    *     parameters:
    *       - in: path

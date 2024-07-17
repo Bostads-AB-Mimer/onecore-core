@@ -50,7 +50,7 @@ const getLeasesWithRelatedEntitiesForPnr = async (
  * @swagger
  * openapi: 3.0.0
  * tags:
- *   - name: lease-service
+ *   - name: Lease service
  *     description: Operations related to leases
  * components:
  *   securitySchemes:
@@ -68,7 +68,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Get leases with related entities for a specific Personal Number (PNR)
    *     tags:
-   *       - lease-service
+   *       - Lease service
    *     description: Retrieves lease information along with related entities (such as tenants, properties, etc.) for the specified Personal Number (PNR).
    *     parameters:
    *       - in: path
@@ -105,7 +105,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Get consumer report for a specific Personal Number (PNR)
    *     tags:
-   *       - lease-service
+   *       - Lease service
    *     description: Retrieves credit information and consumer report for the specified Personal Number (PNR).
    *     parameters:
    *       - in: path
@@ -138,7 +138,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Get contact information for a specific Personal Number (PNR)
    *     tags:
-   *       - lease-service
+   *       - Lease service
    *     description: Retrieves contact information associated with the specified Personal Number (PNR).
    *     parameters:
    *       - in: path
@@ -171,7 +171,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Search contacts by query
    *     tags:
-   *       - lease-service
+   *       - Lease service
    *     description: Retrieves contacts based on the provided search query.
    *     parameters:
    *       - in: query
@@ -216,7 +216,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Get contact by contact code
    *     tags:
-   *       - lease-service
+   *       - Lease service
    *     description: Retrieves a contact based on the provided contact code.
    *     parameters:
    *       - in: path
@@ -254,7 +254,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Get contact by phone number
    *     tags:
-   *       - lease-service
+   *       - Lease service
    *     description: Retrieves a contact based on the provided phone number.
    *     parameters:
    *       - in: path
@@ -287,7 +287,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Get lease by ID
    *     tags:
-   *       - lease-service
+   *       - Lease service
    *     description: Retrieves lease details along with related entities based on the provided ID.
    *     parameters:
    *       - in: path
@@ -323,7 +323,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Get listing by ID
    *     tags:
-   *       - lease-service
+   *       - Lease service
    *     description: Retrieves details of a listing based on the provided ID.
    *     parameters:
    *       - in: path
@@ -354,7 +354,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Get listings with applicants
    *     tags:
-   *       - lease-service
+   *       - Lease service
    *     description: Retrieves a list of listings along with their associated applicants.
    *     responses:
    *       '200':
@@ -382,7 +382,7 @@ export const routes = (router: KoaRouter) => {
    *   post:
    *     summary: Create an offer for a listing
    *     tags:
-   *       - lease-service
+   *       - Lease service
    *     description: Creates an offer for the specified listing.
    *     parameters:
    *       - in: path
@@ -421,7 +421,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Get applicants by contact code
    *     tags:
-   *       - lease-service
+   *       - Lease service
    *     description: Retrieves applicants based on the contact code.
    *     parameters:
    *       - in: path
@@ -454,7 +454,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Get applicants with listings by contact code
    *     tags:
-   *       - lease-service
+   *       - Lease service
    *     description: Retrieves applicants along with their listings based on the contact code.
    *     parameters:
    *       - in: path
@@ -487,7 +487,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Get listing by ID with detailed applicants
    *     tags:
-   *       - lease-service
+   *       - Lease service
    *     description: Retrieves a listing by ID along with detailed information about its applicants.
    *     parameters:
    *       - in: path
@@ -520,7 +520,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Get applicant by contact code and listing ID
    *     tags:
-   *       - lease-service
+   *       - Lease service
    *     description: Retrieves an applicant by their contact code and listing ID.
    *     parameters:
    *       - in: path
@@ -561,7 +561,7 @@ export const routes = (router: KoaRouter) => {
    *   delete:
    *     summary: Withdraw applicant by manager
    *     tags:
-   *       - lease-service
+   *       - Lease service
    *     description: Withdraws an applicant by the manager using the applicant ID.
    *     parameters:
    *       - in: path
@@ -613,7 +613,7 @@ export const routes = (router: KoaRouter) => {
    *   delete:
    *     summary: Withdraw applicant by user
    *     tags:
-   *       - lease-service
+   *       - Lease service
    *     description: Withdraws an applicant by the user identified by contact code and applicant ID.
    *     parameters:
    *       - in: path

@@ -7,7 +7,7 @@ import createHttpError from 'http-errors'
 /**
  * @swagger
  * tags:
- *   - name: auth
+ *   - name: Auth
  *     description: Authentication endpoints
  */
 export const routes = (router: KoaRouter) => {
@@ -18,7 +18,7 @@ export const routes = (router: KoaRouter) => {
    *    summary: Generates a salt and hashes the given password using that salt.
    *    description: Generates a salt and hashes the given password using that salt. Pass cleartext password as query parameter.
    *    tags:
-   *      - auth
+   *      - Auth
    *    parameters:
    *      - in: query
    *        name: password
@@ -56,7 +56,7 @@ export const routes = (router: KoaRouter) => {
    *     summary: Generates a JWT token
    *     description: Validates username and password from request body and returns a JWT token.
    *     tags:
-   *       - auth
+   *       - Auth
    *     requestBody:
    *       required: true
    *       content:

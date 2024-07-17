@@ -25,7 +25,7 @@ import { logger } from 'onecore-utilities'
  * @swagger
  * openapi: 3.0.0
  * tags:
- *   - name: property-management-service
+ *   - name: Property management service
  *     description: Operations related to property management
  * components:
  *   securitySchemes:
@@ -44,7 +44,7 @@ export const routes = (router: KoaRouter) => {
    *     summary: Get floor plan for a rental property
    *     description: Returns the floor plan image for the specified rental property.
    *     tags:
-   *       - property-management-service
+   *       - Property management service
    *     parameters:
    *       - in: path
    *         name: id
@@ -75,7 +75,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Get room types with material options by rental property ID
    *     tags:
-   *       - property-management-service
+   *       - Property management service
    *     parameters:
    *       - in: path
    *         name: id
@@ -105,7 +105,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Get material option by ID for a specific rental property
    *     tags:
-   *       - property-management-service
+   *       - Property management service
    *     parameters:
    *       - in: path
    *         name: id
@@ -147,7 +147,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Get material choices for a specific apartment and contract
    *     tags:
-   *       - property-management-service
+   *       - Property management service
    *     parameters:
    *       - in: path
    *         name: apartmentId
@@ -189,7 +189,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Get rooms with material choices for a specific rental property
    *     tags:
-   *       - property-management-service
+   *       - Property management service
    *     parameters:
    *       - in: path
    *         name: id
@@ -222,7 +222,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Get material choices for a specific rental property
    *     tags:
-   *       - property-management-service
+   *       - Property management service
    *     description: Retrieve material choices associated with a rental property identified by {id}.
    *     parameters:
    *       - in: path
@@ -253,7 +253,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Get material choice statuses for rental properties
    *     tags:
-   *       - property-management-service
+   *       - Property management service
    *     description: Retrieves statuses of material choices associated with rental properties.
    *       Optionally includes rental property details if specified in query parameter.
    *     parameters:
@@ -295,7 +295,7 @@ export const routes = (router: KoaRouter) => {
    *   post:
    *     summary: Save material choices for a rental property
    *     tags:
-   *       - property-management-service
+   *       - Property management service
    *     description: Saves material choices for a specific rental property.
    *     parameters:
    *       - in: path
@@ -336,7 +336,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Get rental property by ID
    *     tags:
-   *       - property-management-service
+   *       - Property management service
    *     description: Retrieves details of a rental property based on the provided ID.
    *     parameters:
    *       - in: path
@@ -372,7 +372,7 @@ export const routes = (router: KoaRouter) => {
    *   post:
    *     summary: Create lease for an external parking space
    *     tags:
-   *       - property-management-service
+   *       - Property management service
    *     description: Creates a new lease for the specified external parking space.
    *     parameters:
    *       - in: path
@@ -480,7 +480,7 @@ export const routes = (router: KoaRouter) => {
    *   post:
    *     summary: Create a note of interest for an internal parking space
    *     tags:
-   *       - property-management-service
+   *       - Property management service
    *     description: Creates a new note of interest for the specified internal parking space.
    *     parameters:
    *       - in: path
@@ -586,7 +586,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Get rental property information from Xpand
    *     tags:
-   *       - property-management-service
+   *       - Property management service
    *     description: Retrieves detailed information about a rental property from Xpand based on the provided rental object code.
    *     parameters:
    *       - in: path
