@@ -25,8 +25,8 @@ import { logger } from 'onecore-utilities'
  * @swagger
  * openapi: 3.0.0
  * tags:
- *   - name: rentalProperties
- *     description: Operations related to rental properties
+ *   - name: property-management-service
+ *     description: Operations related to property management
  * components:
  *   securitySchemes:
  *     bearerAuth:
@@ -43,10 +43,8 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Get floor plan for a rental property
    *     description: Returns the floor plan image for the specified rental property.
-   *     security:
-   *       - bearerAuth: []
    *     tags:
-   *       - rentalProperties
+   *       - property-management-service
    *     parameters:
    *       - in: path
    *         name: id
@@ -62,6 +60,8 @@ export const routes = (router: KoaRouter) => {
    *             schema:
    *               type: string
    *               format: binary
+   *     security:
+   *       - bearerAuth: []
    */
   router.get('(.*)/rentalproperties/:id/floorplan', async (ctx) => {
     const response = await getFloorPlanStream(ctx.params.id)
@@ -74,10 +74,8 @@ export const routes = (router: KoaRouter) => {
    * /rentalproperties/{id}/material-options:
    *   get:
    *     summary: Get room types with material options by rental property ID
-   *     security:
-   *       - bearerAuth: []
    *     tags:
-   *       - rentalProperties
+   *       - property-management-service
    *     parameters:
    *       - in: path
    *         name: id
@@ -92,6 +90,8 @@ export const routes = (router: KoaRouter) => {
    *           application/json:
    *             schema:
    *               type: object
+   *     security:
+   *       - bearerAuth: []
    */
   router.get('(.*)/rentalproperties/:id/material-options', async (ctx) => {
     const roomTypes = await getRoomTypeWithMaterialOptions(ctx.params.id)
@@ -104,10 +104,8 @@ export const routes = (router: KoaRouter) => {
    * /rentalproperties/{id}/material-option/{materialOptionId}:
    *   get:
    *     summary: Get material option by ID for a specific rental property
-   *     security:
-   *       - bearerAuth: []
    *     tags:
-   *       - rentalProperties
+   *       - property-management-service
    *     parameters:
    *       - in: path
    *         name: id
@@ -128,6 +126,8 @@ export const routes = (router: KoaRouter) => {
    *           application/json:
    *             schema:
    *                type: object
+   *     security:
+   *       - bearerAuth: []
    */
   router.get(
     '(.*)/rentalproperties/:id/material-option/:materialOptionId',
@@ -146,10 +146,8 @@ export const routes = (router: KoaRouter) => {
    * /rentalproperties/{apartmentId}/{contractId}/material-choices:
    *   get:
    *     summary: Get material choices for a specific apartment and contract
-   *     security:
-   *       - bearerAuth: []
    *     tags:
-   *       - rentalProperties
+   *       - property-management-service
    *     parameters:
    *       - in: path
    *         name: apartmentId
@@ -170,8 +168,9 @@ export const routes = (router: KoaRouter) => {
    *           application/json:
    *             schema:
    *               type: object
+   *     security:
+   *       - bearerAuth: []
    */
-
   router.get(
     '(.*)/rentalproperties/:apartmentId/:contractId/material-choices',
     async (ctx) => {
@@ -189,10 +188,8 @@ export const routes = (router: KoaRouter) => {
    * /rentalproperties/{id}/rooms-with-material-choices:
    *   get:
    *     summary: Get rooms with material choices for a specific rental property
-   *     security:
-   *       - bearerAuth: []
    *     tags:
-   *       - rentalProperties
+   *       - property-management-service
    *     parameters:
    *       - in: path
    *         name: id
@@ -207,6 +204,8 @@ export const routes = (router: KoaRouter) => {
    *           application/json:
    *             schema:
    *               type: object
+   *     security:
+   *       - bearerAuth: []
    */
   router.get(
     '(.*)/rentalproperties/:id/rooms-with-material-choices',
@@ -222,10 +221,8 @@ export const routes = (router: KoaRouter) => {
    * /rentalproperties/{id}/material-choices:
    *   get:
    *     summary: Get material choices for a specific rental property
-   *     security:
-   *       - bearerAuth: []
    *     tags:
-   *       - rentalProperties
+   *       - property-management-service
    *     description: Retrieve material choices associated with a rental property identified by {id}.
    *     parameters:
    *       - in: path
@@ -241,6 +238,8 @@ export const routes = (router: KoaRouter) => {
    *           application/json:
    *             schema:
    *               type: object
+   *     security:
+   *       - bearerAuth: []
    */
   router.get('(.*)/rentalproperties/:id/material-choices', async (ctx) => {
     const materialChoices = await getMaterialChoices(ctx.params.id)
@@ -253,10 +252,8 @@ export const routes = (router: KoaRouter) => {
    * /rentalproperties/material-choice-statuses:
    *   get:
    *     summary: Get material choice statuses for rental properties
-   *     security:
-   *       - bearerAuth: []
    *     tags:
-   *       - rentalProperties
+   *       - property-management-service
    *     description: Retrieves statuses of material choices associated with rental properties.
    *       Optionally includes rental property details if specified in query parameter.
    *     parameters:
@@ -273,6 +270,8 @@ export const routes = (router: KoaRouter) => {
    *           application/json:
    *             schema:
    *               type: array
+   *     security:
+   *       - bearerAuth: []
    */
   router.get('(.*)/rentalproperties/material-choice-statuses', async (ctx) => {
     const materialChoiceStatuses = await getMaterialChoiceStatuses(
@@ -296,7 +295,7 @@ export const routes = (router: KoaRouter) => {
    *   post:
    *     summary: Save material choices for a rental property
    *     tags:
-   *       - rentalProperties
+   *       - property-management-service
    *     description: Saves material choices for a specific rental property.
    *     parameters:
    *       - in: path
@@ -337,7 +336,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Get rental property by ID
    *     tags:
-   *       - rentalProperties
+   *       - property-management-service
    *     description: Retrieves details of a rental property based on the provided ID.
    *     parameters:
    *       - in: path
@@ -373,7 +372,7 @@ export const routes = (router: KoaRouter) => {
    *   post:
    *     summary: Create lease for an external parking space
    *     tags:
-   *       - parkingspaces
+   *       - property-management-service
    *     description: Creates a new lease for the specified external parking space.
    *     parameters:
    *       - in: path
@@ -481,7 +480,7 @@ export const routes = (router: KoaRouter) => {
    *   post:
    *     summary: Create a note of interest for an internal parking space
    *     tags:
-   *       - parkingspaces
+   *       - property-management-service
    *     description: Creates a new note of interest for the specified internal parking space.
    *     parameters:
    *       - in: path
@@ -587,7 +586,7 @@ export const routes = (router: KoaRouter) => {
    *   get:
    *     summary: Get rental property information from Xpand
    *     tags:
-   *       - propertyInfo
+   *       - property-management-service
    *     description: Retrieves detailed information about a rental property from Xpand based on the provided rental object code.
    *     parameters:
    *       - in: path
