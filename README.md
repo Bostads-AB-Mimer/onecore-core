@@ -18,7 +18,7 @@ Note: The microservices leasing and property-management must be running for this
 
 ## Swagger
 
-We utilize `koa2-swagger-ui` and `swagger-jsdoc` for documenting our APIs. Each endpoint is required to have appropriate JSDoc comments and tags for comprehensive documentation. The Swagger document is exposed on `/swagger`.
+We utilize `koa2-swagger-ui` and `swagger-jsdoc` for documenting our API. Each endpoint is required to have appropriate JSDoc comments and tags for comprehensive documentation. The Swagger document is exposed on `/swagger`.
 
 ## Env
 
