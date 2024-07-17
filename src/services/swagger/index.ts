@@ -15,6 +15,7 @@ export const routes = (router: KoaRouter) => {
       './src/services/health-service/index.ts',
       './src/services/lease-service/index.ts',
       './src/services/property-management-service/index.ts',
+      './src/services/ticketing-service/index.ts',
     ], //todo: add all routes
   }
 
