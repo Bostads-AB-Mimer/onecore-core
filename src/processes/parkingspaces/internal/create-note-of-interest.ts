@@ -5,6 +5,7 @@ import {
   Applicant,
   ApplicantStatus,
   Contact,
+  Listing,
 } from 'onecore-types'
 import {
   getContact,
@@ -183,7 +184,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
         const applicantRequestBody = createApplicantRequestBody(
           applicantContact,
           applicationType,
-          listing
+          listing.data
         )
 
         const applyForListingResult =
@@ -220,10 +221,26 @@ export const createNoteOfInterestForInternalParkingSpace = async (
 
       //if applicant has previously applied and withdrawn application, allow for subsequent application
       else if (applicantResponse.data) {
+        const applicantStatus = applicantResponse.data.status
+        const activeApplication = applicantStatus == ApplicantStatus.Active
         const applicationWithDrawnByUser =
-          applicantResponse.data.status == ApplicantStatus.WithdrawnByUser
+          applicantStatus == ApplicantStatus.WithdrawnByUser
         const applicationWithDrawnByManager =
-          applicantResponse.data.status == ApplicantStatus.WithdrawnByManager
+          applicantStatus == ApplicantStatus.WithdrawnByManager
+
+        if (activeApplication) {
+          log.push(
+            `Sökande har redan en aktiv ansökan på bilplats ${parkingSpaceId}.`
+          )
+          return {
+            processStatus: ProcessStatus.successful,
+            data: null,
+            httpStatus: 200,
+            response: {
+              message: `Applicant ${contactCode} already has application for ${parkingSpaceId}`,
+            },
+          }
+        }
 
         if (applicationWithDrawnByUser || applicationWithDrawnByManager) {
           log.push(
@@ -269,7 +286,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
 const createApplicantRequestBody = (
   applicantContact: Contact,
   applicationType: string,
-  listing: AxiosResponse<any>
+  listing: Listing
 ) => {
   const applicantRequestBody: Applicant = {
     id: 0, //should not be passed
@@ -279,7 +296,7 @@ const createApplicantRequestBody = (
     applicationDate: new Date(),
     applicationType: applicationType,
     status: ApplicantStatus.Active,
-    listingId: listing.data?.id, //null should not be allowed
+    listingId: listing.id, //null should not be allowed
   }
   return applicantRequestBody
 }
