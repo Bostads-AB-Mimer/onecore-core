@@ -531,7 +531,7 @@ describe('lease-service', () => {
     it('responds with offers', async () => {
       const getOffersForContactSpy = jest
         .spyOn(tenantLeaseAdapter, 'getOffersForContact')
-        .mockResolvedValue(offersMock)
+        .mockResolvedValueOnce({ ok: true, data: offersMock })
 
       const res = await request(app.callback()).get('/contacts/P174965/offers')
 

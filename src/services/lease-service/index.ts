@@ -83,11 +83,17 @@ export const routes = (router: KoaRouter) => {
   /**
    * Returns all offers for a contact by contactCode
    */
+  //todo: write swagger docs
   router.get('(.*)/contacts/:contactCode/offers', async (ctx) => {
-    const responseData = await getOffersForContact(ctx.params.contactCode)
+    const res = await getOffersForContact(ctx.params.contactCode)
+    if (!res.ok) {
+      ctx.status = res.err === 'not-found' ? 404 : 500
+      return
+    }
 
+    ctx.status = 200
     ctx.body = {
-      data: responseData,
+      data: res.data,
     }
   })
   /*

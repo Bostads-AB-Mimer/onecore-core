@@ -13,10 +13,12 @@ import {
   ApplicantWithListing,
   Offer,
   DetailedApplicant,
+  OfferWithRentalObjectCode,
 } from 'onecore-types'
 import config from '../common/config'
 import dayjs from 'dayjs'
 import { AdapterResult } from './types'
+import { HttpStatusCode } from 'axios'
 
 //todo: move to global config or handle error statuses in middleware
 axios.defaults.validateStatus = function (status) {
@@ -456,16 +458,22 @@ const updateApplicantStatus = async (params: {
 
 const getOffersForContact = async (
   contactCode: string
-): Promise<Array<any>> => {
+): Promise<
+  AdapterResult<OfferWithRentalObjectCode[], 'not-found' | 'unknown'>
+> => {
   try {
-    const response = await axios(
+    const res = await axios(
       `${tenantsLeasesServiceUrl}/contacts/${contactCode}/offers`
     )
 
-    return response.data.data
+    if (res.status == HttpStatusCode.NotFound) {
+      return { ok: false, err: 'not-found' }
+    }
+
+    return { ok: true, data: res.data.data }
   } catch (err) {
-    console.error('Error fetching offers for contact', err)
-    throw err
+    logger.error({ err }, 'leasing-adapter.getOffersForContact')
+    return { ok: false, err: 'unknown' }
   }
 }
 
