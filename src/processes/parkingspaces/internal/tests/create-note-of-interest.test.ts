@@ -28,10 +28,7 @@ import {
   mockedWaitingList,
 } from './create-note-of-interest.mocks'
 import { HttpStatusCode, InternalAxiosRequestConfig } from 'axios'
-import {
-  mockedListing,
-  mockedListingWithDetailedApplicants,
-} from '../../../../adapters/tests/leasing-adapter.mocks'
+import { mockedDetailedApplicants } from '../../../../adapters/tests/leasing-adapter.mocks'
 
 const createAxiosResponse = (status: number, data: any): AxiosResponse => {
   return {
@@ -344,7 +341,7 @@ describe('createNoteOfInterestForInternalParkingSpace', () => {
     getWaitingListSpy.mockResolvedValue(mockedWaitingList)
     applyForListingSpy.mockResolvedValue({ status: 201 } as any)
     createNewListingSpy.mockResolvedValue(
-      createAxiosResponse(HttpStatusCode.Created, mockedListing)
+      createAxiosResponse(HttpStatusCode.Created, [])
     )
     getListingByRentalObjectCodeSpy.mockResolvedValue({
       status: HttpStatusCode.NotFound,
@@ -394,7 +391,7 @@ describe('createNoteOfInterestForInternalParkingSpace', () => {
     createNewListingSpy.mockResolvedValue(
       createAxiosResponse(
         axios.HttpStatusCode.Created,
-        mockedListingWithDetailedApplicants
+        mockedDetailedApplicants
       )
     )
     getListingByRentalObjectCodeSpy.mockResolvedValue({
