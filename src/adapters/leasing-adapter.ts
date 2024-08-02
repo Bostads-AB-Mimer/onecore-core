@@ -38,7 +38,7 @@ const getLease = async (
       (includeContacts ? '?includeContacts=true' : '')
   )
 
-  return leaseResponse.data.data
+  return leaseResponse.data.content
 }
 
 const getLeasesForPnr = async (
@@ -52,7 +52,7 @@ const getLeasesForPnr = async (
       nationalRegistrationNumber +
       (includeContacts ? '?includeContacts=true' : '')
   )
-  return leasesResponse.data.data
+  return leasesResponse.data.content
 }
 
 const getLeasesForPropertyId = async (
@@ -66,7 +66,7 @@ const getLeasesForPropertyId = async (
       propertyId +
       (includeContacts ? '?includeContacts=true' : '')
   )
-  return leasesResponse.data.data
+  return leasesResponse.data.content
 }
 
 const getContactForPnr = async (
@@ -78,7 +78,7 @@ const getContactForPnr = async (
       nationalRegistrationNumber
   )
 
-  return contactResponse.data.data
+  return contactResponse.data.content
 }
 
 const getContactsDataBySearchQuery = async (
@@ -87,12 +87,12 @@ const getContactsDataBySearchQuery = async (
   AdapterResult<Array<Pick<Contact, 'fullName' | 'contactCode'>>, unknown>
 > => {
   try {
-    const response = await axios.get<{ data: Array<Contact> }>(
+    const response = await axios.get<{ content: Array<Contact> }>(
       `${tenantsLeasesServiceUrl}/contacts/search?q=${q}`
     )
 
     if (response.status === 200) {
-      return { ok: true, data: response.data.data }
+      return { ok: true, data: response.data.content }
     }
 
     throw response.data
@@ -108,7 +108,7 @@ const getContact = async (contactId: string): Promise<Contact | undefined> => {
       tenantsLeasesServiceUrl + '/contact/contactCode/' + contactId
     )
 
-    return contactResponse.data.data
+    return contactResponse.data.content
   } catch (error) {
     return undefined
   }
@@ -118,13 +118,13 @@ const getContactByContactCode = async (
   contactCode: string
 ): Promise<AdapterResult<Contact, 'not-found' | 'unknown'>> => {
   try {
-    const res = await axios.get<{ data: Contact }>(
+    const res = await axios.get<{ content: Contact }>(
       `${tenantsLeasesServiceUrl}/contact/contactCode/${contactCode}`
     )
 
-    if (!res.data.data) return { ok: false, err: 'not-found' }
+    if (!res.data.content) return { ok: false, err: 'not-found' }
 
-    return { ok: true, data: res.data.data }
+    return { ok: true, data: res.data.content }
   } catch (err) {
     logger.error({ err }, 'leasing-adapter.getContactByContactCode')
     return { ok: false, err: 'unknown' }
@@ -138,7 +138,7 @@ const getContactForPhoneNumber = async (
     const contactResponse = await axios(
       tenantsLeasesServiceUrl + '/contact/phoneNumber/' + phoneNumber
     )
-    return contactResponse.data.data
+    return contactResponse.data.content
   } catch (error) {
     return undefined
   }
@@ -162,7 +162,7 @@ const createLease = async (
 
   const result = await axios(tenantsLeasesServiceUrl + '/leases', axiosOptions)
 
-  return result.data
+  return result.data.content
 }
 
 const getCreditInformation = async (
@@ -173,7 +173,7 @@ const getCreditInformation = async (
       '/cas/getConsumerReport/' +
       nationalRegistrationNumber
   )
-  return informationResponse.data.data
+  return informationResponse.data.content
 }
 
 const getInternalCreditInformation = async (
@@ -183,7 +183,7 @@ const getInternalCreditInformation = async (
     tenantsLeasesServiceUrl + '/contact/invoices/contactCode/' + contactCode
   )
 
-  const invoices = result.data.data as Invoice[] | undefined
+  const invoices = result.data.content as Invoice[] | undefined
   const oneDayMs = 24 * 60 * 60 * 1000
   const sixMonthsMs = 182 * oneDayMs
 
@@ -205,12 +205,12 @@ const getInternalCreditInformation = async (
 const getWaitingList = async (
   nationalRegistrationNumber: string
 ): Promise<WaitingList[]> => {
-  const waitingList = await axios(
+  const response = await axios(
     tenantsLeasesServiceUrl +
       '/contact/waitingList/' +
       nationalRegistrationNumber
   )
-  return waitingList.data.data
+  return response.data.content
 }
 
 const addApplicantToWaitingList = async (
@@ -225,7 +225,7 @@ const addApplicantToWaitingList = async (
       waitingListTypeCaption: waitingListTypeCaption,
     },
   }
-  return axios(
+  return await axios(
     tenantsLeasesServiceUrl +
       '/contact/waitingList/' +
       nationalRegistrationNumber,
@@ -235,7 +235,11 @@ const addApplicantToWaitingList = async (
 
 const createNewListing = async (listingData: Listing) => {
   try {
-    return await axios.post(`${tenantsLeasesServiceUrl}/listings`, listingData)
+    const response = await axios.post(
+      `${tenantsLeasesServiceUrl}/listings`,
+      listingData
+    )
+    return response.data.content
   } catch (error) {
     logger.error(error, 'Error creating new listing:')
     return undefined
@@ -244,10 +248,11 @@ const createNewListing = async (listingData: Listing) => {
 
 const applyForListing = async (applicantData: Omit<Applicant, 'id'>) => {
   try {
-    return await axios.post(
+    const response = await axios.post(
       `${tenantsLeasesServiceUrl}/listings/apply`,
       applicantData
     )
+    return response.data.content
   } catch (error) {
     logger.error(error, 'Error applying for listing:', error)
     return undefined
@@ -261,7 +266,7 @@ const getListingByListingId = async (
     const result = await axios.get(
       `${tenantsLeasesServiceUrl}/listings/by-id/${listingId}`
     )
-    return result.data
+    return result.data.content
   } catch (error) {
     logger.error(error, 'Error fetching listing by rental object code')
     return undefined
@@ -274,7 +279,7 @@ const getListingByRentalObjectCode = async (rentalObjectCode: string) => {
       `${tenantsLeasesServiceUrl}/listings/by-code/${rentalObjectCode}`
     )
 
-    return response
+    return response.data.content
   } catch (error) {
     logger.error(error, 'Error fetching listing by rental object code:', error)
     return undefined
@@ -286,7 +291,7 @@ const getListingsWithApplicants = async (): Promise<any[] | undefined> => {
     const response = await axios.get(
       `${tenantsLeasesServiceUrl}/listings-with-applicants`
     )
-    return response.data
+    return response.data.content
   } catch (error) {
     logger.error(error, 'Error fetching listings with applicants:')
     return undefined
@@ -300,7 +305,7 @@ const getApplicantsByContactCode = async (
     const response = await axios.get(
       `${tenantsLeasesServiceUrl}/applicants/${contactCode}/`
     )
-    return response.data
+    return response.data.content
   } catch (error) {
     logger.error(error, 'Error fetching applicants by contact code:')
     return undefined
@@ -359,7 +364,7 @@ const getListingByIdWithDetailedApplicants = async (
     const response = await axios(
       `${tenantsLeasesServiceUrl}/listing/${listingId}/applicants/details`
     )
-    return response.data
+    return response.data.content
   } catch (error) {
     logger.error(
       error,
@@ -427,12 +432,12 @@ type CreateOfferParams = Omit<
 
 const createOffer = async (params: CreateOfferParams): Promise<Offer> => {
   try {
-    const response = await axios.post<{ data: Offer }>(
+    const response = await axios.post<{ content: Offer }>(
       `${tenantsLeasesServiceUrl}/offer`,
       params
     )
 
-    return response.data.data
+    return response.data.content
   } catch (err) {
     logger.error(err, 'Error creating offer:')
     throw err
@@ -470,7 +475,7 @@ const getOffersForContact = async (
       return { ok: false, err: 'not-found' }
     }
 
-    return { ok: true, data: res.data.data }
+    return { ok: true, data: res.data.content }
   } catch (err) {
     logger.error({ err }, 'leasing-adapter.getOffersForContact')
     return { ok: false, err: 'unknown' }
