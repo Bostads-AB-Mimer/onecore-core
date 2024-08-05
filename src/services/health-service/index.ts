@@ -1,5 +1,6 @@
 import KoaRouter from '@koa/router'
 import config from '../../common/config'
+import { healthCheck as odooHealthCheck } from '../ticketing-service/adapters/odoo-adapter'
 import {
   loggedAxios as axios,
   setAxiosExclusionFilters,
@@ -56,6 +57,23 @@ const subsystems = [
         'communication',
         config.communicationService.url + '/health'
       )
+    },
+  },
+  {
+    probe: async (): Promise<SystemHealth> => {
+      try {
+        await odooHealthCheck()
+        return {
+          name: 'odoo',
+          status: 'active',
+        }
+      } catch (error: any) {
+        return {
+          name: 'odoo',
+          status: 'failure',
+          statusMessage: error.message || 'Failed to access odoo.',
+        }
+      }
     },
   },
 ]
