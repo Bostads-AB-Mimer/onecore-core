@@ -22,7 +22,7 @@ import {
   getTicketByContactCode,
   transformEquipmentCode,
 } from './adapters/odoo-adapter'
-import { logger } from 'onecore-utilities'
+import { logger, generateRouteMetadata } from 'onecore-utilities'
 
 interface RentalPropertyInfoWithLeases extends RentalPropertyInfo {
   leases: Lease[]
@@ -30,6 +30,7 @@ interface RentalPropertyInfoWithLeases extends RentalPropertyInfo {
 
 export const routes = (router: KoaRouter) => {
   router.get('(.*)/propertyInfo/:number', async (ctx: any) => {
+    const metadata = generateRouteMetadata(ctx, ['typeOfNumber'])
     const responseData: any = []
 
     const getRentalPropertyInfoWithLeases = async (lease: Lease) => {
@@ -111,32 +112,38 @@ export const routes = (router: KoaRouter) => {
       }
     } catch (error) {
       logger.error(error, 'Error retrieving property info')
-      ctx.throw(500, 'Internal server error')
+      ctx.status = 500
+      ctx.body = { error: 'Internal server error', ...metadata }
     }
 
     ctx.body = {
-      data: responseData,
+      content: responseData,
+      ...metadata,
     }
   })
 
   router.get('(.*)/ticketsByContactCode/:code', async (ctx: any) => {
+    const metadata = generateRouteMetadata(ctx)
     try {
       const tickets = await getTicketByContactCode(ctx.params.code)
       if (tickets && tickets.length > 0) {
         ctx.status = 200
         ctx.body = {
-          totalCount: tickets.length,
-          workOrders: tickets,
+          content: {
+            totalCount: tickets.length,
+            workOrders: tickets,
+          },
+          ...metadata,
         }
       } else {
-        ctx.status = 200
-        ctx.body = { message: 'No tickets found' }
+        ctx.status = 404
+        ctx.body = { reason: 'No tickets found', ...metadata }
         return
       }
     } catch (error) {
       logger.error(error, 'Error getting tickets by contact code')
       ctx.status = 500
-      ctx.body = { message: 'Internal server error' }
+      ctx.body = { error: 'Internal server error', ...metadata }
       return
     }
   })
@@ -144,6 +151,7 @@ export const routes = (router: KoaRouter) => {
   router.get(
     '(.*)/maintenanceUnitsByRentalPropertyId/:rentalPropertyId/:type?',
     async (ctx) => {
+      const metadata = generateRouteMetadata(ctx)
       try {
         const maintenanceUnits = await getMaintenanceUnitsForRentalProperty(
           ctx.params.rentalPropertyId
@@ -157,33 +165,35 @@ export const routes = (router: KoaRouter) => {
                 (unit) =>
                   unit.type.toUpperCase() === ctx.params.type.toUpperCase()
               ),
+              ...metadata,
             }
             return
           }
           // Return all maintenance units if no type is provided
           ctx.status = 200
-          ctx.body = { content: maintenanceUnits }
+          ctx.body = { content: maintenanceUnits, ...metadata }
         } else {
-          ctx.status = 200
-          ctx.body = { message: 'No maintenance units found' }
+          ctx.status = 404
+          ctx.body = { reason: 'No maintenance units found' }
           logger.info('No maintenance units found')
           return
         }
       } catch (error) {
         logger.error(error, 'Error retreiving maintenance units by property')
         ctx.status = 500
-        ctx.body = { message: 'Internal server error' }
+        ctx.body = { error: 'Internal server error', ...metadata }
         return
       }
     }
   )
 
   router.get('(.*)/maintenanceUnitsByContactCode/:contactCode', async (ctx) => {
+    const metadata = generateRouteMetadata(ctx)
     try {
       const contact = await getContact(ctx.params.contactCode)
       if (!contact) {
-        ctx.status = 400
-        ctx.body = { message: 'Contact not found' }
+        ctx.status = 404
+        ctx.body = { reason: 'Contact not found', ...metadata }
         return
       }
       const leases = await getLeasesForPnr(
@@ -204,36 +214,39 @@ export const routes = (router: KoaRouter) => {
 
       if (maintenanceUnits && maintenanceUnits.length > 0) {
         ctx.status = 200
-        ctx.body = { content: maintenanceUnits }
+        ctx.body = { content: maintenanceUnits, ...metadata }
       } else {
-        ctx.status = 200
-        ctx.body = { message: 'No maintenance units found' }
+        ctx.status = 404
+        ctx.body = { reason: 'No maintenance units found', ...metadata }
         logger.info('No maintenance units found')
         return
       }
     } catch (error) {
       console.error('Error:', error)
       ctx.status = 500
-      ctx.body = { message: 'Internal server error' }
+      ctx.body = { error: 'Internal server error', ...metadata }
       return
     }
   })
 
   router.post('(.*)/createTicket/:contactCode', async (ctx) => {
+    const metadata = generateRouteMetadata(ctx)
     try {
       if (!ctx.params.contactCode) {
         ctx.status = 400
         ctx.body = {
-          message: 'Contact code is missing. It needs to be passed in the url.',
+          reason: 'Contact code is missing. It needs to be passed in the url.',
+          ...metadata,
         }
         return
       }
       const { RentalObjectCode, AccessOptions, Pet, Rows } = ctx.request.body
 
       if (Rows.length === 0) {
-        ctx.status = 400
+        ctx.status = 404
         ctx.body = {
-          message: 'Bad request, no tickets found in request',
+          reason: 'No tickets found in request',
+          ...metadata,
         }
         return
       }
@@ -260,9 +273,10 @@ export const routes = (router: KoaRouter) => {
         )
 
         if (!laundryRoom) {
-          ctx.status = 400
+          ctx.status = 404
           ctx.body = {
-            message: 'No laundry room found for rental property',
+            reason: 'No laundry room found for rental property',
+            ...metadata,
           }
           return
         }
@@ -307,13 +321,17 @@ export const routes = (router: KoaRouter) => {
         })
 
         ctx.status = 200
-        ctx.body = { message: `Ticket created with ID ${ticketId}` }
+        ctx.body = {
+          message: `Ticket created with ID ${ticketId}`,
+          ...metadata,
+        }
       }
     } catch (error) {
       logger.error(error, 'Error creating new ticket')
       ctx.status = 500
       ctx.body = {
-        message: 'Failed to create a new ticket',
+        error: 'Failed to create a new ticket',
+        ...metadata,
       }
     }
   })
