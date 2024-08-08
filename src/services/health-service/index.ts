@@ -14,7 +14,7 @@ const healthChecks: Map<string, SystemHealth> = new Map()
 const probe = async (
   systemName: string,
   minimumMinutesBetweenRequests: number,
-  checkFunction: Function
+  checkFunction: () => any
 ): Promise<SystemHealth> => {
   let currentHealth = healthChecks.get(systemName)
 
