@@ -21,6 +21,7 @@ import {
   withdrawApplicantByUser,
   getApplicantsAndListingByContactCode,
   getListingByIdWithDetailedApplicants,
+  getOffersForContact,
   getContactsDataBySearchQuery,
   getContactByContactCode,
   getContactForPnr,
@@ -162,6 +163,55 @@ export const routes = (router: KoaRouter) => {
 
     ctx.body = {
       data: responseData,
+    }
+  })
+
+  /**
+   * @swagger
+   * /contacts/{contactCode}/offers:
+   *   get:
+   *     summary: Get offers for a contact
+   *     tags:
+   *       - Lease service
+   *     description: Retrieves all offers associated with a specific contact based on the provided contact code.
+   *     parameters:
+   *       - in: path
+   *         name: any
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: A wildcard parameter to match any route prefix.
+   *       - in: path
+   *         name: contactCode
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: The unique code identifying the contact.
+   *     responses:
+   *       '200':
+   *         description: Successful response with a list of offers for the contact.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *       '404':
+   *         description: The contact was not found.
+   *       '500':
+   *         description: Internal server error. Failed to retrieve offers.
+   *     security:
+   *       - bearerAuth: []
+   */
+
+  router.get('(.*)/contacts/:contactCode/offers', async (ctx) => {
+    const res = await getOffersForContact(ctx.params.contactCode)
+    if (!res.ok) {
+      ctx.status = res.err === 'not-found' ? 404 : 500
+      return
+    }
+
+    ctx.status = 200
+    ctx.body = {
+      data: res.data,
     }
   })
 
