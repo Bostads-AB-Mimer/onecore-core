@@ -219,7 +219,7 @@ export const routes = (router: KoaRouter) => {
    * @swagger
    * /contacts/search:
    *   get:
-   *     summary: Search contacts by query
+   *     summary: Search contacts by PNR or contact code
    *     tags:
    *       - Lease service
    *     description: Retrieves contacts based on the provided search query.
