@@ -351,7 +351,7 @@ const getApplicantByContactCodeAndListingId = async (
   }
 }
 
-// TODO: This function does not actually get the listing
+// TODO: This function does not actually get the listing. Rename and describe function?
 const getListingByIdWithDetailedApplicants = async (
   listingId: string
 ): Promise<DetailedApplicant[] | undefined> => {

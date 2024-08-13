@@ -172,6 +172,10 @@ describe('createNoteOfInterestForInternalParkingSpace', () => {
     expect(result.httpStatus).toBe(404)
   })
 
+  it.todo(
+    'returns an error if the applicant is not eligible for renting in area with specific rental rule'
+  )
+
   it('performs internal credit check', async () => {
     getParkingSpaceSpy.mockResolvedValue(mockedParkingSpace)
     getContactSpy.mockResolvedValue(mockedApplicant)

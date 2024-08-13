@@ -37,15 +37,18 @@ export const createOfferForInternalParkingSpace = async (
       return makeProcessError('listing-not-expired', 500)
     }
 
-    // TODO: Maybe we want to make a credit check here?
-
     const applicants =
       await leasingAdapter.getListingByIdWithDetailedApplicants(
         String(listing.id)
       )
 
     if (!applicants?.length) return makeProcessError('no-applicants', 500)
+
     const [applicant] = applicants
+
+    //TODO: return an error if the first applicant is not eligible for renting in area with specific rental rule and update their rejection status and notify???
+
+    // TODO: Maybe we want to make a credit check here?
 
     const contact = await leasingAdapter.getContact(applicant.contactCode)
     if (!contact) {

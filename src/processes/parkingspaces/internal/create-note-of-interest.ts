@@ -94,6 +94,8 @@ export const createNoteOfInterestForInternalParkingSpace = async (
       })
     }
 
+    //todo: return error if applicant not eligible for renting in area with specific rental rule
+
     //step 3.a.1. Perform credit check
     const creditCheck = await getInternalCreditInformation(
       applicantContact.contactCode
