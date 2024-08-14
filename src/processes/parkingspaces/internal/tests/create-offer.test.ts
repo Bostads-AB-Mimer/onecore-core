@@ -21,6 +21,7 @@ import { ListingStatus } from 'onecore-types'
 
 import { createOfferForInternalParkingSpace } from '../create-offer'
 import * as leasingAdapter from '../../../../adapters/leasing-adapter'
+import * as communicationAdapter from '../../../../adapters/communication-adapter'
 import * as factory from '../../../../../test/factories'
 import { ProcessStatus } from '../../../../common/types'
 
@@ -78,47 +79,7 @@ describe('createOfferForInternalParkingSpace', () => {
     })
   })
 
-  //fast vi ska ju inte ge ett fel. Vi ska ju hoppa till nästa applicant....
-  // it('returns an error if the selected applicant is not eligible for renting in area with specific rental rule', async () => {
-  //   jest.spyOn(leasingAdapter, 'getListingByListingId').mockResolvedValue(
-  //     factory.listing.build({
-  //       status: ListingStatus.Expired,
-  //       districtCode: 'CEN',
-  //     })
-  //   )
-  //   jest
-  //     .spyOn(leasingAdapter, 'getListingByIdWithDetailedApplicants')
-  //     .mockResolvedValueOnce(
-  //       factory.detailedApplicant
-  //         .params({
-  //           currentHousingContract: {
-  //             residentialArea: {
-  //               code: 'XYZ',
-  //             },
-  //           },
-  //         })
-  //         .buildList(1)
-  //     )
-  //   jest
-  //     .spyOn(leasingAdapter, 'getContact')
-  //     .mockResolvedValueOnce(factory.contact.build())
-  //   jest
-  //     .spyOn(leasingAdapter, 'updateApplicantStatus')
-  //     .mockResolvedValueOnce(null)
-  //   jest
-  //     .spyOn(leasingAdapter, 'createOffer')
-  //     .mockResolvedValueOnce(factory.offer.build())
-
-  //   const result = await createOfferForInternalParkingSpace('123')
-
-  //   expect(result).toEqual({
-  //     processStatus: ProcessStatus.failed,
-  //     error: 'smth-new??',
-  //     httpStatus: 500,
-  //   })
-  // })
-
-  it('passes applicants thaat are not eligible for renting in area with specific rental rule', async () => {
+  it('passes applicants that are not eligible for renting in area with specific rental rule', async () => {
     jest.spyOn(leasingAdapter, 'getListingByListingId').mockResolvedValue(
       factory.listing.build({
         status: ListingStatus.Expired,
@@ -126,17 +87,22 @@ describe('createOfferForInternalParkingSpace', () => {
       })
     )
 
-    const applicants = factory.detailedApplicant
-      .params({
-        currentHousingContract: {
-          residentialArea: {
-            code: 'XYZ',
-          },
-        },
-      })
-      .buildList(2)
-
-    console.log('test')
+    const applicants = [
+      factory.detailedApplicant
+        .params({
+          id: 987,
+          contactCode: '123ABC',
+          priority: undefined,
+        })
+        .build(),
+      factory.detailedApplicant
+        .params({
+          id: 432,
+          contactCode: '456DEF',
+          priority: 1,
+        })
+        .build(),
+    ]
 
     jest
       .spyOn(leasingAdapter, 'getListingByIdWithDetailedApplicants')
@@ -148,21 +114,29 @@ describe('createOfferForInternalParkingSpace', () => {
       .spyOn(leasingAdapter, 'updateApplicantStatus')
       .mockResolvedValueOnce(null)
     jest
+      .spyOn(communicationAdapter, 'sendParkingSpaceOfferEmail')
+      .mockResolvedValueOnce(null)
+    jest
       .spyOn(leasingAdapter, 'createOffer')
       .mockResolvedValueOnce(factory.offer.build())
 
-    //TODO:execute and perform check
+    const result = await createOfferForInternalParkingSpace('123')
 
-    //check spy for updateApplicantStatus to see if the offered applicant is the correct one
-    expect(true).toBe(false)
+    expect(leasingAdapter.updateApplicantStatus).toHaveBeenCalledWith({
+      applicantId: 432,
+      contactCode: '456DEF',
+      status: 6,
+    })
+
+    expect(result).toEqual({
+      processStatus: ProcessStatus.successful,
+      data: null,
+      httpStatus: 200,
+    })
   })
 
   it.todo(
-    'updates the applicants rejection status if they are not eligible for renting in area with specific rental rule'
-  )
-
-  it.todo(
-    'passes applicants that is not eligible for credit check and updates their rejection status'
+    'passes applicants that is not eligible because of bad credit check and updates their rejection status???'
   )
 
   it('fails if retrieving contact information fails', async () => {
@@ -251,6 +225,11 @@ describe('createOfferForInternalParkingSpace', () => {
     jest
       .spyOn(leasingAdapter, 'updateApplicantStatus')
       .mockResolvedValueOnce(null)
+
+    jest
+      .spyOn(communicationAdapter, 'sendParkingSpaceOfferEmail')
+      .mockResolvedValueOnce(null)
+
     jest
       .spyOn(leasingAdapter, 'createOffer')
       .mockResolvedValueOnce(factory.offer.build())

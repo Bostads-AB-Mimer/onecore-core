@@ -37,16 +37,19 @@ export const createOfferForInternalParkingSpace = async (
       return makeProcessError('listing-not-expired', 500)
     }
 
-    const applicants =
-      await leasingAdapter.getListingByIdWithDetailedApplicants(
-        String(listing.id)
-      )
+    const eligibleApplicants = await leasingAdapter
+      .getListingByIdWithDetailedApplicants(String(listing.id))
+      .then((applicants) => {
+        // filter out any applicants that has no priority. They are not eligible to rent the object of this listing
+        return applicants?.filter((detailedApplicant) => {
+          return detailedApplicant.priority != undefined
+        })
+      })
 
-    if (!applicants?.length) return makeProcessError('no-applicants', 500)
+    if (!eligibleApplicants?.length)
+      return makeProcessError('no-applicants', 500)
 
-    const [applicant] = applicants
-
-    //TODO: return an error if the first applicant is not eligible for renting in area with specific rental rule and update their rejection status and notify???
+    const [applicant] = eligibleApplicants
 
     // TODO: Maybe we want to make a credit check here?
 
@@ -76,7 +79,7 @@ export const createOfferForInternalParkingSpace = async (
         applicantId: applicant.id,
         expiresAt: utils.date.addBusinessDays(new Date(), 2),
         listingId: listing.id,
-        selectedApplicants: applicants,
+        selectedApplicants: eligibleApplicants,
         status: OfferStatus.Active,
       })
       log.push(`Created offer ${offer.id}`)
