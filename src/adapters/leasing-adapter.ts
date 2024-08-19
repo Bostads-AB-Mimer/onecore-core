@@ -545,12 +545,12 @@ const validateResidentialAreaRentalRules = async (
 
 const validatePropertyRentalRules = async (
   contactCode: string,
-  districtCode: string,
+  rentalObjectCode: string,
   applicationType: string
 ) => {
   try {
     const res = await axios(
-      `${tenantsLeasesServiceUrl}/applicants/validatePropertyRentalRules/${contactCode}/${districtCode}`
+      `${tenantsLeasesServiceUrl}/applicants/validatePropertyRentalRules/${contactCode}/${rentalObjectCode}`
     )
     return validateRentalRules(res, applicationType)
   } catch (err) {

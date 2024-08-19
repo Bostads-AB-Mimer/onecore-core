@@ -97,7 +97,6 @@ export const createNoteOfInterestForInternalParkingSpace = async (
         message: 'Applicant is not a tenant',
       })
     }
-
     //Check if applicant is eligible for renting in area with specific rental rule
     const [validationResultResArea, validationResultProperty] =
       await Promise.all([
@@ -108,7 +107,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
         ),
         validatePropertyRentalRules(
           contactCode,
-          parkingSpace.districtCode,
+          parkingSpaceId,
           applicationType
         ),
       ])
