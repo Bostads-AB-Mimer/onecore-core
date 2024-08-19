@@ -477,6 +477,88 @@ const getOffersForContact = async (
   }
 }
 
+const validateRentalRules = (
+  validationResult: any,
+  applicationType: string
+) => {
+  if (validationResult.status == HttpStatusCode.NotFound) {
+    return { ok: false, err: 'not-found', httpStatus: HttpStatusCode.NotFound }
+  } else if (validationResult.status == HttpStatusCode.InternalServerError) {
+    return {
+      ok: false,
+      err: 'contact-not-found',
+      httpStatus: HttpStatusCode.InternalServerError,
+    }
+  } else if (validationResult.status == HttpStatusCode.BadRequest) {
+    return {
+      ok: false,
+      err: 'not-a-parking-space',
+      reason: validationResult.data.reason,
+      httpStatus: HttpStatusCode.BadRequest,
+    }
+  } else if (validationResult.status == HttpStatusCode.Forbidden) {
+    return {
+      ok: false,
+      err: 'no-contract-in-the-area',
+      reason: validationResult.data.reason,
+      httpStatus: HttpStatusCode.Forbidden,
+    }
+  } else if (validationResult.status == HttpStatusCode.Ok) {
+    if (validationResult.data.applicationType == 'Additional') {
+      //Applicant is allowed to rent an additional parking space in this area
+      return { ok: true }
+    } else if (
+      validationResult.data.applicationType == 'Replace' &&
+      applicationType == 'Replace'
+    ) {
+      //Applicant is allowed to replace their current parking space for a new one in this area
+      return { ok: true }
+    } else {
+      //Applicant is not allowed to rent an additional parking space in this area
+      return {
+        ok: false,
+        err: 'not-allowed-to-rent-additional',
+        reason: validationResult.data.reason,
+        httpStatus: HttpStatusCode.Forbidden,
+      }
+    }
+  }
+
+  return { ok: false, err: 'unexpected-error' }
+}
+
+const validateResidentialAreaRentalRules = async (
+  contactCode: string,
+  districtCode: string,
+  applicationType: string
+) => {
+  try {
+    const res = await axios(
+      `${tenantsLeasesServiceUrl}/applicants/validateResidentialAreaRentalRules/${contactCode}/${districtCode}`
+    )
+    return validateRentalRules(res, applicationType)
+  } catch (err) {
+    logger.error({ err }, 'leasing-adapter.validateResidentialAreaRentalRules')
+    return { ok: false, err: 'unknown' }
+  }
+}
+
+const validatePropertyRentalRules = async (
+  contactCode: string,
+  districtCode: string,
+  applicationType: string
+) => {
+  try {
+    const res = await axios(
+      `${tenantsLeasesServiceUrl}/applicants/validatePropertyRentalRules/${contactCode}/${districtCode}`
+    )
+    return validateRentalRules(res, applicationType)
+  } catch (err) {
+    logger.error({ err }, 'leasing-adapter.validatePropertyRentalRules')
+    return { ok: false, err: 'unknown' }
+  }
+}
+
 export {
   getLease,
   getLeasesForPnr,
@@ -506,4 +588,6 @@ export {
   getOffersForContact,
   getContactsDataBySearchQuery,
   getContactByContactCode,
+  validateResidentialAreaRentalRules,
+  validatePropertyRentalRules,
 }

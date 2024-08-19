@@ -18,6 +18,8 @@ import {
   getInternalCreditInformation,
   setApplicantStatusActive,
   getApplicantByContactCodeAndListingId,
+  validateResidentialAreaRentalRules,
+  validatePropertyRentalRules,
 } from '../../../adapters/leasing-adapter'
 import { getPublishedParkingSpace } from '../../../adapters/property-management-adapter'
 import { ProcessResult, ProcessStatus } from '../../../common/types'
@@ -53,7 +55,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
   try {
     const parkingSpace = await getPublishedParkingSpace(parkingSpaceId)
     // step 1 - get parking space
-    if (!parkingSpace) {
+    if (!parkingSpace || !parkingSpace.districtCode) {
       return {
         processStatus: ProcessStatus.failed,
         error: 'parkingspace-not-found',
@@ -96,7 +98,40 @@ export const createNoteOfInterestForInternalParkingSpace = async (
       })
     }
 
-    //todo: return error if applicant not eligible for renting in area with specific rental rule
+    //Check if applicant is eligible for renting in area with specific rental rule
+    const [validationResultResArea, validationResultProperty] =
+      await Promise.all([
+        validateResidentialAreaRentalRules(
+          contactCode,
+          parkingSpace.districtCode,
+          applicationType
+        ),
+        validatePropertyRentalRules(
+          contactCode,
+          parkingSpace.districtCode,
+          applicationType
+        ),
+      ])
+    if (!validationResultResArea.ok) {
+      return makeProcessError(
+        validationResultResArea.err,
+        validationResultResArea.httpStatus as number,
+        {
+          message: validationResultResArea.err,
+          reason: validationResultResArea.reason,
+        }
+      )
+    }
+    if (!validationResultProperty.ok) {
+      return makeProcessError(
+        validationResultProperty.err,
+        validationResultProperty.httpStatus as number,
+        {
+          message: validationResultProperty.err,
+          reason: validationResultProperty.reason,
+        }
+      )
+    }
 
     //step 3.a.1. Perform credit check
     const creditCheck = await getInternalCreditInformation(
