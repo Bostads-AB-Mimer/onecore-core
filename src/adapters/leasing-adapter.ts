@@ -477,6 +477,29 @@ const getOffersForContact = async (
   }
 }
 
+const getOfferByContactCodeAndOfferId = async (
+  contactCode: string,
+  offerId: string
+  //todo: fix type
+): Promise<
+  AdapterResult<OfferWithRentalObjectCode, 'not-found' | 'unknown'>
+> => {
+  try {
+    const res = await axios(
+      `${tenantsLeasesServiceUrl}/contacts/${contactCode}/offers/${offerId}`
+    )
+
+    if (res.status == HttpStatusCode.NotFound) {
+      return { ok: false, err: 'not-found' }
+    }
+
+    return { ok: true, data: res.data.data }
+  } catch (err) {
+    logger.error({ err }, 'leasing-adapter.getOffersForContact')
+    return { ok: false, err: 'unknown' }
+  }
+}
+
 export {
   getLease,
   getLeasesForPnr,
@@ -506,4 +529,5 @@ export {
   getOffersForContact,
   getContactsDataBySearchQuery,
   getContactByContactCode,
+  getOfferByContactCodeAndOfferId,
 }

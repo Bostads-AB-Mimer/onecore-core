@@ -218,6 +218,53 @@ describe('lease-service', () => {
     })
   })
 
+  describe('GET /contacts/:contactCode/offers/:offerId', () => {
+    it('responds with an offer', async () => {
+      const detailedApplicant = factory.detailedApplicant.build({
+        contactCode: 'P174965',
+      })
+
+      //todo: use correct factory and type
+      const offer = factory.offerWithRentalObjectCode.build({
+        selectedApplicants: [detailedApplicant],
+        offeredApplicant: detailedApplicant,
+      })
+
+      const getOffersForContactSpy = jest
+        .spyOn(tenantLeaseAdapter, 'getOfferByContactCodeAndOfferId')
+        .mockResolvedValueOnce({ ok: true, data: offer })
+
+      const res = await request(app.callback()).get(
+        `/contacts/${detailedApplicant.contactCode}/offers/${offer.id}`
+      )
+
+      expect(res.status).toBe(200)
+      expect(getOffersForContactSpy).toHaveBeenCalled()
+      expect(JSON.stringify(res.body.data)).toEqual(JSON.stringify(offer))
+    })
+    it('returns 404 if no offer', async () => {
+      const detailedApplicant = factory.detailedApplicant.build({
+        contactCode: 'P174965',
+      })
+
+      //todo: use correct factory and type
+      const offer = factory.offerWithRentalObjectCode.build({
+        selectedApplicants: [detailedApplicant],
+        offeredApplicant: detailedApplicant,
+      })
+      const getContactByContactCodeSpy = jest
+        .spyOn(tenantLeaseAdapter, 'getOfferByContactCodeAndOfferId')
+        .mockResolvedValueOnce({ ok: false, err: 'not-found' })
+
+      const res = await request(app.callback()).get(
+        `/contacts/${detailedApplicant.contactCode}/offers/${offer.id}`
+      )
+
+      expect(res.status).toBe(404)
+      expect(getContactByContactCodeSpy).toHaveBeenCalled()
+    })
+  })
+
   describe('GET /cas/getConsumerReport/:pnr', () => {
     it('responds with a credit information', async () => {
       const getCreditInformationSpy = jest
