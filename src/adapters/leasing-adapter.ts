@@ -484,7 +484,7 @@ const getOfferByContactCodeAndOfferId = async (
 ): Promise<AdapterResult<DetailedOffer, 'not-found' | 'unknown'>> => {
   try {
     const res = await axios(
-      `${tenantsLeasesServiceUrl}/contacts/${contactCode}/offers/${offerId}`
+      `${tenantsLeasesServiceUrl}/offers/${offerId}/applicants/${contactCode}`
     )
 
     if (res.status == HttpStatusCode.NotFound) {
