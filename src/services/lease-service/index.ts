@@ -7,31 +7,12 @@
  */
 import KoaRouter from '@koa/router'
 import { logger, generateRouteMetadata } from 'onecore-utilities'
-
-import {
-  getLease,
-  getLeasesForPnr,
-  getCreditInformation,
-  getListingByListingId,
-  getListingsWithApplicants,
-  getApplicantsByContactCode,
-  getApplicantByContactCodeAndListingId,
-  getContactForPhoneNumber,
-  withdrawApplicantByManager,
-  withdrawApplicantByUser,
-  getApplicantsAndListingByContactCode,
-  getListingByIdWithDetailedApplicants,
-  getOffersForContact,
-  getContactsDataBySearchQuery,
-  getContactByContactCode,
-  getContactForPnr,
-  getOfferByContactCodeAndOfferId,
-} from '../../adapters/leasing-adapter'
+import * as leasingAdapter from '../../adapters/leasing-adapter'
 import { ProcessStatus } from '../../common/types'
 import { createOfferForInternalParkingSpace } from '../../processes/parkingspaces/internal'
 
 const getLeaseWithRelatedEntities = async (rentalId: string) => {
-  const lease = await getLease(rentalId, 'true')
+  const lease = await leasingAdapter.getLease(rentalId, 'true')
 
   return lease
 }
@@ -39,7 +20,7 @@ const getLeaseWithRelatedEntities = async (rentalId: string) => {
 const getLeasesWithRelatedEntitiesForPnr = async (
   nationalRegistrationNumber: string
 ) => {
-  const leases = await getLeasesForPnr(
+  const leases = await leasingAdapter.getLeasesForPnr(
     nationalRegistrationNumber,
     undefined,
     'true'
@@ -130,7 +111,9 @@ export const routes = (router: KoaRouter) => {
    */
   router.get('(.*)/cas/getConsumerReport/:pnr', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
-    const responseData = await getCreditInformation(ctx.params.pnr)
+    const responseData = await leasingAdapter.getCreditInformation(
+      ctx.params.pnr
+    )
 
     ctx.body = {
       content: responseData,
@@ -165,7 +148,7 @@ export const routes = (router: KoaRouter) => {
    */
   router.get('(.*)/contact/:pnr', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
-    const responseData = await getContactForPnr(ctx.params.pnr)
+    const responseData = await leasingAdapter.getContactForPnr(ctx.params.pnr)
 
     ctx.body = {
       content: responseData,
@@ -205,8 +188,7 @@ export const routes = (router: KoaRouter) => {
 
   router.get('(.*)/contacts/:contactCode/offers', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
-    const res = await getOffersForContact(ctx.params.contactCode)
-
+    const res = await leasingAdapter.getOffersForContact(ctx.params.contactCode)
     if (!res.ok) {
       if (res.err === 'not-found') {
         ctx.status = 404
@@ -264,7 +246,7 @@ export const routes = (router: KoaRouter) => {
 
   router.get('(.*)/offers/:offerId/applicants/:contactCode', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
-    const res = await getOfferByContactCodeAndOfferId(
+    const res = await leasingAdapter.getOfferByContactCodeAndOfferId(
       ctx.params.contactCode,
       ctx.params.offerId
     )
@@ -318,7 +300,7 @@ export const routes = (router: KoaRouter) => {
       return
     }
 
-    const res = await getContactsDataBySearchQuery(ctx.query.q)
+    const res = await leasingAdapter.getContactsDataBySearchQuery(ctx.query.q)
 
     if (!res.ok) {
       ctx.status = 500
@@ -356,7 +338,10 @@ export const routes = (router: KoaRouter) => {
    */
   router.get('(.*)/contact/contactCode/:contactCode', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
-    const res = await getContactByContactCode(ctx.params.contactCode)
+    const res = await leasingAdapter.getContactByContactCode(
+      ctx.params.contactCode
+    )
+
     if (!res.ok) {
       if (res.err === 'not-found') {
         ctx.status = 404
@@ -403,7 +388,9 @@ export const routes = (router: KoaRouter) => {
    */
   router.get('(.*)/contact/phoneNumber/:pnr', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
-    const responseData = await getContactForPhoneNumber(ctx.params.pnr)
+    const responseData = await leasingAdapter.getContactForPhoneNumber(
+      ctx.params.pnr
+    )
 
     ctx.body = {
       content: responseData,
@@ -476,7 +463,9 @@ export const routes = (router: KoaRouter) => {
    */
   router.get('(.*)/listing/:id', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
-    const responseData = await getListingByListingId(ctx.params.id)
+    const responseData = await leasingAdapter.getListingByListingId(
+      ctx.params.id
+    )
 
     ctx.body = { content: responseData, ...metadata }
   })
@@ -505,7 +494,7 @@ export const routes = (router: KoaRouter) => {
    */
   router.get('/listings-with-applicants', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
-    const responseData = await getListingsWithApplicants()
+    const responseData = await leasingAdapter.getListingsWithApplicants()
 
     ctx.body = { content: responseData, ...metadata }
   })
@@ -579,7 +568,7 @@ export const routes = (router: KoaRouter) => {
    */
   router.get('/applicants/:contactCode', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
-    const responseData = await getApplicantsByContactCode(
+    const responseData = await leasingAdapter.getApplicantsByContactCode(
       ctx.params.contactCode
     )
 
@@ -613,9 +602,10 @@ export const routes = (router: KoaRouter) => {
    */
   router.get('/applicants-with-listings/:contactCode', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
-    const responseData = await getApplicantsAndListingByContactCode(
-      ctx.params.contactCode
-    )
+    const responseData =
+      await leasingAdapter.getApplicantsAndListingByContactCode(
+        ctx.params.contactCode
+      )
 
     ctx.body = { content: responseData, ...metadata }
   })
@@ -647,9 +637,10 @@ export const routes = (router: KoaRouter) => {
    */
   router.get('/listing/:listingId/applicants/details', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
-    const responseData = await getListingByIdWithDetailedApplicants(
-      ctx.params.listingId
-    )
+    const responseData =
+      await leasingAdapter.getListingByIdWithDetailedApplicants(
+        ctx.params.listingId
+      )
 
     ctx.body = { content: responseData, ...metadata }
   })
@@ -688,10 +679,11 @@ export const routes = (router: KoaRouter) => {
   router.get('/applicants/:contactCode/:listingId', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
     const { contactCode, listingId } = ctx.params
-    const responseData = await getApplicantByContactCodeAndListingId(
-      contactCode,
-      listingId
-    )
+    const responseData =
+      await leasingAdapter.getApplicantByContactCodeAndListingId(
+        contactCode,
+        listingId
+      )
 
     ctx.body = { content: responseData, ...metadata }
   })
@@ -737,9 +729,10 @@ export const routes = (router: KoaRouter) => {
    */
   router.delete('/applicants/:applicantId/by-manager', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
-    const responseData = await withdrawApplicantByManager(
+    const responseData = await leasingAdapter.withdrawApplicantByManager(
       ctx.params.applicantId
     )
+
     if (responseData.error) {
       ctx.status = 500 // Internal Server Error
       ctx.body = { error: responseData.error, ...metadata }
@@ -801,10 +794,11 @@ export const routes = (router: KoaRouter) => {
     '/applicants/:applicantId/by-user/:contactCode',
     async (ctx) => {
       const metadata = generateRouteMetadata(ctx)
-      const responseData = await withdrawApplicantByUser(
+      const responseData = await leasingAdapter.withdrawApplicantByUser(
         ctx.params.applicantId,
         ctx.params.contactCode
       )
+
       if (responseData.error) {
         ctx.status = 500 // Internal Server Error
         ctx.body = { error: responseData.error, ...metadata }

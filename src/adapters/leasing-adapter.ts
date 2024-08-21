@@ -501,6 +501,17 @@ const getOfferByContactCodeAndOfferId = async (
   }
 }
 
+type ValidateRentalRulesResult = AdapterResult<
+  { reason: string },
+  | 'not-found'
+  | 'unknown'
+  | 'contact-not-found'
+  | 'not-a-parking-space'
+  | 'no-contract-in-the-area'
+  | 'not-allowed-to-rent-additional'
+  | 'unexpected-error'
+>
+
 const validateRentalRules = (
   validationResult: AxiosResponse,
   applicationType: string
@@ -557,18 +568,7 @@ const validateResidentialAreaRentalRules = async (
   contactCode: string,
   districtCode: string,
   applicationType: string
-): Promise<
-  AdapterResult<
-    { reason: string },
-    | 'not-found'
-    | 'unknown'
-    | 'contact-not-found'
-    | 'not-a-parking-space'
-    | 'no-contract-in-the-area'
-    | 'not-allowed-to-rent-additional'
-    | 'unexpected-error'
-  >
-> => {
+): Promise<ValidateRentalRulesResult> => {
   try {
     const res = await axios(
       `${tenantsLeasesServiceUrl}/applicants/validateResidentialAreaRentalRules/${contactCode}/${districtCode}`
