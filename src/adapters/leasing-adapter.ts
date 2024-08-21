@@ -18,7 +18,7 @@ import {
 import config from '../common/config'
 import dayjs from 'dayjs'
 import { AdapterResult } from './types'
-import { HttpStatusCode } from 'axios'
+import { AxiosResponse, HttpStatusCode } from 'axios'
 
 //todo: move to global config or handle error statuses in middleware
 axios.defaults.validateStatus = function (status) {
@@ -478,7 +478,7 @@ const getOffersForContact = async (
 }
 
 const validateRentalRules = (
-  validationResult: any,
+  validationResult: AxiosResponse,
   applicationType: string
 ): AdapterResult<
   { reason: string },
