@@ -14,6 +14,7 @@ import {
   Offer,
   DetailedApplicant,
   OfferWithRentalObjectCode,
+  DetailedOffer,
 } from 'onecore-types'
 import config from '../common/config'
 import dayjs from 'dayjs'
@@ -480,10 +481,7 @@ const getOffersForContact = async (
 const getOfferByContactCodeAndOfferId = async (
   contactCode: string,
   offerId: string
-  //todo: fix type
-): Promise<
-  AdapterResult<OfferWithRentalObjectCode, 'not-found' | 'unknown'>
-> => {
+): Promise<AdapterResult<DetailedOffer, 'not-found' | 'unknown'>> => {
   try {
     const res = await axios(
       `${tenantsLeasesServiceUrl}/contacts/${contactCode}/offers/${offerId}`
