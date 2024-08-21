@@ -480,46 +480,48 @@ const getOffersForContact = async (
 const validateRentalRules = (
   validationResult: any,
   applicationType: string
-) => {
+): AdapterResult<
+  { reason: string },
+  | 'not-found'
+  | 'unknown'
+  | 'contact-not-found'
+  | 'not-a-parking-space'
+  | 'no-contract-in-the-area'
+  | 'not-allowed-to-rent-additional'
+  | 'unexpected-error'
+> => {
   if (validationResult.status == HttpStatusCode.NotFound) {
-    return { ok: false, err: 'not-found', httpStatus: HttpStatusCode.NotFound }
+    return { ok: false, err: 'not-found' }
   } else if (validationResult.status == HttpStatusCode.InternalServerError) {
     return {
       ok: false,
       err: 'contact-not-found',
-      httpStatus: HttpStatusCode.InternalServerError,
     }
   } else if (validationResult.status == HttpStatusCode.BadRequest) {
     return {
       ok: false,
       err: 'not-a-parking-space',
-      reason: validationResult.data.reason,
-      httpStatus: HttpStatusCode.BadRequest,
     }
   } else if (validationResult.status == HttpStatusCode.Forbidden) {
     return {
       ok: false,
       err: 'no-contract-in-the-area',
-      reason: validationResult.data.reason,
-      httpStatus: HttpStatusCode.Forbidden,
     }
   } else if (validationResult.status == HttpStatusCode.Ok) {
     if (validationResult.data.applicationType == 'Additional') {
       //Applicant is allowed to rent an additional parking space in this area
-      return { ok: true }
+      return { ok: true, data: { reason: validationResult.data.reason } }
     } else if (
       validationResult.data.applicationType == 'Replace' &&
       applicationType == 'Replace'
     ) {
       //Applicant is allowed to replace their current parking space for a new one in this area
-      return { ok: true }
+      return { ok: true, data: { reason: validationResult.data.reason } }
     } else {
       //Applicant is not allowed to rent an additional parking space in this area
       return {
         ok: false,
         err: 'not-allowed-to-rent-additional',
-        reason: validationResult.data.reason,
-        httpStatus: HttpStatusCode.Forbidden,
       }
     }
   }
@@ -531,7 +533,18 @@ const validateResidentialAreaRentalRules = async (
   contactCode: string,
   districtCode: string,
   applicationType: string
-) => {
+): Promise<
+  AdapterResult<
+    { reason: string },
+    | 'not-found'
+    | 'unknown'
+    | 'contact-not-found'
+    | 'not-a-parking-space'
+    | 'no-contract-in-the-area'
+    | 'not-allowed-to-rent-additional'
+    | 'unexpected-error'
+  >
+> => {
   try {
     const res = await axios(
       `${tenantsLeasesServiceUrl}/applicants/validateResidentialAreaRentalRules/${contactCode}/${districtCode}`
@@ -547,7 +560,18 @@ const validatePropertyRentalRules = async (
   contactCode: string,
   rentalObjectCode: string,
   applicationType: string
-) => {
+): Promise<
+  AdapterResult<
+    { reason: string },
+    | 'not-found'
+    | 'unknown'
+    | 'contact-not-found'
+    | 'not-a-parking-space'
+    | 'no-contract-in-the-area'
+    | 'not-allowed-to-rent-additional'
+    | 'unexpected-error'
+  >
+> => {
   try {
     const res = await axios(
       `${tenantsLeasesServiceUrl}/applicants/validatePropertyRentalRules/${contactCode}/${rentalObjectCode}`

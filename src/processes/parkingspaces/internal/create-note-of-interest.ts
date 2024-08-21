@@ -112,24 +112,10 @@ export const createNoteOfInterestForInternalParkingSpace = async (
         ),
       ])
     if (!validationResultResArea.ok) {
-      return makeProcessError(
-        validationResultResArea.err,
-        validationResultResArea.httpStatus as number,
-        {
-          message: validationResultResArea.err,
-          reason: validationResultResArea.reason,
-        }
-      )
+      return makeProcessError(validationResultResArea.err, 400)
     }
     if (!validationResultProperty.ok) {
-      return makeProcessError(
-        validationResultProperty.err,
-        validationResultProperty.httpStatus as number,
-        {
-          message: validationResultProperty.err,
-          reason: validationResultProperty.reason,
-        }
-      )
+      return makeProcessError(validationResultProperty.err, 400)
     }
 
     //step 3.a.1. Perform credit check

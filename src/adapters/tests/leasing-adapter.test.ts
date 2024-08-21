@@ -599,7 +599,7 @@ describe('leasing-adapter', () => {
       )
 
       expect(result.ok).toBe(false)
-      expect(result.err).toBe('not-allowed-to-rent-additional')
+      if (!result.ok) expect(result.err).toBe('not-allowed-to-rent-additional')
     })
     it('calls leasing and returns an error', async () => {
       nock(config.tenantsLeasesService.url)
@@ -612,8 +612,9 @@ describe('leasing-adapter', () => {
       )
 
       expect(result.ok).toBe(false)
-      expect(result.err).toBe('not-a-parking-space')
-      expect(result.reason).toBe('some-reason')
+      if (!result.ok) {
+        expect(result.err).toBe('not-a-parking-space')
+      }
     })
   })
   describe(leasingAdapter.validatePropertyRentalRules, () => {
@@ -640,7 +641,7 @@ describe('leasing-adapter', () => {
       )
 
       expect(result.ok).toBe(false)
-      expect(result.err).toBe('not-allowed-to-rent-additional')
+      if (!result.ok) expect(result.err).toBe('not-allowed-to-rent-additional')
     })
     it('calls leasing and returns an error', async () => {
       nock(config.tenantsLeasesService.url)
@@ -653,8 +654,7 @@ describe('leasing-adapter', () => {
       )
 
       expect(result.ok).toBe(false)
-      expect(result.err).toBe('no-contract-in-the-area')
-      expect(result.reason).toBe('some-other-reason')
+      if (!result.ok) expect(result.err).toBe('no-contract-in-the-area')
     })
   })
 })

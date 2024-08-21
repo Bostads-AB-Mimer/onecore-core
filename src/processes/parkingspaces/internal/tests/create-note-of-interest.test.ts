@@ -81,11 +81,11 @@ describe('createNoteOfInterestForInternalParkingSpace', () => {
 
   const validatePropertyRentalRules = jest
     .spyOn(leasingAdapter, 'validatePropertyRentalRules')
-    .mockResolvedValue({ ok: true })
+    .mockResolvedValue({ ok: true, data: { reason: '' } })
 
   const validateResidentialAreaRentalRules = jest
     .spyOn(leasingAdapter, 'validateResidentialAreaRentalRules')
-    .mockResolvedValue({ ok: true })
+    .mockResolvedValue({ ok: true, data: { reason: '' } })
 
   jest
     .spyOn(leasingAdapter, 'getListingByRentalObjectCode')
@@ -189,15 +189,11 @@ describe('createNoteOfInterestForInternalParkingSpace', () => {
     getLeasesForPnrSpy.mockResolvedValue(mockedLeases)
     validatePropertyRentalRules.mockResolvedValueOnce({
       ok: false,
-      httpStatus: 400,
-      err: 'fel',
-      reason: 'whyyy',
+      err: 'not-found',
     })
     validateResidentialAreaRentalRules.mockResolvedValueOnce({
       ok: false,
-      httpStatus: 500,
-      err: 'fel',
-      reason: 'whyyy',
+      err: 'not-allowed-to-rent-additional',
     })
 
     const result =
@@ -206,10 +202,12 @@ describe('createNoteOfInterestForInternalParkingSpace', () => {
         'bar',
         'baz'
       )
+
     expect(result.processStatus).toBe(ProcessStatus.failed)
-    expect(result.httpStatus).toBe(500)
-    expect(result.response.message).toBe('fel')
-    expect(result.response.reason).toBe('whyyy')
+    if (result.processStatus == ProcessStatus.failed) {
+      expect(result.httpStatus).toBe(400)
+      expect(result.error).toBe('not-allowed-to-rent-additional')
+    }
   })
 
   it('performs internal credit check', async () => {
