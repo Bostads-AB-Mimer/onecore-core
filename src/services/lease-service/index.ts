@@ -575,6 +575,46 @@ export const routes = (router: KoaRouter) => {
     ctx.body = { content: responseData, ...metadata }
   })
 
+  // router.get(
+  // '(.*)/applicants/validate-rental-rules/property/:contactCode/:rentalObjectCode',
+  // async (ctx) => {
+  // const res = await leasingAdapter.validatePropertyRentalRules(
+  // ctx.params.contactCode,
+  // ctx.params.rentalObjectCode
+  // )
+
+  // if (!res.ok) {
+  // ctx.status = 500
+  // return
+  // }
+
+  // ctx.status = 200
+  // ctx.body = {
+  // data: res.data,
+  // }
+  // }
+  // )
+
+  // router.get(
+  // '(.*)/applicants/validate-rental-rules/residential-area/:contactCode/:districtCode',
+  // async (ctx) => {
+  // const res = await leasingAdapter.validateResidentialAreaRentalRules(
+  // ctx.params.contactCode,
+  // ctx.params.districtCode
+  // )
+
+  // if (!res.ok) {
+  // ctx.status = 500
+  // return
+  // }
+
+  // ctx.status = 200
+  // ctx.body = {
+  // data: res.data,
+  // }
+  // }
+  // )
+
   /**
    * @swagger
    * /applicants-with-listings/{contactCode}:

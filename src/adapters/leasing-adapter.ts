@@ -19,7 +19,7 @@ import {
 import config from '../common/config'
 import dayjs from 'dayjs'
 import { AdapterResult } from './types'
-import { AxiosResponse, HttpStatusCode } from 'axios'
+import { HttpStatusCode } from 'axios'
 
 //todo: move to global config or handle error statuses in middleware
 axios.defaults.validateStatus = function (status) {
@@ -501,79 +501,25 @@ const getOfferByContactCodeAndOfferId = async (
   }
 }
 
-type ValidateRentalRulesResult = AdapterResult<
-  { reason: string },
-  | 'not-found'
-  | 'unknown'
-  | 'contact-not-found'
-  | 'not-a-parking-space'
-  | 'no-contract-in-the-area'
-  | 'not-allowed-to-rent-additional'
-  | 'unexpected-error'
->
-
-const validateRentalRules = (
-  validationResult: AxiosResponse,
-  applicationType: string
-): AdapterResult<
-  { reason: string },
-  | 'not-found'
-  | 'unknown'
-  | 'contact-not-found'
-  | 'not-a-parking-space'
-  | 'no-contract-in-the-area'
-  | 'not-allowed-to-rent-additional'
-  | 'unexpected-error'
-> => {
-  if (validationResult.status == HttpStatusCode.NotFound) {
-    return { ok: false, err: 'not-found' }
-  } else if (validationResult.status == HttpStatusCode.InternalServerError) {
-    return {
-      ok: false,
-      err: 'contact-not-found',
-    }
-  } else if (validationResult.status == HttpStatusCode.BadRequest) {
-    return {
-      ok: false,
-      err: 'not-a-parking-space',
-    }
-  } else if (validationResult.status == HttpStatusCode.Forbidden) {
-    return {
-      ok: false,
-      err: 'no-contract-in-the-area',
-    }
-  } else if (validationResult.status == HttpStatusCode.Ok) {
-    if (validationResult.data.applicationType == 'Additional') {
-      //Applicant is allowed to rent an additional parking space in this area
-      return { ok: true, data: { reason: validationResult.data.reason } }
-    } else if (
-      validationResult.data.applicationType == 'Replace' &&
-      applicationType == 'Replace'
-    ) {
-      //Applicant is allowed to replace their current parking space for a new one in this area
-      return { ok: true, data: { reason: validationResult.data.reason } }
-    } else {
-      //Applicant is not allowed to rent an additional parking space in this area
-      return {
-        ok: false,
-        err: 'not-allowed-to-rent-additional',
-      }
-    }
-  }
-
-  return { ok: false, err: 'unexpected-error' }
-}
-
 const validateResidentialAreaRentalRules = async (
   contactCode: string,
-  districtCode: string,
-  applicationType: string
-): Promise<ValidateRentalRulesResult> => {
+  districtCode: string
+): Promise<
+  AdapterResult<
+    { reason: string; applicationType: 'Replace' | 'Additional' },
+    'no-housing-contract-in-the-area' | 'unknown'
+  >
+> => {
   try {
     const res = await axios(
       `${tenantsLeasesServiceUrl}/applicants/validateResidentialAreaRentalRules/${contactCode}/${districtCode}`
     )
-    return validateRentalRules(res, applicationType)
+    if (res.status === 403) {
+      return { ok: false, err: 'no-housing-contract-in-the-area' }
+    }
+    if (res.status !== 200) return { ok: false, err: 'unknown' }
+
+    return { ok: true, data: res.data }
   } catch (err) {
     logger.error({ err }, 'leasing-adapter.validateResidentialAreaRentalRules')
     return { ok: false, err: 'unknown' }
@@ -582,25 +528,25 @@ const validateResidentialAreaRentalRules = async (
 
 const validatePropertyRentalRules = async (
   contactCode: string,
-  rentalObjectCode: string,
-  applicationType: string
+  rentalObjectCode: string
 ): Promise<
   AdapterResult<
-    { reason: string },
-    | 'not-found'
-    | 'unknown'
-    | 'contact-not-found'
+    { reason: string; applicationType: 'Replace' | 'Additional' },
+    | 'not-tenant-in-the-property'
     | 'not-a-parking-space'
-    | 'no-contract-in-the-area'
-    | 'not-allowed-to-rent-additional'
-    | 'unexpected-error'
+    | 'property-info-not-found'
+    | 'unknown'
   >
 > => {
   try {
     const res = await axios(
       `${tenantsLeasesServiceUrl}/applicants/validatePropertyRentalRules/${contactCode}/${rentalObjectCode}`
     )
-    return validateRentalRules(res, applicationType)
+    if (res.status === 403) {
+      return { ok: false, err: 'not-tenant-in-the-property' }
+    }
+
+    return { ok: true, data: res.data }
   } catch (err) {
     logger.error({ err }, 'leasing-adapter.validatePropertyRentalRules')
     return { ok: false, err: 'unknown' }
