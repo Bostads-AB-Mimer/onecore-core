@@ -361,6 +361,22 @@ export const routes = (router: KoaRouter) => {
     }
   })
 
+  router.get('(.*)/tenant/contactCode/:contactCode', async (ctx) => {
+    const res = await leasingAdapter.getTenantByContactCode(
+      ctx.params.contactCode
+    )
+
+    if (!res.ok) {
+      ctx.status = res.err === 'not-found' ? 404 : 500
+      return
+    }
+
+    ctx.status = 200
+    ctx.body = {
+      data: res.data,
+    }
+  })
+
   /**
    * @swagger
    * /contact/phoneNumber/{pnr}:
@@ -575,45 +591,55 @@ export const routes = (router: KoaRouter) => {
     ctx.body = { content: responseData, ...metadata }
   })
 
-  // router.get(
-  // '(.*)/applicants/validate-rental-rules/property/:contactCode/:rentalObjectCode',
-  // async (ctx) => {
-  // const res = await leasingAdapter.validatePropertyRentalRules(
-  // ctx.params.contactCode,
-  // ctx.params.rentalObjectCode
-  // )
+  router.get(
+    '(.*)/applicants/validate-rental-rules/property/:contactCode/:rentalObjectCode',
+    async (ctx) => {
+      const res = await leasingAdapter.validatePropertyRentalRules(
+        ctx.params.contactCode,
+        ctx.params.rentalObjectCode
+      )
 
-  // if (!res.ok) {
-  // ctx.status = 500
-  // return
-  // }
+      if (!res.ok) {
+        if (res.err === 'not-tenant-in-the-property') {
+          ctx.status = 403
+          return
+        } else {
+          ctx.status = 500
+          return
+        }
+      }
 
-  // ctx.status = 200
-  // ctx.body = {
-  // data: res.data,
-  // }
-  // }
-  // )
+      ctx.status = 200
+      ctx.body = {
+        data: res.data,
+      }
+    }
+  )
 
-  // router.get(
-  // '(.*)/applicants/validate-rental-rules/residential-area/:contactCode/:districtCode',
-  // async (ctx) => {
-  // const res = await leasingAdapter.validateResidentialAreaRentalRules(
-  // ctx.params.contactCode,
-  // ctx.params.districtCode
-  // )
+  router.get(
+    '(.*)/applicants/validate-rental-rules/residential-area/:contactCode/:districtCode',
+    async (ctx) => {
+      const res = await leasingAdapter.validateResidentialAreaRentalRules(
+        ctx.params.contactCode,
+        ctx.params.districtCode
+      )
 
-  // if (!res.ok) {
-  // ctx.status = 500
-  // return
-  // }
+      if (!res.ok) {
+        if (res.err === 'no-housing-contract-in-the-area') {
+          ctx.status = 403
+          return
+        } else {
+          ctx.status = 500
+          return
+        }
+      }
 
-  // ctx.status = 200
-  // ctx.body = {
-  // data: res.data,
-  // }
-  // }
-  // )
+      ctx.status = 200
+      ctx.body = {
+        data: res.data,
+      }
+    }
+  )
 
   /**
    * @swagger

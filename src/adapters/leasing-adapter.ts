@@ -131,6 +131,23 @@ const getContactByContactCode = async (
   }
 }
 
+const getTenantByContactCode = async (
+  contactCode: string
+): Promise<AdapterResult<any, unknown>> => {
+  try {
+    const res = await axios.get(
+      `${tenantsLeasesServiceUrl}/tenant/contactCode/${contactCode}`
+    )
+
+    if (!res.data.data) return { ok: false, err: 'not-found' }
+
+    return { ok: true, data: res.data.data }
+  } catch (err) {
+    logger.error({ err }, 'leasing-adapter.getTenantByContactCode')
+    return { ok: false, err: 'unknown' }
+  }
+}
+
 const getContactForPhoneNumber = async (
   phoneNumber: string
 ): Promise<Contact | undefined> => {
@@ -585,4 +602,5 @@ export {
   getOfferByContactCodeAndOfferId,
   validateResidentialAreaRentalRules,
   validatePropertyRentalRules,
+  getTenantByContactCode,
 }
