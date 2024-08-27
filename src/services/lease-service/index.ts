@@ -619,10 +619,7 @@ export const routes = (router: KoaRouter) => {
    *               type: object
    *               properties:
    *                 applicationType: string
-   *                 example: Additional - applicant is eligible for applying
-   *                 for an additional parking space. Replace - applicant is
-   *                 eligible for replacing their current parking space in the
-   *                 same residential area or property.
+   *                 example: Additional - applicant is eligible for applying for an additional parking space. Replace - applicant is eligible for replacing their current parking space in the same residential area or property.
    *                 reason:
    *                   type: string
    *                   example: No property rental rules applies to this property.
@@ -718,7 +715,7 @@ export const routes = (router: KoaRouter) => {
   )
   /**
    * @swagger
-   * /applicants/validate-rental-rules/residential-area/{contactCode}/{districtCode}
+   * /applicants/validate-rental-rules/residential-area/{contactCode}/{districtCode}:
    *   get:
    *     summary: Validate residential area rental rules for applicant
    *     description: Validate residential area rental rules for an applicant based on contact code and district code.
@@ -745,10 +742,7 @@ export const routes = (router: KoaRouter) => {
    *               type: object
    *               properties:
    *                 applicationType: string
-   *                 example: Additional - applicant is eligible for applying
-   *                 for an additional parking space. Replace - applicant is
-   *                 eligible for replacing their current parking space in the
-   *                 same residential area or property.
+   *                 example: Additional - applicant is eligible for applying for an additional parking space. Replace - applicant is eligible for replacing their current parking space in the same residential area or property.
    *                 reason:
    *                   type: string
    *                   examples:
