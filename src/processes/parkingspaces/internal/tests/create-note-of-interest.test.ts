@@ -198,11 +198,11 @@ describe('createNoteOfInterestForInternalParkingSpace', () => {
     getLeasesForPnrSpy.mockResolvedValue(mockedLeases)
     validatePropertyRentalRules.mockResolvedValueOnce({
       ok: false,
-      err: 'property-info-not-found',
+      err: { tag: 'not-found', data: null },
     })
     validateResidentialAreaRentalRules.mockResolvedValueOnce({
       ok: false,
-      err: 'no-housing-contract-in-the-area',
+      err: { tag: 'no-housing-contract-in-the-area', data: null },
     })
     validateRentalRules.mockReturnValueOnce({
       ok: false,

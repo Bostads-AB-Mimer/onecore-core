@@ -23,17 +23,17 @@ export const validateRentalRules = (
   applicationType: 'Replace' | 'Additional'
 ) => {
   if (!validationResult.ok) {
-    if (validationResult.err === 'property-info-not-found') {
+    if (validationResult.err.tag === 'not-found') {
       return { ok: false, err: 'not-found' }
     }
 
-    if (validationResult.err === 'not-a-parking-space') {
+    if (validationResult.err.tag === 'not-a-parking-space') {
       return { ok: false, err: 'not-a-parking-space' }
     }
 
     if (
-      validationResult.err === 'not-tenant-in-the-property' ||
-      validationResult.err === 'no-housing-contract-in-the-area'
+      validationResult.err.tag === 'not-tenant-in-the-property' ||
+      validationResult.err.tag === 'no-housing-contract-in-the-area'
     ) {
       return { ok: false, err: 'no-contract-in-the-area' }
     }

@@ -599,7 +599,7 @@ describe('leasing-adapter', () => {
         'ABC'
       )
 
-      expect(result).toEqual({ ok: false, err: 'unknown' })
+      expect(result).toMatchObject({ ok: false, err: { tag: 'unknown' } })
     })
   })
 
@@ -627,7 +627,10 @@ describe('leasing-adapter', () => {
         'ABC'
       )
 
-      expect(result).toEqual({ ok: false, err: 'not-tenant-in-the-property' })
+      expect(result).toMatchObject({
+        ok: false,
+        err: { tag: 'not-tenant-in-the-property' },
+      })
     })
   })
 })

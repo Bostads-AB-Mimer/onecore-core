@@ -524,7 +524,10 @@ const validateResidentialAreaRentalRules = async (
 ): Promise<
   AdapterResult<
     { reason: string; applicationType: 'Replace' | 'Additional' },
-    'no-housing-contract-in-the-area' | 'unknown'
+    {
+      tag: 'no-housing-contract-in-the-area' | 'not-found' | 'unknown'
+      data: unknown
+    }
   >
 > => {
   try {
@@ -532,14 +535,27 @@ const validateResidentialAreaRentalRules = async (
       `${tenantsLeasesServiceUrl}/applicants/validateResidentialAreaRentalRules/${contactCode}/${districtCode}`
     )
     if (res.status === 403) {
-      return { ok: false, err: 'no-housing-contract-in-the-area' }
+      return {
+        ok: false,
+        err: { tag: 'no-housing-contract-in-the-area', data: res.data },
+      }
     }
-    if (res.status !== 200) return { ok: false, err: 'unknown' }
+
+    if (res.status === 404) {
+      return {
+        ok: false,
+        err: { tag: 'not-found', data: res.data },
+      }
+    }
+
+    if (res.status !== 200) {
+      return { ok: false, err: { tag: 'unknown', data: res.data } }
+    }
 
     return { ok: true, data: res.data }
   } catch (err) {
     logger.error({ err }, 'leasing-adapter.validateResidentialAreaRentalRules')
-    return { ok: false, err: 'unknown' }
+    return { ok: false, err: { tag: 'unknown', data: err } }
   }
 }
 
@@ -549,24 +565,40 @@ const validatePropertyRentalRules = async (
 ): Promise<
   AdapterResult<
     { reason: string; applicationType: 'Replace' | 'Additional' },
-    | 'not-tenant-in-the-property'
-    | 'not-a-parking-space'
-    | 'property-info-not-found'
-    | 'unknown'
+    {
+      tag:
+        | 'not-tenant-in-the-property'
+        | 'not-a-parking-space'
+        | 'not-found'
+        | 'unknown'
+      data: unknown
+    }
   >
 > => {
   try {
     const res = await axios(
       `${tenantsLeasesServiceUrl}/applicants/validatePropertyRentalRules/${contactCode}/${rentalObjectCode}`
     )
+
+    if (res.status === 404) {
+      return { ok: false, err: { tag: 'not-found', data: res.data } }
+    }
+
+    if (res.status === 400) {
+      return { ok: false, err: { tag: 'not-a-parking-space', data: res.data } }
+    }
+
     if (res.status === 403) {
-      return { ok: false, err: 'not-tenant-in-the-property' }
+      return {
+        ok: false,
+        err: { tag: 'not-tenant-in-the-property', data: res.data },
+      }
     }
 
     return { ok: true, data: res.data }
   } catch (err) {
     logger.error({ err }, 'leasing-adapter.validatePropertyRentalRules')
-    return { ok: false, err: 'unknown' }
+    return { ok: false, err: { tag: 'unknown', data: err } }
   }
 }
 

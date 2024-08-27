@@ -590,7 +590,95 @@ export const routes = (router: KoaRouter) => {
 
     ctx.body = { content: responseData, ...metadata }
   })
-
+  /**
+   * @swagger
+   * /applicants/validate-rental-rules/property/{contactCode}/{rentalObjectCode}:
+   *   get:
+   *     summary: Validate property rental rules for applicant
+   *     description: Validate property rental rules for an applicant based on contact code and listing ID.
+   *     tags: [Applicants]
+   *     parameters:
+   *       - in: path
+   *         name: contactCode
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: The contact code of the applicant.
+   *       - in: path
+   *         name: rentalObjectCode
+   *         required: true
+   *         schema:
+   *           type: integer
+   *         description: The xpand rental object code of the property.
+   *     responses:
+   *       200:
+   *         description: No property rental rules apply to this property.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 applicationType: string
+   *                 example: Additional - applicant is eligible for applying
+   *                 for an additional parking space. Replace - applicant is
+   *                 eligible for replacing their current parking space in the
+   *                 same residential area or property.
+   *                 reason:
+   *                   type: string
+   *                   example: No property rental rules applies to this property.
+   *       400:
+   *         description: Rental object code is not a parking space.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 reason:
+   *                   type: string
+   *                   example: Rental object code entity is not a parking space.
+   *       403:
+   *         description: Applicant is not eligible for the property based on property rental rules.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 reason:
+   *                   type: string
+   *                   examples:
+   *                     notTenant:
+   *                       value: Applicant is not a current or coming tenant in the property.
+   *                     noParkingContracts:
+   *                       value: User does not have any active parking space contracts in the property residential area.
+   *       404:
+   *         description: Listing, property info, or applicant not found.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 reason:
+   *                   type: string
+   *                   examples:
+   *                     listingNotFound:
+   *                       value: Listing was not found.
+   *                     propertyInfoNotFound:
+   *                       value: Property info for listing was not found.
+   *                     applicantNotFound:
+   *                       value: Applicant was not found.
+   *                     contactCodeMismatch:
+   *                       value: Applicant not found for this contactCode.
+   *       500:
+   *         description: An error occurred while validating property rental rules.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 error:
+   *                   type: string
+   *                   example: An error occurred while validating property rental rules.
+   */
   router.get(
     '(.*)/applicants/validate-rental-rules/property/:contactCode/:rentalObjectCode',
     async (ctx) => {
@@ -600,13 +688,26 @@ export const routes = (router: KoaRouter) => {
       )
 
       if (!res.ok) {
-        if (res.err === 'not-tenant-in-the-property') {
+        if (res.err.tag === 'not-tenant-in-the-property') {
           ctx.status = 403
-          return
-        } else {
-          ctx.status = 500
+          ctx.body = { data: res.err.data }
           return
         }
+
+        if (res.err.tag === 'not-found') {
+          ctx.status = 404
+          ctx.body = { data: res.err.data }
+          return
+        }
+
+        if (res.err.tag === 'not-a-parking-space') {
+          ctx.status = 400
+          ctx.body = { data: res.err.data }
+          return
+        }
+
+        ctx.status = 500
+        return
       }
 
       ctx.status = 200
@@ -615,7 +716,81 @@ export const routes = (router: KoaRouter) => {
       }
     }
   )
-
+  /**
+   * @swagger
+   * /applicants/validate-rental-rules/residential-area/{contactCode}/{districtCode}
+   *   get:
+   *     summary: Validate residential area rental rules for applicant
+   *     description: Validate residential area rental rules for an applicant based on contact code and district code.
+   *     tags: [Applicants]
+   *     parameters:
+   *       - in: path
+   *         name: contactCode
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: The contact code of the applicant.
+   *       - in: path
+   *         name: districtCode
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: The xpand district code of the residential area to validate against.
+   *     responses:
+   *       200:
+   *         description: Either no residential area rental rules apply or applicant is eligible to apply for parking space.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 applicationType: string
+   *                 example: Additional - applicant is eligible for applying
+   *                 for an additional parking space. Replace - applicant is
+   *                 eligible for replacing their current parking space in the
+   *                 same residential area or property.
+   *                 reason:
+   *                   type: string
+   *                   examples:
+   *                     noRules:
+   *                       value: No residential area rental rules applies to this listing.
+   *                     eligible:
+   *                       value: Applicant does not have any active parking space contracts in the listings residential area. Applicant is eligible to apply to parking space.
+   *       403:
+   *         description: Applicant is not eligible for the listing based on residential area rental rules.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 reason:
+   *                   type: string
+   *                   example: Applicant does not have any current or upcoming housing contracts in the residential area.
+   *       404:
+   *         description: Listing or applicant not found.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 reason:
+   *                   type: string
+   *                   examples:
+   *                     listingNotFound:
+   *                       value: Listing was not found.
+   *                     applicantNotFound:
+   *                       value: Applicant was not found.
+   *       500:
+   *         description: An error occurred while validating residential area rental rules.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 error:
+   *                   type: string
+   *                   example: An error occurred while validating residential area rental rules.
+   */
   router.get(
     '(.*)/applicants/validate-rental-rules/residential-area/:contactCode/:districtCode',
     async (ctx) => {
@@ -625,13 +800,20 @@ export const routes = (router: KoaRouter) => {
       )
 
       if (!res.ok) {
-        if (res.err === 'no-housing-contract-in-the-area') {
+        if (res.err.tag === 'no-housing-contract-in-the-area') {
           ctx.status = 403
-          return
-        } else {
-          ctx.status = 500
+          ctx.body = { data: res.err.data }
           return
         }
+
+        if (res.err.tag === 'not-found') {
+          ctx.status = 404
+          ctx.body = { data: res.err.data }
+          return
+        }
+
+        ctx.status = 500
+        return
       }
 
       ctx.status = 200
