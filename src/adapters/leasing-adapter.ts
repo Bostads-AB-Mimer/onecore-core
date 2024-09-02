@@ -131,17 +131,18 @@ const getContactByContactCode = async (
   }
 }
 
+// TODO: Use Tenant type for return
 const getTenantByContactCode = async (
   contactCode: string
-): Promise<AdapterResult<any, unknown>> => {
+): Promise<AdapterResult<any, 'unknown'>> => {
   try {
     const res = await axios.get(
-      `${tenantsLeasesServiceUrl}/tenant/contactCode/${contactCode}`
+      `${tenantsLeasesServiceUrl}/tenants/contactCode/${contactCode}`
     )
 
-    if (!res.data.data) return { ok: false, err: 'not-found' }
+    if (!res.data.content) return { ok: false, err: 'unknown' }
 
-    return { ok: true, data: res.data.data }
+    return { ok: true, data: res.data.content }
   } catch (err) {
     logger.error({ err }, 'leasing-adapter.getTenantByContactCode')
     return { ok: false, err: 'unknown' }
