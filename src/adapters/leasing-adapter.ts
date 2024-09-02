@@ -15,6 +15,7 @@ import {
   DetailedApplicant,
   OfferWithRentalObjectCode,
   DetailedOffer,
+  Tenant,
 } from 'onecore-types'
 import config from '../common/config'
 import dayjs from 'dayjs'
@@ -131,10 +132,9 @@ const getContactByContactCode = async (
   }
 }
 
-// TODO: Use Tenant type for return
 const getTenantByContactCode = async (
   contactCode: string
-): Promise<AdapterResult<any, 'unknown'>> => {
+): Promise<AdapterResult<Tenant, 'unknown'>> => {
   try {
     const res = await axios.get(
       `${tenantsLeasesServiceUrl}/tenants/contactCode/${contactCode}`
