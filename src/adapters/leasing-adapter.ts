@@ -304,15 +304,17 @@ const getListingByRentalObjectCode = async (rentalObjectCode: string) => {
   }
 }
 
-const getListingsWithApplicants = async (): Promise<any[] | undefined> => {
+const getListingsWithApplicants = async (): Promise<
+  AdapterResult<any[] | undefined, 'unknown'>
+> => {
   try {
     const response = await axios.get(
       `${tenantsLeasesServiceUrl}/listings-with-applicants`
     )
-    return response.data.content
+    return { ok: true, data: response.data.content }
   } catch (error) {
     logger.error(error, 'Error fetching listings with applicants:')
-    return undefined
+    return { ok: false, err: 'unknown' }
   }
 }
 

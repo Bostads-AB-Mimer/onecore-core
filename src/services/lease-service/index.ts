@@ -513,9 +513,16 @@ export const routes = (router: KoaRouter) => {
    */
   router.get('/listings-with-applicants', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
-    const responseData = await leasingAdapter.getListingsWithApplicants()
+    const result = await leasingAdapter.getListingsWithApplicants()
 
-    ctx.body = { content: responseData, ...metadata }
+    if (!result.ok) {
+      ctx.status = 500
+      ctx.body = { error: 'Unknown error', ...metadata }
+      return
+    }
+
+    ctx.status = 200
+    ctx.body = { content: result.data, ...metadata }
   })
 
   /**
