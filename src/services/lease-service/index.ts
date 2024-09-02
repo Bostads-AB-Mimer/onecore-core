@@ -361,7 +361,7 @@ export const routes = (router: KoaRouter) => {
     }
   })
 
-  router.get('(.*)/tenant/contactCode/:contactCode', async (ctx) => {
+  router.get('(.*)/tenants/contactCode/:contactCode', async (ctx) => {
     const res = await leasingAdapter.getTenantByContactCode(
       ctx.params.contactCode
     )
