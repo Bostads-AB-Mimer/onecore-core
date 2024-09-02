@@ -362,18 +362,21 @@ export const routes = (router: KoaRouter) => {
   })
 
   router.get('(.*)/tenants/contactCode/:contactCode', async (ctx) => {
+    const metadata = generateRouteMetadata(ctx)
     const res = await leasingAdapter.getTenantByContactCode(
       ctx.params.contactCode
     )
 
     if (!res.ok) {
-      ctx.status = res.err === 'not-found' ? 404 : 500
+      ctx.status = 500
+      ctx.body = { error: 'Internal server error', ...metadata }
       return
     }
 
     ctx.status = 200
     ctx.body = {
-      data: res.data,
+      content: res.data,
+      ...metadata,
     }
   })
 
