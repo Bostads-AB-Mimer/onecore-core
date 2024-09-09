@@ -595,7 +595,7 @@ export const routes = (router: KoaRouter) => {
     }
 
     ctx.status = 200
-    ctx.body = { content: null, ...metadata }
+    ctx.body = { content: result.data, ...metadata }
   })
 
   /**

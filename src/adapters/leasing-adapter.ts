@@ -1,5 +1,6 @@
 import { loggedAxios as axios, logger } from 'onecore-utilities'
-
+import { HttpStatusCode } from 'axios'
+import dayjs from 'dayjs'
 import {
   ConsumerReport,
   Contact,
@@ -17,10 +18,9 @@ import {
   DetailedOffer,
   Tenant,
 } from 'onecore-types'
+
 import config from '../common/config'
-import dayjs from 'dayjs'
 import { AdapterResult } from './types'
-import { HttpStatusCode } from 'axios'
 
 //todo: move to global config or handle error statuses in middleware
 axios.defaults.validateStatus = function (status) {
@@ -605,20 +605,29 @@ const validatePropertyRentalRules = async (
   }
 }
 
+// TODO: Use from onecore-types once mim-15 is merged
+type InternalParkingSpaceSyncSuccessResponse = {
+  inserted: Array<{ rentalObjectCode: string; id: number }>
+  failed: Array<{
+    rentalObjectCode: string
+    err: 'unknown' | 'active-listing-exists'
+  }>
+}
+
 const syncInternalParkingSpacesFromXpand = async () => {
   try {
-    const res = await axios.post(
-      `${tenantsLeasesServiceUrl}/listings/sync-from-xpand`
-    )
+    const res = await axios.post<{
+      content: InternalParkingSpaceSyncSuccessResponse
+    }>(`${tenantsLeasesServiceUrl}/listings/sync-internal-from-xpand`)
 
     if (res.status !== 200) {
-      return { ok: false, err: 'unknown' }
+      return { ok: false, err: 'unknown' } as const
     }
 
-    return { ok: true, data: null }
+    return { ok: true, data: res.data.content } as const
   } catch (err) {
     logger.error({ err }, 'leasing-adapter.syncInternalParkingSpacesFromXpand')
-    return { ok: false, err: 'unknown' }
+    return { ok: false, err: 'unknown' } as const
   }
 }
 
