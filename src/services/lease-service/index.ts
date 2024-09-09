@@ -580,8 +580,7 @@ export const routes = (router: KoaRouter) => {
    *       '200':
    *         description: Request ok.
    *       '500':
-   *         description: Internal server error. Failed to sync internal
-   *         parking spaces.
+   *         description: Internal server error. Failed to sync internal parking spaces.
    *     security:
    *       - bearerAuth: []
    */
