@@ -605,6 +605,23 @@ const validatePropertyRentalRules = async (
   }
 }
 
+const syncInternalParkingSpacesFromXpand = async () => {
+  try {
+    const res = await axios.post(
+      `${tenantsLeasesServiceUrl}/listings/sync-from-xpand`
+    )
+
+    if (res.status !== 200) {
+      return { ok: false, err: 'unknown' }
+    }
+
+    return { ok: true, data: null }
+  } catch (err) {
+    logger.error({ err }, 'leasing-adapter.syncInternalParkingSpacesFromXpand')
+    return { ok: false, err: 'unknown' }
+  }
+}
+
 export {
   getLease,
   getLeasesForPnr,
@@ -638,4 +655,5 @@ export {
   validateResidentialAreaRentalRules,
   validatePropertyRentalRules,
   getTenantByContactCode,
+  syncInternalParkingSpacesFromXpand,
 }
