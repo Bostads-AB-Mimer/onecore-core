@@ -607,11 +607,17 @@ const validatePropertyRentalRules = async (
 
 // TODO: Use from onecore-types once mim-15 is merged
 type InternalParkingSpaceSyncSuccessResponse = {
-  inserted: Array<{ rentalObjectCode: string; id: number }>
-  failed: Array<{
+  invalid: Array<{
     rentalObjectCode: string
-    err: 'unknown' | 'active-listing-exists'
+    errors: Array<{ path: string; code: string }>
   }>
+  insertions: {
+    inserted: Array<{ rentalObjectCode: string; id: number }>
+    failed: Array<{
+      rentalObjectCode: string
+      err: 'unknown' | 'active-listing-exists'
+    }>
+  }
 }
 
 const syncInternalParkingSpacesFromXpand = async () => {
