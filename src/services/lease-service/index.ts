@@ -1067,7 +1067,7 @@ export const routes = (router: KoaRouter) => {
    *         required: true
    *         schema:
    *           type: number
-   *         description: ID of the listing to fetch.
+   *         description: ID of the listing to delete.
    *     responses:
    *       '200':
    *         description: Successfully deleted listing.
@@ -1091,7 +1091,7 @@ export const routes = (router: KoaRouter) => {
     )
 
     if (!result.ok) {
-      if (result.err === 'conflict') {
+      if (result.err.tag === 'conflict') {
         ctx.status = 409
         ctx.body = { reason: result.err, ...metadata }
         return
