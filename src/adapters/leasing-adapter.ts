@@ -623,6 +623,22 @@ const syncInternalParkingSpacesFromXpand = async () => {
   }
 }
 
+const deleteListing = async (listingId: number) => {
+  const res = await axios.delete(
+    `${tenantsLeasesServiceUrl}/listings/${listingId}`
+  )
+
+  if (res.status === 200) {
+    return { ok: true, data: null } as const
+  }
+
+  if (res.status === 409) {
+    return { ok: false, err: res.data.reason } as const
+  }
+
+  return { ok: false, err: res.data.error } as const
+}
+
 export {
   getLease,
   getLeasesForPnr,
@@ -657,4 +673,5 @@ export {
   validatePropertyRentalRules,
   getTenantByContactCode,
   syncInternalParkingSpacesFromXpand,
+  deleteListing,
 }
