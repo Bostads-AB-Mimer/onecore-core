@@ -17,6 +17,7 @@ import {
   OfferWithRentalObjectCode,
   DetailedOffer,
   Tenant,
+  InternalParkingSpaceSyncSuccessResponse,
 } from 'onecore-types'
 
 import config from '../common/config'
@@ -602,21 +603,6 @@ const validatePropertyRentalRules = async (
   } catch (err) {
     logger.error({ err }, 'leasing-adapter.validatePropertyRentalRules')
     return { ok: false, err: { tag: 'unknown', data: err } }
-  }
-}
-
-// TODO: Use from onecore-types once mim-15 is merged
-type InternalParkingSpaceSyncSuccessResponse = {
-  invalid: Array<{
-    rentalObjectCode: string
-    errors: Array<{ path: string; code: string }>
-  }>
-  insertions: {
-    inserted: Array<{ rentalObjectCode: string; id: number }>
-    failed: Array<{
-      rentalObjectCode: string
-      err: 'unknown' | 'active-listing-exists'
-    }>
   }
 }
 
