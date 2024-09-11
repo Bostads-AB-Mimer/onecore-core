@@ -709,7 +709,7 @@ export const routes = (router: KoaRouter) => {
 
     if (!result.ok) {
       ctx.status = 500
-      ctx.body = { message: 'Unknown error', ...metadata }
+      ctx.body = { error: 'Unknown error', ...metadata }
       return
     }
 
