@@ -10,7 +10,12 @@ import { logger, generateRouteMetadata } from 'onecore-utilities'
 
 import * as leasingAdapter from '../../adapters/leasing-adapter'
 import { ProcessStatus } from '../../common/types'
-import { createOfferForInternalParkingSpace } from '../../processes/parkingspaces/internal'
+import {
+  createOfferForInternalParkingSpace,
+  acceptOffer,
+  denyOffer,
+  expireOffer,
+} from '../../processes/parkingspaces/internal'
 
 const getLeaseWithRelatedEntities = async (rentalId: string) => {
   const lease = await leasingAdapter.getLease(rentalId, 'true')
@@ -408,7 +413,7 @@ export const routes = (router: KoaRouter) => {
    */
   router.get('(.*)/contact/phoneNumber/:pnr', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
-    const responseData = await leasingAdapter.getContactForPhoneNumber(
+    const responseData = await leasingAdapter.getContactByPhoneNumber(
       ctx.params.pnr
     )
 
@@ -570,6 +575,120 @@ export const routes = (router: KoaRouter) => {
 
   /**
    * @swagger
+   * /offers/{offerId}/accept:
+   *   get:
+   *     summary: Accept an offer
+   *     tags:
+   *       - Lease service
+   *     description: Accepts an offer for the contact of the contactCode provided
+   *     parameters:
+   *       - in: path
+   *         name: offerId
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: The ID of the offer to accept
+   *     responses:
+   *       '202':
+   *         description: Offer accepted successful.
+   *       '500':
+   *         description: Internal server error. Failed to accept the offer.
+   *     security:
+   *       - bearerAuth: []
+   */
+  router.get('(.*)/offers/:offerId/accept', async (ctx) => {
+    const metadata = generateRouteMetadata(ctx)
+    const result = await acceptOffer(ctx.params.offerId)
+
+    if (result.processStatus === ProcessStatus.successful) {
+      logger.info(result)
+      ctx.status = 202
+      ctx.body = { message: 'Offer accepted successfully', ...metadata }
+      return
+    }
+
+    ctx.status = 500
+    ctx.body = { error: result.error, ...metadata }
+  })
+
+  /**
+   * @swagger
+   * /offers/{offerId}/deny:
+   *   get:
+   *     summary: Deny an offer
+   *     tags:
+   *       - Lease service
+   *     description: Denies an offer
+   *     parameters:
+   *       - in: path
+   *         name: offerId
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: The ID of the offer to deny
+   *     responses:
+   *       '202':
+   *         description: Offer denied successful.
+   *       '500':
+   *         description: Internal server error. Failed to deny the offer.
+   *     security:
+   *       - bearerAuth: []
+   */
+  router.get('(.*)/offers/:offerId/deny', async (ctx) => {
+    const metadata = generateRouteMetadata(ctx)
+    const result = await denyOffer(ctx.params.offerId)
+
+    if (result.processStatus === ProcessStatus.successful) {
+      logger.info(result)
+      ctx.status = 202
+      ctx.body = { message: 'Offer denied successfully', ...metadata }
+      return
+    }
+
+    ctx.status = 500
+    ctx.body = { error: result.error, ...metadata }
+  })
+
+  /**
+   * @swagger
+   * /offers/{offerId}/expire:
+   *   get:
+   *     summary: Expire an offer
+   *     tags:
+   *       - Lease service
+   *     description: Expires an offer
+   *     parameters:
+   *       - in: path
+   *         name: offerId
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: The ID of the offer to expire
+   *     responses:
+   *       '202':
+   *         description: Offer expired successful.
+   *       '500':
+   *         description: Internal server error. Failed to expire the offer.
+   *     security:
+   *       - bearerAuth: []
+   */
+  router.get('(.*)/offers/:offerId/expire', async (ctx) => {
+    const metadata = generateRouteMetadata(ctx)
+    const result = await expireOffer(ctx.params.offerId)
+
+    if (result.processStatus === ProcessStatus.successful) {
+      logger.info(result)
+      ctx.status = 202
+      ctx.body = { message: 'Offer expired successfully', ...metadata }
+      return
+    }
+
+    ctx.status = 500
+    ctx.body = { error: result.error, ...metadata }
+  })
+
+  /**
+   * @swagger
    * /listings/sync-internal-from-xpand:
    *   post:
    *     summary: Sync internal parking spaces from xpand to onecores database
@@ -720,6 +839,7 @@ export const routes = (router: KoaRouter) => {
   router.get(
     '(.*)/applicants/validate-rental-rules/property/:contactCode/:rentalObjectCode',
     async (ctx) => {
+      const metadata = generateRouteMetadata(ctx)
       const res = await leasingAdapter.validatePropertyRentalRules(
         ctx.params.contactCode,
         ctx.params.rentalObjectCode
@@ -728,29 +848,31 @@ export const routes = (router: KoaRouter) => {
       if (!res.ok) {
         if (res.err.tag === 'not-tenant-in-the-property') {
           ctx.status = 403
-          ctx.body = { data: res.err.data }
+          ctx.body = { reason: res.err.data, ...metadata }
           return
         }
 
         if (res.err.tag === 'not-found') {
           ctx.status = 404
-          ctx.body = { data: res.err.data }
+          ctx.body = { reason: res.err.data, ...metadata }
           return
         }
 
         if (res.err.tag === 'not-a-parking-space') {
           ctx.status = 400
-          ctx.body = { data: res.err.data }
+          ctx.body = { reason: res.err.data, ...metadata }
           return
         }
 
         ctx.status = 500
+        ctx.body = { error: 'An internal server error occured.', ...metadata }
         return
       }
 
       ctx.status = 200
       ctx.body = {
-        data: res.data,
+        content: res.data,
+        ...metadata,
       }
     }
   )
@@ -829,6 +951,7 @@ export const routes = (router: KoaRouter) => {
   router.get(
     '(.*)/applicants/validate-rental-rules/residential-area/:contactCode/:districtCode',
     async (ctx) => {
+      const metadata = generateRouteMetadata(ctx)
       const res = await leasingAdapter.validateResidentialAreaRentalRules(
         ctx.params.contactCode,
         ctx.params.districtCode
@@ -837,23 +960,25 @@ export const routes = (router: KoaRouter) => {
       if (!res.ok) {
         if (res.err.tag === 'no-housing-contract-in-the-area') {
           ctx.status = 403
-          ctx.body = { data: res.err.data }
+          ctx.body = { reason: res.err.data, ...metadata }
           return
         }
 
         if (res.err.tag === 'not-found') {
           ctx.status = 404
-          ctx.body = { data: res.err.data }
+          ctx.body = { reason: res.err.data, ...metadata }
           return
         }
 
         ctx.status = 500
+        ctx.body = { error: 'An internal server error occured.', ...metadata }
         return
       }
 
       ctx.status = 200
       ctx.body = {
-        data: res.data,
+        content: res.data,
+        ...metadata,
       }
     }
   )

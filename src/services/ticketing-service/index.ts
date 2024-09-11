@@ -1,7 +1,7 @@
 import KoaRouter from '@koa/router'
 import {
   getContact,
-  getContactForPhoneNumber,
+  getContactByPhoneNumber,
   getLease,
   getLeasesForPnr,
   getLeasesForPropertyId,
@@ -146,7 +146,7 @@ export const routes = (router: KoaRouter) => {
           break
         }
         case 'phoneNumber': {
-          const contact = await getContactForPhoneNumber(ctx.params.number)
+          const contact = await getContactByPhoneNumber(ctx.params.number)
           if (contact) {
             const leases = await getLeasesForPnr(
               contact.nationalRegistrationNumber,
@@ -578,6 +578,7 @@ export const routes = (router: KoaRouter) => {
         )
 
         if (!laundryRoom) {
+          console.log('No laundry room found for rental property')
           ctx.status = 404
           ctx.body = {
             reason: 'No laundry room found for rental property',
