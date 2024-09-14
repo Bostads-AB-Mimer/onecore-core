@@ -176,31 +176,35 @@ export const createNoteOfInterestForInternalParkingSpace = async (
 
     //step 4.b Add parking space listing to onecore-leases database
     let listing = await getListingByRentalObjectCode(parkingSpaceId)
-    if (listing?.status == HttpStatusCode.Ok) {
+    if (listing?.ok) {
       log.push(
-        `Annons med id ${listing?.data.id} existerar sedan tidigare i onecore-leasing`
+        `Annons med id ${listing.data?.id} existerar sedan tidigare i onecore-leasing`
       )
     }
 
-    if (listing?.status == HttpStatusCode.NotFound) {
+    if (!listing.ok && listing?.err == 'not-found') {
       log.push(`Annons existerar inte i onecore-leasing, skapar annons`)
       const createListingResult = await createNewListing(parkingSpace)
+      //todo: how to check for 201? We only have ok in the new response format?
       if (createListingResult?.status == HttpStatusCode.Created) {
         log.push(`Annons skapad i onecore-leasing`)
-        listing = createListingResult
+        listing = createListingResult //todo: should use data.content
       }
     }
 
     //step 4.c Add applicant to onecore-leasing database
     //todo: fix schema for listingId in leasing, null should not be allowed
     //todo: or add a request type with only required fields
-    if (listing?.data != undefined) {
+    if (listing.ok && listing?.data != undefined) {
+      //todo: data.content?
+      //todo: fix below response format
       const applicantResponse = await getApplicantByContactCodeAndListingId(
         contactCode,
-        listing.data.id
+        listing.data.id.toString()
       )
 
       //create new applicant if applicant does not exist
+      //todo: !applicantResponse.ok && applicantResponse.err = 'not-found'
       if (applicantResponse.status == HttpStatusCode.NotFound) {
         const applicantRequestBody = createApplicantRequestBody(
           applicantContact,
@@ -210,8 +214,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
 
         const applyForListingResult =
           await applyForListing(applicantRequestBody)
-
-        if (applyForListingResult?.status == HttpStatusCode.Created) {
+        if (applyForListingResult?.error == 'HttpStatusCode.Created') {
           log.push(`Sökande skapad i onecore-leasing. Process avslutad.`)
           logger.debug(log)
           return {
@@ -224,7 +227,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
           }
         }
 
-        if (applyForListingResult?.status == HttpStatusCode.Conflict) {
+        if (applyForListingResult?.error == 'HttpStatusCode.Conflict') {
           log.push(
             `Sökande existerar redan i onecore-leasing. Process avslutad`
           )
@@ -241,8 +244,8 @@ export const createNoteOfInterestForInternalParkingSpace = async (
       }
 
       //if applicant has previously applied and withdrawn application, allow for subsequent application
-      else if (applicantResponse.data) {
-        const applicantStatus = applicantResponse.data.status
+      else if (applicantResponse.data.content) {
+        const applicantStatus = applicantResponse.data.content.status
         const activeApplication = applicantStatus == ApplicantStatus.Active
         const applicationWithDrawnByUser =
           applicantStatus == ApplicantStatus.WithdrawnByUser
@@ -269,8 +272,8 @@ export const createNoteOfInterestForInternalParkingSpace = async (
           )
 
           await setApplicantStatusActive(
-            applicantResponse.data.id,
-            applicantResponse.data.contactCode
+            applicantResponse.data.content.id,
+            applicantResponse.data.content.contactCode
           )
 
           logger.debug(log)
@@ -288,7 +291,8 @@ export const createNoteOfInterestForInternalParkingSpace = async (
 
     logger.error(
       listing,
-      'Create not of interest for internal parking space failed due to unknown error'
+      'Create not of interest for internal parking space failed due to unknown error',
+      log
     )
     return makeProcessError('internal-error', 500, {
       message: 'failed due to unknown error',

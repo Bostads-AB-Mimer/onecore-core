@@ -252,6 +252,8 @@ const addApplicantToWaitingList = async (
   )
 }
 
+//todo: fix with response format 
+//todo: check usages
 const createNewListing = async (listingData: Listing) => {
   try {
     const response = await axios.post(
@@ -267,11 +269,16 @@ const createNewListing = async (listingData: Listing) => {
 
 const applyForListing = async (applicantData: Omit<Applicant, 'id'>) => {
   try {
-    const response = await axios.post(
+    const res = await axios.post(
       `${tenantsLeasesServiceUrl}/listings/apply`,
       applicantData
     )
-    return response.data.content
+
+    if (res.status === HttpStatusCode.Conflict) {
+      return { ok: false, error: 'conflict' }
+    }
+
+    return { ok: true, data: res.data.content }
   } catch (error) {
     logger.error(error, 'Error applying for listing:', error)
     return undefined
@@ -292,16 +299,22 @@ const getListingByListingId = async (
   }
 }
 
-const getListingByRentalObjectCode = async (rentalObjectCode: string) => {
+const getListingByRentalObjectCode = async (
+  rentalObjectCode: string
+): Promise<AdapterResult<Listing | undefined, 'not-found' | 'unknown'>> => {
   try {
-    const response = await axios.get(
+    const res = await axios.get(
       `${tenantsLeasesServiceUrl}/listings/by-code/${rentalObjectCode}`
     )
 
-    return response.data.content
+    if (res.status == HttpStatusCode.NotFound) {
+      return { ok: false, err: 'not-found' }
+    }
+
+    return { ok: true, data: res.data.content }
   } catch (error) {
     logger.error(error, 'Error fetching listing by rental object code:', error)
-    return undefined
+    return { ok: false, err: 'unknown' }
   }
 }
 
@@ -360,6 +373,8 @@ const getApplicantsAndListingByContactCode = async (
   }
 }
 
+//todo: fix with response format 
+//todo: check usages
 const getApplicantByContactCodeAndListingId = async (
   contactCode: string,
   listingId: string
