@@ -211,6 +211,8 @@ export const createNoteOfInterestForInternalParkingSpace = async (
           listing.data
         )
 
+        log.push(`Sökande existerar inte, skapar sökande.`)
+
         const applyForListingResult =
           await applyForListing(applicantRequestBody)
         if (applyForListingResult.ok) {
@@ -287,11 +289,10 @@ export const createNoteOfInterestForInternalParkingSpace = async (
         }
       }
     }
-
+    console.log(log)
     logger.error(
       listing,
-      'Create not of interest for internal parking space failed due to unknown error',
-      log
+      'Create not of interest for internal parking space failed due to unknown error'
     )
     return makeProcessError('internal-error', 500, {
       message: 'failed due to unknown error',

@@ -276,8 +276,9 @@ const createNewListing = async (
   }
 }
 
-const applyForListing = async (applicantData: Omit<Applicant, 'id'>):  
-Promise<AdapterResult<Applicant, 'conflict' | 'unknown'>> => {
+const applyForListing = async (
+  applicantData: Omit<Applicant, 'id'>
+): Promise<AdapterResult<Applicant, 'conflict' | 'unknown'>> => {
   try {
     const res = await axios.post(
       `${tenantsLeasesServiceUrl}/listings/apply`,
@@ -383,8 +384,6 @@ const getApplicantsAndListingByContactCode = async (
   }
 }
 
-//todo: fix with response format
-//todo: check usages
 const getApplicantByContactCodeAndListingId = async (
   contactCode: string,
   listingId: string
