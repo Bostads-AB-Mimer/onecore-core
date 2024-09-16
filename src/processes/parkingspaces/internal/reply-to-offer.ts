@@ -1,7 +1,5 @@
 import { ProcessResult, ProcessStatus } from '../../../common/types'
 import * as leasingAdapter from '../../../adapters/leasing-adapter'
-import * as utils from '../../../utils'
-import * as communicationAdapter from '../../../adapters/communication-adapter'
 import { makeProcessError } from '../utils'
 import { logger } from 'onecore-utilities'
 import * as propertyManagementAdapter from '../../../adapters/property-management-adapter'
