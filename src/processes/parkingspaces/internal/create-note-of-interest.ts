@@ -175,6 +175,8 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     )
 
     //step 4.b Add parking space listing to onecore-leases database
+    //todo: refactor get and create listing to new func ->
+    //todo: should return the listing regardless of if it exists previously or is being created
     let listing = await getListingByRentalObjectCode(parkingSpaceId)
     if (listing?.ok) {
       log.push(
@@ -186,9 +188,9 @@ export const createNoteOfInterestForInternalParkingSpace = async (
       log.push(`Annons existerar inte i onecore-leasing, skapar annons`)
       const createListingResult = await createNewListing(parkingSpace)
       //todo: how to check for 201? We only have ok in the new response format?
-      if (createListingResult?.status == HttpStatusCode.Created) {
+      if (createListingResult.ok && createListingResult.data) {
         log.push(`Annons skapad i onecore-leasing`)
-        listing = createListingResult //todo: should use data.content
+        listing = createListingResult
       }
     }
 
@@ -196,15 +198,12 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     //todo: fix schema for listingId in leasing, null should not be allowed
     //todo: or add a request type with only required fields
     if (listing.ok && listing?.data != undefined) {
-      //todo: data.content?
-      //todo: fix below response format
       const applicantResponse = await getApplicantByContactCodeAndListingId(
         contactCode,
         listing.data.id.toString()
       )
 
       //create new applicant if applicant does not exist
-      //todo: !applicantResponse.ok && applicantResponse.err = 'not-found'
       if (applicantResponse.status == HttpStatusCode.NotFound) {
         const applicantRequestBody = createApplicantRequestBody(
           applicantContact,
@@ -214,7 +213,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
 
         const applyForListingResult =
           await applyForListing(applicantRequestBody)
-        if (applyForListingResult?.error == 'HttpStatusCode.Created') {
+        if (applyForListingResult.ok) {
           log.push(`Sökande skapad i onecore-leasing. Process avslutad.`)
           logger.debug(log)
           return {
@@ -227,7 +226,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
           }
         }
 
-        if (applyForListingResult?.error == 'HttpStatusCode.Conflict') {
+        if (applyForListingResult.err == 'conflict') {
           log.push(
             `Sökande existerar redan i onecore-leasing. Process avslutad`
           )
