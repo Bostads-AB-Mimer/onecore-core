@@ -420,10 +420,9 @@ describe('createNoteOfInterestForInternalParkingSpace', () => {
     expect(applyForListingSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         applicationType: 'Additional',
-        contactCode: 'P12345',
+        contactCode: mockedApplicant.contactCode,
         id: 0,
-        listingId: undefined,
-        name: 'Foo Bar',
+        listingId: sharedListing.id,
         status: 1,
       })
     )
