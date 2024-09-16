@@ -177,30 +177,30 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     //step 4.b Add parking space listing to onecore-leases database
     //todo: refactor get and create listing to new func ->
     //todo: should return the listing regardless of if it exists previously or is being created
-    let listing = await getListingByRentalObjectCode(parkingSpaceId)
-    if (listing?.ok) {
+    let listingAdapterResult =
+      await getListingByRentalObjectCode(parkingSpaceId)
+    if (listingAdapterResult?.ok) {
       log.push(
-        `Annons med id ${listing.data?.id} existerar sedan tidigare i onecore-leasing`
+        `Annons med id ${listingAdapterResult.data?.id} existerar sedan tidigare i onecore-leasing`
       )
     }
 
-    if (!listing.ok && listing?.err == 'not-found') {
+    if (!listingAdapterResult.ok && listingAdapterResult?.err == 'not-found') {
       log.push(`Annons existerar inte i onecore-leasing, skapar annons`)
       const createListingResult = await createNewListing(parkingSpace)
-      //todo: how to check for 201? We only have ok in the new response format?
-      if (createListingResult.ok && createListingResult.data) {
+      if (createListingResult.ok) {
         log.push(`Annons skapad i onecore-leasing`)
-        listing = createListingResult
+        listingAdapterResult = createListingResult
       }
     }
 
     //step 4.c Add applicant to onecore-leasing database
     //todo: fix schema for listingId in leasing, null should not be allowed
     //todo: or add a request type with only required fields
-    if (listing.ok && listing?.data != undefined) {
+    if (listingAdapterResult.ok && listingAdapterResult?.data != undefined) {
       const applicantResponse = await getApplicantByContactCodeAndListingId(
         contactCode,
-        listing.data.id.toString()
+        listingAdapterResult.data.id.toString()
       )
 
       //create new applicant if applicant does not exist
@@ -208,7 +208,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
         const applicantRequestBody = createApplicantRequestBody(
           applicantContact,
           applicationType,
-          listing.data
+          listingAdapterResult.data
         )
 
         log.push(`Sökande existerar inte, skapar sökande.`)
@@ -289,9 +289,9 @@ export const createNoteOfInterestForInternalParkingSpace = async (
         }
       }
     }
-    console.log(log)
+
     logger.error(
-      listing,
+      listingAdapterResult,
       'Create not of interest for internal parking space failed due to unknown error'
     )
     return makeProcessError('internal-error', 500, {
