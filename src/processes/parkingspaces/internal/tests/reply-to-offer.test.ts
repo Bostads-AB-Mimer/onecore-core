@@ -71,7 +71,7 @@ describe('replyToOffer', () => {
         error: 'no-listing',
         httpStatus: 404,
         response: {
-          message: `The parking space ${offer.listingId} does not exist or is no longer available.`,
+          message: `The parking space ${offer.rentalObjectCode} does not exist or is no longer available.`,
         },
       })
     })
@@ -129,7 +129,7 @@ describe('replyToOffer', () => {
         error: 'no-listing',
         httpStatus: 404,
         response: {
-          message: `The parking space ${offer.listingId} does not exist or is no longer available.`,
+          message: `The parking space ${offer.rentalObjectCode} does not exist or is no longer available.`,
         },
       })
     })
@@ -166,7 +166,7 @@ describe('replyToOffer', () => {
         error: 'no-listing',
         httpStatus: 404,
         response: {
-          message: `The parking space ${offer.listingId} does not exist or is no longer available.`,
+          message: `The parking space ${offer.rentalObjectCode} does not exist or is no longer available.`,
         },
       })
     })

@@ -32,7 +32,7 @@ export const acceptOffer = async (
     )
     if (!listing || !listing.districtCode) {
       return makeProcessError('no-listing', 404, {
-        message: `The parking space ${offer.listingId.toString()} does not exist or is no longer available.`,
+        message: `The parking space ${offer.rentalObjectCode} does not exist or is no longer available.`,
       })
     }
 
@@ -79,11 +79,11 @@ export const denyOffer = async (
 
     //Get listing
     const listing = await propertyManagementAdapter.getPublishedParkingSpace(
-      offer.listingId.toString()
+      offer.rentalObjectCode
     )
     if (!listing || !listing.districtCode) {
       return makeProcessError('no-listing', 404, {
-        message: `The parking space ${offer.listingId.toString()} does not exist or is no longer available.`,
+        message: `The parking space ${offer.rentalObjectCode} does not exist or is no longer available.`,
       })
     }
 
@@ -117,7 +117,7 @@ export const expireOffer = async (
     )
     if (!listing || !listing.districtCode) {
       return makeProcessError('no-listing', 404, {
-        message: `The parking space ${offer.listingId.toString()} does not exist or is no longer available.`,
+        message: `The parking space ${offer.rentalObjectCode} does not exist or is no longer available.`,
       })
     }
 
