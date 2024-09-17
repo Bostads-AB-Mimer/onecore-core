@@ -96,6 +96,27 @@ describe('replyToOffer', () => {
         },
       })
     })
+
+    it('returns a process error if close offer fails', async () => {
+      const closeOfferSpy = jest.spyOn(leasingAdapter, 'closeOfferByAccept')
+      getOfferByIdSpy.mockResolvedValueOnce({
+        ok: true,
+        data: factory.detailedOffer.build(),
+      })
+      getPublishedParkingSpaceSpy.mockResolvedValueOnce(factory.listing.build())
+      closeOfferSpy.mockResolvedValueOnce({ ok: false, err: 'unknown' })
+
+      const result = await acceptOffer(123)
+
+      expect(result).toEqual({
+        processStatus: ProcessStatus.failed,
+        error: 'close-offer',
+        httpStatus: 500,
+        response: {
+          message: 'Something went wrong when closing the offer.',
+        },
+      })
+    })
   })
 
   describe('denyOffer', () => {
