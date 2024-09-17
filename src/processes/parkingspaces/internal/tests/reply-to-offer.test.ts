@@ -17,14 +17,12 @@ jest.mock('onecore-utilities', () => {
   }
 })
 
-import { ListingStatus } from 'onecore-types'
-
 import * as leasingAdapter from '../../../../adapters/leasing-adapter'
 import * as propertyManagementAdapter from '../../../../adapters/property-management-adapter'
-import * as communicationAdapter from '../../../../adapters/communication-adapter'
-import * as factory from '../../../../../test/factories'
 import { ProcessStatus } from '../../../../common/types'
 import { acceptOffer, denyOffer, expireOffer } from '../reply-to-offer'
+
+import * as factory from '../../../../../test/factories'
 
 describe('replyToOffer', () => {
   // Mock out all top level functions, such as get, put, delete and post:
@@ -63,6 +61,27 @@ describe('replyToOffer', () => {
         httpStatus: 404,
         response: {
           message: 'The offer 123 does not exist or could not be retrieved.',
+        },
+      })
+    })
+
+    it('returns a process error if close offer fails', async () => {
+      const closeOfferSpy = jest.spyOn(leasingAdapter, 'closeOfferByAccept')
+      getOfferByIdSpy.mockResolvedValueOnce({
+        ok: true,
+        data: factory.detailedOffer.build(),
+      })
+      getPublishedParkingSpaceSpy.mockResolvedValueOnce(factory.listing.build())
+      closeOfferSpy.mockResolvedValueOnce({ ok: false, err: 'unknown' })
+
+      const result = await acceptOffer(123)
+
+      expect(result).toEqual({
+        processStatus: ProcessStatus.failed,
+        error: 'close-offer',
+        httpStatus: 500,
+        response: {
+          message: 'Something went wrong when closing the offer.',
         },
       })
     })
