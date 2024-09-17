@@ -34,7 +34,13 @@ describe('replyToOffer', () => {
     'getPublishedParkingSpace'
   )
 
+  beforeEach(jest.resetAllMocks)
   describe('acceptOffer', () => {
+    const getOfferByIdSpy = jest.spyOn(leasingAdapter, 'getOfferByOfferId')
+    const getPublishedParkingSpaceSpy = jest.spyOn(
+      propertyManagementAdapter,
+      'getPublishedParkingSpace'
+    )
     it('returns a process error if no offer found', async () => {
       getOfferByIdSpy.mockResolvedValueOnce({ ok: false, err: 'not-found' })
 
@@ -51,16 +57,21 @@ describe('replyToOffer', () => {
     })
 
     it('returns a process error if no listing found', async () => {
+      const offer = factory.detailedOffer.build()
+      getOfferByIdSpy.mockResolvedValueOnce({
+        ok: true,
+        data: offer,
+      })
       getPublishedParkingSpaceSpy.mockResolvedValueOnce(undefined)
 
       const result = await acceptOffer(123)
 
       expect(result).toEqual({
         processStatus: ProcessStatus.failed,
-        error: 'no-offer',
+        error: 'no-listing',
         httpStatus: 404,
         response: {
-          message: 'The offer 123 does not exist or could not be retrieved.',
+          message: `The parking space ${offer.listingId} does not exist or is no longer available.`,
         },
       })
     })
@@ -104,16 +115,21 @@ describe('replyToOffer', () => {
     })
 
     it('returns a process error if no listing found', async () => {
+      const offer = factory.detailedOffer.build()
+      getOfferByIdSpy.mockResolvedValueOnce({
+        ok: true,
+        data: offer,
+      })
       getPublishedParkingSpaceSpy.mockResolvedValueOnce(undefined)
 
       const result = await denyOffer(123)
 
       expect(result).toEqual({
         processStatus: ProcessStatus.failed,
-        error: 'no-offer',
+        error: 'no-listing',
         httpStatus: 404,
         response: {
-          message: 'The offer 123 does not exist or could not be retrieved.',
+          message: `The parking space ${offer.listingId} does not exist or is no longer available.`,
         },
       })
     })
@@ -136,16 +152,21 @@ describe('replyToOffer', () => {
     })
 
     it('returns a process error if no listing found', async () => {
+      const offer = factory.detailedOffer.build()
+      getOfferByIdSpy.mockResolvedValueOnce({
+        ok: true,
+        data: offer,
+      })
       getPublishedParkingSpaceSpy.mockResolvedValueOnce(undefined)
 
       const result = await expireOffer(123)
 
       expect(result).toEqual({
         processStatus: ProcessStatus.failed,
-        error: 'no-offer',
+        error: 'no-listing',
         httpStatus: 404,
         response: {
-          message: 'The offer 123 does not exist or could not be retrieved.',
+          message: `The parking space ${offer.listingId} does not exist or is no longer available.`,
         },
       })
     })
