@@ -29,7 +29,7 @@ export const acceptOffer = async (
 
     //Get listing
     const listing = await propertyManagementAdapter.getPublishedParkingSpace(
-      offer.listingId.toString()
+      offer.rentalObjectCode
     )
     if (!listing || !listing.districtCode) {
       return makeProcessError('no-listing', 404, {
