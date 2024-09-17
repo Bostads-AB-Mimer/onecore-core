@@ -8,6 +8,7 @@ type ReplyToOfferError =
   | 'no-offer'
   | 'no-contact'
   | 'no-listing'
+  | 'close-offer'
   | 'send-email'
   | 'unknown'
 
@@ -44,6 +45,13 @@ export const acceptOffer = async (
     //     message: `Applicant ${offer.offeredApplicant.contactCode} could not be retrieved.`,
     //   })
     // }
+
+    const closeOffer = await leasingAdapter.closeOfferByAccept(offer.id)
+    if (!closeOffer.ok) {
+      return makeProcessError('close-offer', 500, {
+        message: `Something went wrong when closing the offer.`,
+      })
+    }
 
     return {
       processStatus: ProcessStatus.successful,
