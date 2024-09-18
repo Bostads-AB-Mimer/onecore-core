@@ -17,12 +17,8 @@ jest.mock('onecore-utilities', () => {
   }
 })
 
-import { ListingStatus } from 'onecore-types'
-
 import * as leasingAdapter from '../../../../adapters/leasing-adapter'
 import * as propertyManagementAdapter from '../../../../adapters/property-management-adapter'
-import * as communicationAdapter from '../../../../adapters/communication-adapter'
-import * as factory from '../../../../../test/factories'
 import { ProcessStatus } from '../../../../common/types'
 import { acceptOffer, denyOffer, expireOffer } from '../reply-to-offer'
 

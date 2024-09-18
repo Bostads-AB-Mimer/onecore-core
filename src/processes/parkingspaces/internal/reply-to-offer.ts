@@ -1,10 +1,8 @@
 import { ProcessResult, ProcessStatus } from '../../../common/types'
 import * as leasingAdapter from '../../../adapters/leasing-adapter'
-import * as utils from '../../../utils'
 import * as communicationAdapter from '../../../adapters/communication-adapter'
 import { makeProcessError } from '../utils'
 import { logger } from 'onecore-utilities'
-import * as propertyManagementAdapter from '../../../adapters/property-management-adapter'
 
 type ReplyToOfferError =
   | 'no-offer'
@@ -27,13 +25,23 @@ export const acceptOffer = async (
     }
     const offer = res.data
 
+    const log: string[] = [
+      `Tackat ja till intern bilplats`,
+      `Tidpunkt för ja tack: ${new Date()
+        .toISOString()
+        .substring(0, 16)
+        .replace('T', ' ')}`,
+      `Sökande ${offer.offeredApplicant.contactCode} har tackat ja till bilplats ${offer.rentalObjectCode} och erbjudande ${offerId}`,
+    ]
+
     //Get listing
-    const listing = await propertyManagementAdapter.getPublishedParkingSpace(
-      offer.rentalObjectCode
+    const listing = await leasingAdapter.getListingByListingId(
+      offer.listingId.toString()
     )
+
     if (!listing || !listing.districtCode) {
       return makeProcessError('no-listing', 404, {
-        message: `The parking space ${offer.listingId.toString()} does not exist or is no longer available.`,
+        message: `The listing ${offer.listingId.toString()} cannot be found.`,
       })
     }
 
@@ -46,6 +54,51 @@ export const acceptOffer = async (
     //     message: `Applicant ${offer.offeredApplicant.contactCode} could not be retrieved.`,
     //   })
     // }
+
+    //Create lease
+    const lease = await leasingAdapter.createLease(
+      listing.rentalObjectCode,
+      offer.offeredApplicant.contactCode,
+      listing.vacantFrom.toISOString(),
+      '001'
+    )
+    log.push(`Kontrakt skapat: ${lease.LeaseId}`)
+    log.push(
+      'Kontrollera om moms ska läggas på kontraktet. Detta måste göras manuellt innan det skickas för påskrift.'
+    )
+
+    //Reset internal waiting list
+    const internalWaitingListResult = await leasingAdapter.resetWaitingList(
+      offer.offeredApplicant.nationalRegistrationNumber,
+      offer.offeredApplicant.contactCode,
+      'Bilplats (intern)'
+    )
+    if (!internalWaitingListResult.ok) {
+      log.push(
+        'Kunde inte återställa köpoäng för interna bilplatser: ' +
+          internalWaitingListResult.err
+      )
+    }
+
+    //Reset external waiting list
+    const externalWaitingListResult = await leasingAdapter.resetWaitingList(
+      offer.offeredApplicant.nationalRegistrationNumber,
+      offer.offeredApplicant.contactCode,
+      'Bilplats (extern)'
+    )
+    if (!externalWaitingListResult.ok) {
+      log.push(
+        'Kunde inte återställa köpoäng för externa bilplatser: ' +
+          externalWaitingListResult.err
+      )
+    }
+
+    //send notification to the leasing team
+    await communicationAdapter.sendNotificationToRole(
+      'leasing',
+      'Bilplats tilldelad och kontrakt skapat för intern bilplats',
+      log.join('\n')
+    )
 
     return {
       processStatus: ProcessStatus.successful,
@@ -72,12 +125,12 @@ export const denyOffer = async (
     const offer = res.data
 
     //Get listing
-    const listing = await propertyManagementAdapter.getPublishedParkingSpace(
+    const listing = await leasingAdapter.getListingByListingId(
       offer.listingId.toString()
     )
     if (!listing || !listing.districtCode) {
       return makeProcessError('no-listing', 404, {
-        message: `The parking space ${offer.listingId.toString()} does not exist or is no longer available.`,
+        message: `The listing ${offer.listingId.toString()} cannot be found.`,
       })
     }
 
@@ -106,12 +159,12 @@ export const expireOffer = async (
     const offer = res.data
 
     //Get listing
-    const listing = await propertyManagementAdapter.getPublishedParkingSpace(
+    const listing = await leasingAdapter.getListingByListingId(
       offer.listingId.toString()
     )
     if (!listing || !listing.districtCode) {
       return makeProcessError('no-listing', 404, {
-        message: `The parking space ${offer.listingId.toString()} does not exist or is no longer available.`,
+        message: `The listing ${offer.listingId.toString()} cannot be found.`,
       })
     }
 
