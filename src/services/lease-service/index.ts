@@ -596,7 +596,7 @@ export const routes = (router: KoaRouter) => {
    *     security:
    *       - bearerAuth: []
    */
-  router.get('(.*)/offers/:offerId/accept', async (ctx) => {
+  router.post('(.*)/offers/:offerId/accept', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
     const result = await acceptOffer(parseInt(ctx.params.offerId))
 
@@ -634,7 +634,7 @@ export const routes = (router: KoaRouter) => {
    *     security:
    *       - bearerAuth: []
    */
-  router.get('(.*)/offers/:offerId/deny', async (ctx) => {
+  router.post('(.*)/offers/:offerId/deny', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
     const result = await denyOffer(parseInt(ctx.params.offerId))
 

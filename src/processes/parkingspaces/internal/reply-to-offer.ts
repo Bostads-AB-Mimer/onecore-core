@@ -25,6 +25,7 @@ export const acceptOffer = async (
         message: `The offer ${offerId} does not exist or could not be retrieved.`,
       })
     }
+
     const offer = res.data
 
     //Get listing
@@ -73,7 +74,7 @@ export const denyOffer = async (
 
     //Get listing
     const listing = await propertyManagementAdapter.getPublishedParkingSpace(
-      offer.listingId.toString()
+      offer.rentalObjectCode
     )
     if (!listing || !listing.districtCode) {
       return makeProcessError('no-listing', 404, {
