@@ -36,20 +36,21 @@ export const acceptOffer = async (
       })
     }
 
-    //Get contact - behövs contact senare i flödet?
-    // const contact = await leasingAdapter.getContact(
-    //   offer.offeredApplicant.nationalRegistrationNumber
-    // )
-    // if (!contact) {
-    //   return makeProcessError('no-contact', 404, {
-    //     message: `Applicant ${offer.offeredApplicant.contactCode} could not be retrieved.`,
-    //   })
-    // }
-
     const closeOffer = await leasingAdapter.closeOfferByAccept(offer.id)
+
     if (!closeOffer.ok) {
       return makeProcessError('close-offer', 500, {
         message: `Something went wrong when closing the offer.`,
+      })
+    }
+
+    const contact = await leasingAdapter.getContact(
+      offer.offeredApplicant.nationalRegistrationNumber
+    )
+
+    if (!contact) {
+      return makeProcessError('no-contact', 404, {
+        message: `Applicant ${offer.offeredApplicant.contactCode} could not be retrieved.`,
       })
     }
 
