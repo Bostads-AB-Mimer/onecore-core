@@ -3,7 +3,7 @@ import * as leasingAdapter from '../../../adapters/leasing-adapter'
 import { makeProcessError } from '../utils'
 import { logger } from 'onecore-utilities'
 import * as propertyManagementAdapter from '../../../adapters/property-management-adapter'
-import { OfferWithRentalObjectCode } from 'onecore-types'
+import { OfferStatus, OfferWithRentalObjectCode } from 'onecore-types'
 import { AdapterResult } from '../../../adapters/types'
 
 type ReplyToOfferError =
@@ -57,7 +57,7 @@ export const acceptOffer = async (
       })
     }
 
-    const otherOffers = await getContactOtherOffers({
+    const otherOffers = await getContactOtherActiveOffers({
       contactCode: contact.data.contactCode,
       excludeOfferId: offer.id,
     })
@@ -68,7 +68,17 @@ export const acceptOffer = async (
       })
     }
 
-    const restartOtherOffers = otherOffers.data.map((o) => denyOffer(o.id))
+    const denyOtherOffers = await Promise.all(
+      otherOffers.data.map((o) => denyOffer(o.id))
+    )
+
+    const failedDenyOtherOffers = denyOtherOffers.filter(
+      (o) => o.processStatus === ProcessStatus.failed
+    )
+
+    if (failedDenyOtherOffers.length > 0) {
+      // TODO: Add failed deny other offers to log
+    }
 
     return {
       processStatus: ProcessStatus.successful,
@@ -148,7 +158,7 @@ export const expireOffer = async (
   }
 }
 
-const getContactOtherOffers = async (params: {
+const getContactOtherActiveOffers = async (params: {
   contactCode: string
   excludeOfferId: number
 }): Promise<AdapterResult<Array<OfferWithRentalObjectCode>, 'unknown'>> => {
@@ -160,8 +170,11 @@ const getContactOtherOffers = async (params: {
     return { ok: false, err: 'unknown' }
   }
 
+  console.log(res.data)
   return {
     ok: true,
-    data: res.data.filter((o) => o.id !== params.excludeOfferId),
+    data: res.data
+      .filter((o) => o.status === OfferStatus.Active)
+      .filter((o) => o.id !== params.excludeOfferId),
   }
 }
