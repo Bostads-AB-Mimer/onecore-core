@@ -178,7 +178,7 @@ export const denyOffer = async (
     }
 
     const _createOffer = createOfferForInternalParkingSpace(
-      offer.rentalObjectCode
+      offer.listingId.toString()
     )
 
     return {
