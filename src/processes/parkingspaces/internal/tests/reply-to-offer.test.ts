@@ -1,22 +1,3 @@
-import axios from 'axios'
-jest.mock('onecore-utilities', () => {
-  return {
-    logger: {
-      info: () => {
-        return
-      },
-      error: () => {
-        return
-      },
-      debug: () => {
-        return
-      },
-    },
-    loggedAxios: axios,
-    axiosTypes: axios,
-  }
-})
-
 import * as leasingAdapter from '../../../../adapters/leasing-adapter'
 // import * as propertyManagementAdapter from '../../../../adapters/property-management-adapter'
 import * as communicationAdapter from '../../../../adapters/communication-adapter'
@@ -24,7 +5,8 @@ import * as communicationAdapter from '../../../../adapters/communication-adapte
 import { OfferStatus } from 'onecore-types'
 
 import { ProcessResult, ProcessStatus } from '../../../../common/types'
-import * as processes from '../reply-to-offer'
+import * as replyProcesses from '../reply-to-offer'
+import * as createProcess from '../create-offer'
 import * as factory from '../../../../../test/factories'
 
 describe('replyToOffer', () => {
@@ -56,7 +38,7 @@ describe('replyToOffer', () => {
     it('returns a process error if no offer found', async () => {
       getOfferByIdSpy.mockResolvedValueOnce({ ok: false, err: 'not-found' })
 
-      const result = await processes.acceptOffer(123)
+      const result = await replyProcesses.acceptOffer(123)
 
       expect(result).toEqual({
         processStatus: ProcessStatus.failed,
@@ -76,7 +58,7 @@ describe('replyToOffer', () => {
       })
       getListingByListingIdSpy.mockResolvedValueOnce(undefined)
 
-      const result = await processes.acceptOffer(123)
+      const result = await replyProcesses.acceptOffer(123)
 
       expect(result).toEqual({
         processStatus: ProcessStatus.failed,
@@ -103,7 +85,7 @@ describe('replyToOffer', () => {
       })
       resetWaitingListSpy.mockResolvedValue({ ok: true, data: undefined })
 
-      const result = await processes.acceptOffer(123)
+      const result = await replyProcesses.acceptOffer(123)
 
       expect(result).toEqual({
         processStatus: ProcessStatus.failed,
@@ -130,7 +112,7 @@ describe('replyToOffer', () => {
         .mockResolvedValueOnce({ ok: false, err: 'unknown' })
       resetWaitingListSpy.mockResolvedValue({ ok: true, data: undefined })
 
-      const result = await processes.acceptOffer(123)
+      const result = await replyProcesses.acceptOffer(123)
 
       expect(result).toEqual({
         processStatus: ProcessStatus.failed,
@@ -261,12 +243,12 @@ describe('replyToOffer', () => {
       resetWaitingListSpy.mockResolvedValue({ ok: true, data: undefined })
 
       const denyOfferSpy = jest
-        .spyOn(processes, 'denyOffer')
+        .spyOn(replyProcesses, 'denyOffer')
         .mockResolvedValueOnce({
           processStatus: ProcessStatus.successful,
         } as ProcessResult)
 
-      const result = await processes.acceptOffer(123)
+      const result = await replyProcesses.acceptOffer(123)
 
       console.log('result', result)
       expect(result).toMatchObject({
@@ -282,7 +264,7 @@ describe('replyToOffer', () => {
     it('returns a process error if no offer found', async () => {
       getOfferByIdSpy.mockResolvedValueOnce({ ok: false, err: 'not-found' })
 
-      const result = await processes.denyOffer(123)
+      const result = await replyProcesses.denyOffer(123)
 
       expect(result).toEqual({
         processStatus: ProcessStatus.failed,
@@ -302,7 +284,7 @@ describe('replyToOffer', () => {
       })
       getListingByListingIdSpy.mockResolvedValueOnce(undefined)
 
-      const result = await processes.denyOffer(123)
+      const result = await replyProcesses.denyOffer(123)
 
       expect(result).toEqual({
         processStatus: ProcessStatus.failed,
@@ -313,13 +295,58 @@ describe('replyToOffer', () => {
         },
       })
     })
+
+    it('returns a process error if close offer fails', async () => {
+      const closeOfferSpy = jest.spyOn(leasingAdapter, 'closeOfferByDeny')
+      getOfferByIdSpy.mockResolvedValueOnce({
+        ok: true,
+        data: factory.detailedOffer.build(),
+      })
+      getPublishedParkingSpaceSpy.mockResolvedValueOnce(factory.listing.build())
+      closeOfferSpy.mockResolvedValueOnce({ ok: false, err: 'unknown' })
+
+      const result = await replyProcesses.denyOffer(123)
+
+      expect(result).toEqual({
+        processStatus: ProcessStatus.failed,
+        error: 'close-offer',
+        httpStatus: 500,
+        response: {
+          message: 'Something went wrong when closing the offer.',
+        },
+      })
+    })
+
+    it('calls create offer to restart the process', async () => {
+      const closeOfferSpy = jest.spyOn(leasingAdapter, 'closeOfferByDeny')
+      getOfferByIdSpy.mockResolvedValueOnce({
+        ok: true,
+        data: factory.detailedOffer.build(),
+      })
+      getPublishedParkingSpaceSpy.mockResolvedValueOnce(factory.listing.build())
+      closeOfferSpy.mockResolvedValueOnce({ ok: true, data: null })
+
+      const createOfferProcess = jest
+        .spyOn(createProcess, 'createOfferForInternalParkingSpace')
+        .mockResolvedValueOnce({
+          processStatus: ProcessStatus.successful,
+        } as ProcessResult)
+
+      const result = await replyProcesses.denyOffer(123)
+
+      expect(result).toMatchObject({
+        processStatus: ProcessStatus.successful,
+      })
+      expect(createOfferProcess).toHaveBeenCalledTimes(1)
+      createOfferProcess.mockRestore()
+    })
   })
 
   describe('expireOffer', () => {
     it('returns a process error if no offer found', async () => {
       getOfferByIdSpy.mockResolvedValueOnce({ ok: false, err: 'not-found' })
 
-      const result = await processes.expireOffer(123)
+      const result = await replyProcesses.expireOffer(123)
 
       expect(result).toEqual({
         processStatus: ProcessStatus.failed,
@@ -339,7 +366,7 @@ describe('replyToOffer', () => {
       })
       getListingByListingIdSpy.mockResolvedValueOnce(undefined)
 
-      const result = await processes.expireOffer(123)
+      const result = await replyProcesses.expireOffer(123)
 
       expect(result).toEqual({
         processStatus: ProcessStatus.failed,
