@@ -177,9 +177,7 @@ export const denyOffer = async (
       })
     }
 
-    const _createOffer = createOfferForInternalParkingSpace(
-      offer.listingId.toString()
-    )
+    const _createOffer = createOfferForInternalParkingSpace(offer.listingId)
 
     return {
       processStatus: ProcessStatus.successful,

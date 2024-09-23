@@ -529,7 +529,7 @@ export const routes = (router: KoaRouter) => {
   router.get('(.*)/listing/:id', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
     const responseData = await leasingAdapter.getListingByListingId(
-      ctx.params.id
+      Number.parseInt(ctx.params.id)
     )
 
     ctx.body = { content: responseData, ...metadata }
@@ -597,7 +597,7 @@ export const routes = (router: KoaRouter) => {
   router.post('(.*)/listings/:listingId/offers', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
     const result = await createOfferForInternalParkingSpace(
-      ctx.params.listingId
+      Number.parseInt(ctx.params.listingId)
     )
 
     if (result.processStatus === ProcessStatus.successful) {

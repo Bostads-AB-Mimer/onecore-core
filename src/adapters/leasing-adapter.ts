@@ -342,7 +342,7 @@ const applyForListing = async (
 }
 
 const getListingByListingId = async (
-  listingId: string
+  listingId: number
 ): Promise<Listing | undefined> => {
   try {
     const result = await axios.get(
@@ -411,9 +411,7 @@ const getApplicantsAndListingByContactCode = async (
       contactCode
     )) as Applicant[]
     for (const applicant of applicantsResponse) {
-      const listingResponse = await getListingByListingId(
-        applicant.listingId.toString()
-      )
+      const listingResponse = await getListingByListingId(applicant.listingId)
       if (listingResponse) {
         applicantsAndListings.push({ applicant, listing: listingResponse })
       }
