@@ -170,7 +170,6 @@ const getContactOtherActiveOffers = async (params: {
     return { ok: false, err: 'unknown' }
   }
 
-  console.log(res.data)
   return {
     ok: true,
     data: res.data

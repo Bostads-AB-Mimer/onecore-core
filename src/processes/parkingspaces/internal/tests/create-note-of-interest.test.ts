@@ -1,22 +1,4 @@
-import axios, { AxiosResponse } from 'axios'
-jest.mock('onecore-utilities', () => {
-  return {
-    logger: {
-      info: () => {
-        return
-      },
-      error: () => {
-        return
-      },
-      debug: () => {
-        return
-      },
-    },
-    loggedAxios: axios,
-    axiosTypes: axios,
-  }
-})
-
+import axios, { AxiosResponse, HttpStatusCode } from 'axios'
 import * as propertyManagementAdapter from '../../../../adapters/property-management-adapter'
 import * as leasingAdapter from '../../../../adapters/leasing-adapter'
 import { ProcessStatus } from '../../../../common/types'
@@ -27,7 +9,6 @@ import {
   mockedLeases,
   mockedWaitingList,
 } from './create-note-of-interest.mocks'
-import { HttpStatusCode } from 'axios'
 import { ApplicantStatus, ListingStatus } from 'onecore-types'
 import * as factory from '../../../../../test/factories'
 import * as processUtils from '../../utils'

@@ -1,34 +1,12 @@
-import axios from 'axios'
-jest.mock('onecore-utilities', () => {
-  return {
-    logger: {
-      info: () => {
-        return
-      },
-      error: () => {
-        return
-      },
-      debug: () => {
-        return
-      },
-    },
-    loggedAxios: axios,
-    axiosTypes: axios,
-  }
-})
+import { OfferStatus } from 'onecore-types'
 
 import * as leasingAdapter from '../../../../adapters/leasing-adapter'
 import * as propertyManagementAdapter from '../../../../adapters/property-management-adapter'
 import { ProcessResult, ProcessStatus } from '../../../../common/types'
 import * as processes from '../reply-to-offer'
-
 import * as factory from '../../../../../test/factories'
-import { OfferStatus } from 'onecore-types'
 
 describe('replyToOffer', () => {
-  // Mock out all top level functions, such as get, put, delete and post:
-  jest.mock('axios')
-
   const getOfferByIdSpy = jest.spyOn(leasingAdapter, 'getOfferByOfferId')
   const getPublishedParkingSpaceSpy = jest.spyOn(
     propertyManagementAdapter,
