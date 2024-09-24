@@ -19,6 +19,7 @@ jest.mock('onecore-utilities', () => {
 
 import * as leasingAdapter from '../../../../adapters/leasing-adapter'
 // import * as propertyManagementAdapter from '../../../../adapters/property-management-adapter'
+import * as communicationAdapter from '../../../../adapters/communication-adapter'
 
 import { OfferStatus } from 'onecore-types'
 
@@ -40,8 +41,16 @@ describe('replyToOffer', () => {
     leasingAdapter,
     'getOffersForContact'
   )
+  const resetWaitingListSpy = jest.spyOn(leasingAdapter, 'resetWaitingList')
+
+  const sendNotificationToRoleSpy = jest.spyOn(
+    communicationAdapter,
+    'sendNotificationToRole'
+  )
 
   beforeEach(jest.resetAllMocks)
+  // afterEach(createLeaseSpy.mockClear)
+  // afterEach(createLeaseSpy.mockReset)
 
   describe('acceptOffer', () => {
     it('returns a process error if no offer found', async () => {
@@ -92,6 +101,7 @@ describe('replyToOffer', () => {
         ok: true,
         data: factory.offerWithRentalObjectCode.buildList(2),
       })
+      resetWaitingListSpy.mockResolvedValue({ ok: true, data: undefined })
 
       const result = await processes.acceptOffer(123)
 
@@ -118,6 +128,7 @@ describe('replyToOffer', () => {
       jest
         .spyOn(leasingAdapter, 'getOffersForContact')
         .mockResolvedValueOnce({ ok: false, err: 'unknown' })
+      resetWaitingListSpy.mockResolvedValue({ ok: true, data: undefined })
 
       const result = await processes.acceptOffer(123)
 
@@ -131,13 +142,100 @@ describe('replyToOffer', () => {
       })
     })
 
-    it.todo('returns a process error if reset for internal waiting lists fails')
+    it('returns success if reset waiting lists fails', async () => {
+      const closeOfferSpy = jest.spyOn(leasingAdapter, 'closeOfferByAccept')
+      const offer = factory.detailedOffer.build()
+      getOfferByIdSpy.mockResolvedValueOnce({
+        ok: true,
+        data: offer,
+      })
+      getListingByListingIdSpy.mockResolvedValueOnce(factory.listing.build())
+      closeOfferSpy.mockResolvedValueOnce({ ok: true, data: null })
+      createLeaseSpy.mockResolvedValueOnce(factory.lease.build())
+      getOffersForContactSpy.mockResolvedValueOnce({
+        ok: true,
+        data: factory.offerWithRentalObjectCode.buildList(2, {
+          id: offer.id + 1,
+          status: OfferStatus.Active,
+          offeredApplicant: {
+            id: offer.offeredApplicant.id,
+          },
+        }),
+      })
+      resetWaitingListSpy.mockResolvedValue({
+        ok: false,
+        err: 'not-in-waiting-list',
+      })
 
-    it.todo('returns a process error if reset for external waiting lists fails')
+      const result = await processes.acceptOffer(123)
 
-    it.todo('returns a process error if create lease fails')
+      expect(result).toEqual({
+        processStatus: ProcessStatus.successful,
+        httpStatus: 202,
+        data: null,
+      })
+    })
 
-    it.todo('returns a process error if sendNotificationToRole fails')
+    it('returns a process error if create lease fails', async () => {
+      const offer = factory.detailedOffer.build()
+      getOfferByIdSpy.mockResolvedValueOnce({
+        ok: true,
+        data: offer,
+      })
+      getListingByListingIdSpy.mockResolvedValueOnce(factory.listing.build())
+
+      createLeaseSpy.mockImplementation(() => {
+        throw new Error('Lease not created')
+      })
+
+      const result = await processes.acceptOffer(offer.id)
+
+      expect(result).toEqual({
+        processStatus: ProcessStatus.failed,
+        error: 'create-lease-failed',
+        httpStatus: 500,
+        response: {
+          message: `Create Lease for ${offer.id} failed.`,
+        },
+      })
+    })
+
+    it('returns success even if sendNotificationToRole fails', async () => {
+      const closeOfferSpy = jest.spyOn(leasingAdapter, 'closeOfferByAccept')
+      const offer = factory.detailedOffer.build()
+      getOfferByIdSpy.mockResolvedValueOnce({
+        ok: true,
+        data: offer,
+      })
+      getListingByListingIdSpy.mockResolvedValueOnce(factory.listing.build())
+      closeOfferSpy.mockResolvedValueOnce({ ok: true, data: null })
+      createLeaseSpy.mockResolvedValueOnce(factory.lease.build())
+      getOffersForContactSpy.mockResolvedValueOnce({
+        ok: true,
+        data: factory.offerWithRentalObjectCode.buildList(2, {
+          id: offer.id + 1,
+          status: OfferStatus.Active,
+          offeredApplicant: {
+            id: offer.offeredApplicant.id,
+          },
+        }),
+      })
+      resetWaitingListSpy.mockResolvedValue({
+        ok: true,
+        data: undefined,
+      })
+      sendNotificationToRoleSpy.mockImplementation(() => {
+        throw new Error('Email not sent')
+      })
+
+      const result = await processes.acceptOffer(123)
+
+      expect(result).toEqual({
+        processStatus: ProcessStatus.successful,
+        httpStatus: 202,
+        data: null,
+      })
+    })
 
     it('calls denyOffer with remaining offers if exists', async () => {
       const closeOfferSpy = jest.spyOn(leasingAdapter, 'closeOfferByAccept')
@@ -160,6 +258,7 @@ describe('replyToOffer', () => {
           },
         }),
       })
+      resetWaitingListSpy.mockResolvedValue({ ok: true, data: undefined })
 
       const denyOfferSpy = jest
         .spyOn(processes, 'denyOffer')

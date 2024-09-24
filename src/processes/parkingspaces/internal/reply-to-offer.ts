@@ -12,6 +12,7 @@ type ReplyToOfferError =
   | 'close-offer'
   | 'get-other-offers'
   | 'send-email'
+  | 'create-lease-failed'
   | 'unknown'
 
 export const acceptOffer = async (
@@ -49,16 +50,25 @@ export const acceptOffer = async (
     }
 
     //Create lease
-    const lease = await leasingAdapter.createLease(
-      listing.rentalObjectCode,
-      offer.offeredApplicant.contactCode,
-      listing.vacantFrom.toISOString(),
-      '001'
-    )
-    log.push(`Kontrakt skapat: ${lease.LeaseId}`)
-    log.push(
-      'Kontrollera om moms ska läggas på kontraktet. Detta måste göras manuellt innan det skickas för påskrift.'
-    )
+    let lease: any
+    try {
+      lease = await leasingAdapter.createLease(
+        listing.rentalObjectCode,
+        offer.offeredApplicant.contactCode,
+        listing.vacantFrom.toISOString(),
+        '001'
+      )
+
+      log.push(`Kontrakt skapat: ${lease.LeaseId}`)
+      log.push(
+        'Kontrollera om moms ska läggas på kontraktet. Detta måste göras manuellt innan det skickas för påskrift.'
+      )
+    } catch (err) {
+      logger.error(err, 'Create Lease failed')
+      return makeProcessError('create-lease-failed', 500, {
+        message: `Create Lease for ${offerId} failed.`,
+      })
+    }
 
     //Reset internal waiting list
     const internalWaitingListResult = await leasingAdapter.resetWaitingList(
@@ -114,12 +124,16 @@ export const acceptOffer = async (
       })
     }
 
-    //send notification to the leasing team
-    await communicationAdapter.sendNotificationToRole(
-      'leasing',
-      'Bilplats tilldelad och kontrakt skapat för intern bilplats',
-      log.join('\n')
-    )
+    try {
+      //send notification to the leasing team
+      await communicationAdapter.sendNotificationToRole(
+        'leasing',
+        'Bilplats tilldelad och kontrakt skapat för intern bilplats',
+        log.join('\n')
+      )
+    } catch (error) {
+      logger.error(error, 'Send Notification to leasing failed')
+    }
 
     return {
       processStatus: ProcessStatus.successful,
@@ -127,7 +141,7 @@ export const acceptOffer = async (
       data: null,
     }
   } catch (err) {
-    console.error(err)
+    logger.error(err, 'Accept offer of parking space uncaught error')
     return makeProcessError('unknown', 500)
   }
 }
