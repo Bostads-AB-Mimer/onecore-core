@@ -7,7 +7,6 @@ import * as communicationAdapter from '../../../adapters/communication-adapter'
 import { makeProcessError } from '../utils'
 import * as propertyManagementAdapter from '../../../adapters/property-management-adapter'
 import { AdapterResult } from '../../../adapters/types'
-import { createOfferForInternalParkingSpace } from './create-offer'
 
 type ReplyToOfferError =
   | 'no-offer'
@@ -149,7 +148,7 @@ export const acceptOffer = async (
 
 export const denyOffer = async (
   offerId: number
-): Promise<ProcessResult<null, ReplyToOfferError>> => {
+): Promise<ProcessResult<{ listingId: number }, ReplyToOfferError>> => {
   try {
     //Get offer
     const res = await leasingAdapter.getOfferByOfferId(offerId)
@@ -177,12 +176,10 @@ export const denyOffer = async (
       })
     }
 
-    const _createOffer = createOfferForInternalParkingSpace(offer.listingId)
-
     return {
       processStatus: ProcessStatus.successful,
       httpStatus: 202,
-      data: null,
+      data: { listingId: listing.id },
     }
   } catch (err) {
     return makeProcessError('unknown', 500)

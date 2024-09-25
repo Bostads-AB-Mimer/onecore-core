@@ -316,30 +316,6 @@ describe('replyToOffer', () => {
         },
       })
     })
-
-    it('calls create offer to restart the process', async () => {
-      const closeOfferSpy = jest.spyOn(leasingAdapter, 'closeOfferByDeny')
-      getOfferByIdSpy.mockResolvedValueOnce({
-        ok: true,
-        data: factory.detailedOffer.build(),
-      })
-      getPublishedParkingSpaceSpy.mockResolvedValueOnce(factory.listing.build())
-      closeOfferSpy.mockResolvedValueOnce({ ok: true, data: null })
-
-      const createOfferProcess = jest
-        .spyOn(createProcess, 'createOfferForInternalParkingSpace')
-        .mockResolvedValueOnce({
-          processStatus: ProcessStatus.successful,
-        } as ProcessResult)
-
-      const result = await replyProcesses.denyOffer(123)
-
-      expect(result).toMatchObject({
-        processStatus: ProcessStatus.successful,
-      })
-      expect(createOfferProcess).toHaveBeenCalledTimes(1)
-      createOfferProcess.mockRestore()
-    })
   })
 
   describe('expireOffer', () => {
