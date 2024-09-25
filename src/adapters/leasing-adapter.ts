@@ -105,14 +105,25 @@ const getContactsDataBySearchQuery = async (
   }
 }
 
-const getContact = async (contactId: string): Promise<Contact | undefined> => {
+const getContact = async (
+  contactCode: string
+): Promise<AdapterResult<Contact, 'not-found' | 'unknown'>> => {
   try {
-    const contactResponse = await axios(
-      tenantsLeasesServiceUrl + '/contact/contactCode/' + contactId
+    const res = await axios<{ content?: Contact }>(
+      tenantsLeasesServiceUrl + '/contact/contactCode/' + contactCode
     )
-    return contactResponse.data.content
+
+    if (res.status === 404) {
+      return { ok: false, err: 'not-found' }
+    }
+
+    if (res.status === 200 && res.data.content) {
+      return { ok: true, data: res.data.content }
+    }
+
+    return { ok: false, err: 'unknown' }
   } catch (error) {
-    return undefined
+    return { ok: false, err: 'unknown' }
   }
 }
 
@@ -250,6 +261,40 @@ const addApplicantToWaitingList = async (
       nationalRegistrationNumber,
     axiosOptions
   )
+}
+
+const resetWaitingList = async (
+  nationalRegistrationNumber: string,
+  contactCode: string,
+  waitingListTypeCaption: string
+): Promise<AdapterResult<undefined, 'not-in-waiting-list' | 'unknown'>> => {
+  try {
+    const axiosOptions = {
+      method: 'POST',
+      data: {
+        contactCode: contactCode,
+        waitingListTypeCaption: waitingListTypeCaption,
+      },
+    }
+    const res = await axios(
+      tenantsLeasesServiceUrl +
+        '/contact/waitingList/' +
+        nationalRegistrationNumber +
+        '/reset',
+      axiosOptions
+    )
+
+    if (res.status == 200) return { ok: true, data: undefined }
+    else if (res.status == 404) return { ok: false, err: 'not-in-waiting-list' }
+
+    return { ok: false, err: 'unknown' }
+  } catch (error: unknown) {
+    logger.error(
+      error,
+      'Error resetting waiting list for applicant ' + contactCode
+    )
+    return { ok: false, err: 'unknown' }
+  }
 }
 
 const createNewListing = async (
@@ -689,6 +734,24 @@ const deleteListing = async (
   return { ok: false, err: { tag: 'unknown', data: res.data } }
 }
 
+async function closeOfferByAccept(
+  offerId: number
+): Promise<AdapterResult<null, 'offer-not-found' | 'unknown'>> {
+  const res = await axios.put(
+    `${tenantsLeasesServiceUrl}/offers/${offerId}/close-by-accept`
+  )
+
+  if (res.status === 200) {
+    return { ok: true, data: null }
+  }
+
+  if (res.status === 404) {
+    return { ok: false, err: 'offer-not-found' }
+  }
+
+  return { ok: false, err: 'unknown' }
+}
+
 export {
   getLease,
   getLeasesForPnr,
@@ -701,6 +764,7 @@ export {
   getInternalCreditInformation,
   getWaitingList,
   addApplicantToWaitingList,
+  resetWaitingList,
   createNewListing,
   getListingByListingId,
   getListingByRentalObjectCode,
@@ -725,4 +789,5 @@ export {
   getTenantByContactCode,
   syncInternalParkingSpacesFromXpand,
   deleteListing,
+  closeOfferByAccept,
 }
