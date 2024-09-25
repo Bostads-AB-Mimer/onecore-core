@@ -1,4 +1,4 @@
-/**
+/*
  * Self-contained service, ready to be extracted into a microservice if appropriate.
  *
  * All adapters such as database clients etc. should go into subfolders of the service,
@@ -294,7 +294,6 @@ export const routes = (router: KoaRouter) => {
    *         description: Internal server error.
    */
   router.get('/offers/listing-id/:listingId', async (ctx) => {
-    console.log('ok')
     const metadata = generateRouteMetadata(ctx)
     const result = await leasingAdapter.getOffersByListingId(
       Number.parseInt(ctx.params.listingId)
