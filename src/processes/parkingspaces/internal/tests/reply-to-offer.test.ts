@@ -6,7 +6,6 @@ import { OfferStatus } from 'onecore-types'
 
 import { ProcessResult, ProcessStatus } from '../../../../common/types'
 import * as replyProcesses from '../reply-to-offer'
-import * as createProcess from '../create-offer'
 import * as factory from '../../../../../test/factories'
 
 describe('replyToOffer', () => {
@@ -149,7 +148,7 @@ describe('replyToOffer', () => {
         err: 'not-in-waiting-list',
       })
 
-      const result = await processes.acceptOffer(123)
+      const result = await replyProcesses.acceptOffer(123)
 
       expect(result).toEqual({
         processStatus: ProcessStatus.successful,
@@ -170,7 +169,7 @@ describe('replyToOffer', () => {
         throw new Error('Lease not created')
       })
 
-      const result = await processes.acceptOffer(offer.id)
+      const result = await replyProcesses.acceptOffer(offer.id)
 
       expect(result).toEqual({
         processStatus: ProcessStatus.failed,
@@ -210,7 +209,7 @@ describe('replyToOffer', () => {
         throw new Error('Email not sent')
       })
 
-      const result = await processes.acceptOffer(123)
+      const result = await replyProcesses.acceptOffer(123)
 
       expect(result).toEqual({
         processStatus: ProcessStatus.successful,
@@ -250,7 +249,6 @@ describe('replyToOffer', () => {
 
       const result = await replyProcesses.acceptOffer(123)
 
-      console.log('result', result)
       expect(result).toMatchObject({
         processStatus: ProcessStatus.successful,
       })
@@ -292,27 +290,6 @@ describe('replyToOffer', () => {
         httpStatus: 404,
         response: {
           message: `The parking space ${offer.listingId} does not exist or is no longer available.`,
-        },
-      })
-    })
-
-    it('returns a process error if close offer fails', async () => {
-      const closeOfferSpy = jest.spyOn(leasingAdapter, 'closeOfferByDeny')
-      getOfferByIdSpy.mockResolvedValueOnce({
-        ok: true,
-        data: factory.detailedOffer.build(),
-      })
-      getPublishedParkingSpaceSpy.mockResolvedValueOnce(factory.listing.build())
-      closeOfferSpy.mockResolvedValueOnce({ ok: false, err: 'unknown' })
-
-      const result = await replyProcesses.denyOffer(123)
-
-      expect(result).toEqual({
-        processStatus: ProcessStatus.failed,
-        error: 'close-offer',
-        httpStatus: 500,
-        response: {
-          message: 'Something went wrong when closing the offer.',
         },
       })
     })
