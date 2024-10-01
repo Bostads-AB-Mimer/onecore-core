@@ -532,7 +532,7 @@ export type OfferApplicant = {
   createdAt: Date
 }
 
-type OfferWithOfferApplicants = Omit<Offer, 'selectedApplicants'> & {
+type OfferWithSelectedApplicants = Omit<Offer, 'selectedApplicants'> & {
   selectedApplicants: Array<OfferApplicant>
 }
 
@@ -558,17 +558,17 @@ type CreateOfferParams = {
 
 const createOffer = async (
   params: CreateOfferParams
-): Promise<Omit<Offer, 'selectedApplicants'>> => {
+): Promise<AdapterResult<Omit<Offer, 'selectedApplicants'>, 'unknown'>> => {
   try {
     const response = await axios.post<{ content: Offer }>(
       `${tenantsLeasesServiceUrl}/offer`,
       params
     )
 
-    return response.data.content
+    return { ok: true, data: response.data.content }
   } catch (err) {
     logger.error(err, 'Error creating offer:')
-    throw err
+    return { ok: false, err: 'unknown' }
   }
 }
 
@@ -590,7 +590,7 @@ const getOfferByOfferId = async (
 
 const getOffersByListingId = async (
   listingId: number
-): Promise<AdapterResult<Array<Offer>, 'unknown'>> => {
+): Promise<AdapterResult<Array<OfferWithSelectedApplicants>, 'unknown'>> => {
   try {
     const res = await axios(
       `${tenantsLeasesServiceUrl}/offers/listing-id/${listingId}`

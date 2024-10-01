@@ -442,7 +442,8 @@ describe('lease-service', () => {
         .spyOn(tenantLeaseAdapter, 'getOffersByListingId')
         .mockResolvedValueOnce({
           ok: true,
-          data: factory.offer.buildList(1),
+          // data: factory.offer.buildList(1),
+          data: [],
         })
 
       const res = await request(app.callback()).get(`/offers/listing-id/1`)

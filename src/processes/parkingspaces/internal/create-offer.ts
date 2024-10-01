@@ -53,10 +53,15 @@ export const createOfferForInternalParkingSpace = async (
         })
       })
 
-    if (!eligibleApplicants?.length)
-      return makeProcessError('no-applicants', 500)
+    const pickableApplicants = eligibleApplicants?.filter(
+      (a) => a.status === ApplicantStatus.Active
+    )
 
-    const [applicant, ...restApplicants] = eligibleApplicants
+    if (!pickableApplicants?.length) {
+      return makeProcessError('no-applicants', 500)
+    }
+
+    const [applicant, ...restApplicants] = pickableApplicants
 
     // TODO: Maybe we want to make a credit check here?
 
@@ -69,6 +74,8 @@ export const createOfferForInternalParkingSpace = async (
     const contact = getContact.data
 
     try {
+      // TODO: Maybe this should happen in leasing so we dont get inconsintent
+      // state if offer creation fails?
       await leasingAdapter.updateApplicantStatus({
         applicantId: applicant.id,
         contactCode: applicant.contactCode,
@@ -90,75 +97,75 @@ export const createOfferForInternalParkingSpace = async (
       ...applicant,
       status: ApplicantStatus.Offered,
     }
-    try {
-      const offer = await leasingAdapter.createOffer({
-        applicantId: applicant.id,
-        expiresAt: utils.date.addBusinessDays(new Date(), 2),
+    const offer = await leasingAdapter.createOffer({
+      applicantId: applicant.id,
+      expiresAt: utils.date.addBusinessDays(new Date(), 2),
+      listingId: listing.id,
+      status: OfferStatus.Active,
+      // TODO: It's more obvious now that this remapping dont have to leak
+      // into core. From cores perspective, the applicant prefix doesnt make
+      // sense
+      //
+      // This spread is so selectedApplicants gets the updated offered
+      // applicants status
+      selectedApplicants: [updatedApplicant, ...restApplicants].map((a) => ({
         listingId: listing.id,
-        status: OfferStatus.Active,
-        // TODO: It's more obvious now that this remapping dont have to leak
-        // into core. From cores perspective, the applicant prefix doesnt make
-        // sense
-        //
-        // This spread is so selectedApplicants gets the updated offered
-        // applicants status
-        selectedApplicants: [updatedApplicant, ...restApplicants].map((a) => ({
-          listingId: listing.id,
-          applicantId: a.id,
-          applicantPriority: a.priority || -1, // Fix this
-          applicantStatus: a.status,
-          applicantAddress: a.address
-            ? `${a.address.street} ${a.address.city}`
-            : '', // TODO: Fix this
-          applicantApplicationType: a.applicationType
-            ? (a.applicationType as 'Replace' | 'Additional')
-            : 'Additional', //TODO: Fix this
-          applicantName: a.name,
-          applicantQueuePoints: a.queuePoints,
-          applicantHasParkingSpace: Boolean(a.parkingSpaceContracts?.length), //TODO: Fix this
-          applicantHousingLeaseStatus: LeaseStatus.Current, //TODO: Fix this
-        })),
+        applicantId: a.id,
+        priority: a.priority || -1, // Fix this
+        status: a.status,
+        address: a.address ? `${a.address.street} ${a.address.city}` : '', // TODO: Fix this
+        applicationType: a.applicationType
+          ? (a.applicationType as 'Replace' | 'Additional')
+          : 'Additional', //TODO: Fix this
+        name: a.name,
+        queuePoints: a.queuePoints,
+        hasParkingSpace: Boolean(a.parkingSpaceContracts?.length), //TODO: Fix this
+        housingLeaseStatus: LeaseStatus.Current, //TODO: Fix this
+      })),
+    })
+
+    if (!offer.ok) {
+      logger.error(
+        offer.err,
+        'Error creating offer for internal parking space - could not create offer'
+      )
+
+      return makeProcessError('create-offer', 500)
+    }
+
+    log.push(`Created offer ${offer.data.id}`)
+    console.log(log)
+    logger.debug(log)
+
+    try {
+      if (!contact.emailAddress)
+        throw new Error('Recipient has no email address')
+
+      await communicationAdapter.sendParkingSpaceOfferEmail({
+        to: contact.emailAddress,
+        subject: 'Erbjudande om intern bilplats',
+        text: 'Erbjudande om intern bilplats',
+        address: listing.address,
+        firstName: applicant.name,
+        availableFrom: new Date(listing.vacantFrom).toISOString(),
+        deadlineDate: new Date(offer.data.expiresAt).toISOString(),
+        rent: String(listing.monthlyRent),
+        type: listing.rentalObjectTypeCaption ?? '',
+        parkingSpaceId: listing.rentalObjectCode,
+        objectId: listing.id.toString(),
+        hasParkingSpace: false,
       })
-      log.push(`Created offer ${offer.id}`)
-      console.log(log)
-      logger.debug(log)
-
-      try {
-        if (!contact.emailAddress)
-          throw new Error('Recipient has no email address')
-
-        await communicationAdapter.sendParkingSpaceOfferEmail({
-          to: contact.emailAddress,
-          subject: 'Erbjudande om intern bilplats',
-          text: 'Erbjudande om intern bilplats',
-          address: listing.address,
-          firstName: applicant.name,
-          availableFrom: new Date(listing.vacantFrom).toISOString(),
-          deadlineDate: new Date(offer.expiresAt).toISOString(),
-          rent: String(listing.monthlyRent),
-          type: listing.rentalObjectTypeCaption ?? '',
-          parkingSpaceId: listing.rentalObjectCode,
-          objectId: listing.id.toString(),
-          hasParkingSpace: false,
-        })
-      } catch (_err) {
-        logger.error(
-          _err,
-          'Error creating offer for internal parking space - could not send email'
-        )
-        return makeProcessError('send-email', 500)
-      }
-      return {
-        processStatus: ProcessStatus.successful,
-        httpStatus: 200,
-        data: null,
-      }
     } catch (_err) {
       logger.error(
         _err,
-        'Error creating offer for internal parking space - could not create offer'
+        'Error creating offer for internal parking space - could not send email'
       )
-      return makeProcessError('create-offer', 500)
+      return makeProcessError('send-email', 500)
+    }
+    return {
+      processStatus: ProcessStatus.successful,
+      httpStatus: 200,
+      data: null,
     }
 
     // step 5 - notify winning applicant
