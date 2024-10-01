@@ -1,4 +1,11 @@
-import { ApplicantStatus, ListingStatus, OfferStatus } from 'onecore-types'
+import {
+  Applicant,
+  ApplicantStatus,
+  DetailedApplicant,
+  LeaseStatus,
+  ListingStatus,
+  OfferStatus,
+} from 'onecore-types'
 
 import { ProcessResult, ProcessStatus } from '../../../common/types'
 import * as leasingAdapter from '../../../adapters/leasing-adapter'
@@ -49,7 +56,7 @@ export const createOfferForInternalParkingSpace = async (
     if (!eligibleApplicants?.length)
       return makeProcessError('no-applicants', 500)
 
-    const [applicant] = eligibleApplicants
+    const [applicant, ...restApplicants] = eligibleApplicants
 
     // TODO: Maybe we want to make a credit check here?
 
@@ -76,13 +83,41 @@ export const createOfferForInternalParkingSpace = async (
       return makeProcessError('update-applicant-status', 500)
     }
 
+    // This spread is so the offer applicants gets the updated offered
+    // applicants status. If leasing takes applicant status from its own DB we
+    // dont need this
+    const updatedApplicant: DetailedApplicant = {
+      ...applicant,
+      status: ApplicantStatus.Offered,
+    }
     try {
       const offer = await leasingAdapter.createOffer({
         applicantId: applicant.id,
         expiresAt: utils.date.addBusinessDays(new Date(), 2),
         listingId: listing.id,
-        selectedApplicants: eligibleApplicants,
         status: OfferStatus.Active,
+        // TODO: It's more obvious now that this remapping dont have to leak
+        // into core. From cores perspective, the applicant prefix doesnt make
+        // sense
+        //
+        // This spread is so selectedApplicants gets the updated offered
+        // applicants status
+        selectedApplicants: [updatedApplicant, ...restApplicants].map((a) => ({
+          listingId: listing.id,
+          applicantId: a.id,
+          applicantPriority: a.priority || -1, // Fix this
+          applicantStatus: a.status,
+          applicantAddress: a.address
+            ? `${a.address.street} ${a.address.city}`
+            : '', // TODO: Fix this
+          applicantApplicationType: a.applicationType
+            ? (a.applicationType as 'Replace' | 'Additional')
+            : 'Additional', //TODO: Fix this
+          applicantName: a.name,
+          applicantQueuePoints: a.queuePoints,
+          applicantHasParkingSpace: Boolean(a.parkingSpaceContracts?.length), //TODO: Fix this
+          applicantHousingLeaseStatus: LeaseStatus.Current, //TODO: Fix this
+        })),
       })
       log.push(`Created offer ${offer.id}`)
       console.log(log)
