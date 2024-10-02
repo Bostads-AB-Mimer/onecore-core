@@ -1,18 +1,17 @@
 import {
-  Applicant,
   ApplicantStatus,
   DetailedApplicant,
   LeaseStatus,
   ListingStatus,
   OfferStatus,
 } from 'onecore-types'
+import { logger } from 'onecore-utilities'
 
 import { ProcessResult, ProcessStatus } from '../../../common/types'
 import * as leasingAdapter from '../../../adapters/leasing-adapter'
 import * as utils from '../../../utils'
 import * as communicationAdapter from '../../../adapters/communication-adapter'
 import { makeProcessError } from '../utils'
-import { logger } from 'onecore-utilities'
 
 type CreateOfferError =
   | 'no-listing'
@@ -102,10 +101,6 @@ export const createOfferForInternalParkingSpace = async (
       expiresAt: utils.date.addBusinessDays(new Date(), 2),
       listingId: listing.id,
       status: OfferStatus.Active,
-      // TODO: It's more obvious now that this remapping dont have to leak
-      // into core. From cores perspective, the applicant prefix doesnt make
-      // sense
-      //
       // This spread is so selectedApplicants gets the updated offered
       // applicants status
       selectedApplicants: [updatedApplicant, ...restApplicants].map((a) => ({

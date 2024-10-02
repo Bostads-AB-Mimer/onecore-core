@@ -539,13 +539,13 @@ type OfferWithSelectedApplicants = Omit<Offer, 'selectedApplicants'> & {
 type CreateOfferApplicantParams = {
   listingId: number
   applicantId: number
-  applicantStatus: ApplicantStatus
-  applicantApplicationType: 'Replace' | 'Additional'
-  applicantQueuePoints: number
-  applicantAddress: string
-  applicantHasParkingSpace: boolean
-  applicantHousingLeaseStatus: LeaseStatus
-  applicantPriority: number | null
+  status: ApplicantStatus
+  applicationType: 'Replace' | 'Additional'
+  queuePoints: number
+  address: string
+  hasParkingSpace: boolean
+  housingLeaseStatus: LeaseStatus
+  priority: number | null
 }
 
 type CreateOfferParams = {
