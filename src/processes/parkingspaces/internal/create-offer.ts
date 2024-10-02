@@ -55,8 +55,8 @@ export const createOfferForInternalParkingSpace = async (
     const pickableApplicants = eligibleApplicants?.filter(
       (a) => a.status === ApplicantStatus.Active
     )
-
     if (!pickableApplicants?.length) {
+      logger.error('No pickable applicants found, cannot create new offer')
       return makeProcessError('no-applicants', 500)
     }
 
