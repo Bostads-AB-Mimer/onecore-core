@@ -526,10 +526,12 @@ export type OfferApplicant = {
   address: string
   hasParkingSpace: boolean
   housingLeaseStatus: LeaseStatus
-  applicationDate: Date
   priority: number | null
   sortOrder: number
   createdAt: Date
+
+  applicationDate: Date
+  name: string
 }
 
 type OfferWithSelectedApplicants = Omit<Offer, 'selectedApplicants'> & {
