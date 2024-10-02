@@ -526,7 +526,7 @@ export type OfferApplicant = {
   address: string
   hasParkingSpace: boolean
   housingLeaseStatus: LeaseStatus
-  priority: number | null
+  priority: number
   sortOrder: number
   createdAt: Date
 
@@ -538,7 +538,7 @@ type OfferWithSelectedApplicants = Omit<Offer, 'selectedApplicants'> & {
   selectedApplicants: Array<OfferApplicant>
 }
 
-type CreateOfferApplicantParams = {
+export type CreateOfferApplicantParams = {
   listingId: number
   applicantId: number
   status: ApplicantStatus
@@ -547,7 +547,7 @@ type CreateOfferApplicantParams = {
   address: string
   hasParkingSpace: boolean
   housingLeaseStatus: LeaseStatus
-  priority: number | null
+  priority: number
 }
 
 type CreateOfferParams = {

@@ -47,9 +47,13 @@ export const createOfferForInternalParkingSpace = async (
       .getListingByIdWithDetailedApplicants(String(listing.id))
       .then((applicants) => {
         // filter out any applicants that has no priority. They are not eligible to rent the object of this listing
-        return applicants?.filter((detailedApplicant) => {
-          return detailedApplicant.priority != undefined
-        })
+        return applicants?.filter(
+          (
+            detailedApplicant
+          ): detailedApplicant is DetailedApplicant & { priority: number } => {
+            return detailedApplicant.priority != undefined
+          }
+        )
       })
 
     const pickableApplicants = eligibleApplicants?.filter(
@@ -89,10 +93,7 @@ export const createOfferForInternalParkingSpace = async (
       return makeProcessError('update-applicant-status', 500)
     }
 
-    // This spread is so the offer applicants gets the updated offered
-    // applicants status. If leasing takes applicant status from its own DB we
-    // dont need this
-    const updatedApplicant: DetailedApplicant = {
+    const updatedApplicant: DetailedApplicant & { priority: number } = {
       ...applicant,
       status: ApplicantStatus.Offered,
     }
@@ -101,22 +102,9 @@ export const createOfferForInternalParkingSpace = async (
       expiresAt: utils.date.addBusinessDays(new Date(), 2),
       listingId: listing.id,
       status: OfferStatus.Active,
-      // This spread is so selectedApplicants gets the updated offered
-      // applicants status
-      selectedApplicants: [updatedApplicant, ...restApplicants].map((a) => ({
-        listingId: listing.id,
-        applicantId: a.id,
-        priority: a.priority || -1, // Fix this
-        status: a.status,
-        address: a.address ? `${a.address.street} ${a.address.city}` : '', // TODO: Fix this
-        applicationType: a.applicationType
-          ? (a.applicationType as 'Replace' | 'Additional')
-          : 'Additional', //TODO: Fix this
-        name: a.name,
-        queuePoints: a.queuePoints,
-        hasParkingSpace: Boolean(a.parkingSpaceContracts?.length), //TODO: Fix this
-        housingLeaseStatus: LeaseStatus.Current, //TODO: Fix this
-      })),
+      selectedApplicants: [updatedApplicant, ...restApplicants].map(
+        mapDetailedApplicantsToCreateOfferSelectedApplicants
+      ),
     })
 
     if (!offer.ok) {
@@ -166,5 +154,23 @@ export const createOfferForInternalParkingSpace = async (
     // step 5 - notify winning applicant
   } catch (err) {
     return makeProcessError('unknown', 500)
+  }
+}
+
+function mapDetailedApplicantsToCreateOfferSelectedApplicants(
+  a: DetailedApplicant & { priority: number }
+): leasingAdapter.CreateOfferApplicantParams {
+  return {
+    listingId: a.listingId,
+    applicantId: a.id,
+    priority: a.priority,
+    status: a.status,
+    address: a.address ? `${a.address.street} ${a.address.city}` : '',
+    applicationType: a.applicationType
+      ? (a.applicationType as 'Replace' | 'Additional')
+      : 'Additional', //TODO: Fix this
+    queuePoints: a.queuePoints,
+    hasParkingSpace: Boolean(a.parkingSpaceContracts?.length), // TODO: We need to calculate the right value here
+    housingLeaseStatus: LeaseStatus.Current, //TODO: We need to calculate the right lease status
   }
 }
