@@ -1,5 +1,6 @@
 import {
   ApplicantStatus,
+  CreateOfferApplicantParams,
   DetailedApplicant,
   LeaseStatus,
   ListingStatus,
@@ -159,7 +160,7 @@ export const createOfferForInternalParkingSpace = async (
 
 function mapDetailedApplicantsToCreateOfferSelectedApplicants(
   a: DetailedApplicant & { priority: number }
-): leasingAdapter.CreateOfferApplicantParams {
+): CreateOfferApplicantParams {
   return {
     listingId: a.listingId,
     applicantId: a.id,

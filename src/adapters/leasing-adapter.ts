@@ -20,6 +20,8 @@ import {
   InternalParkingSpaceSyncSuccessResponse,
   LeaseStatus,
   OfferStatus,
+  CreateOfferParams,
+  OfferWithOfferApplicants,
 } from 'onecore-types'
 
 import config from '../common/config'
@@ -515,49 +517,6 @@ const withdrawApplicantByUser = async (
   }
 }
 
-export type OfferApplicant = {
-  id: number
-  listingId: number
-  offerId: number
-  applicantId: number
-  status: ApplicantStatus
-  applicationType: 'Replace' | 'Additional'
-  queuePoints: number
-  address: string
-  hasParkingSpace: boolean
-  housingLeaseStatus: LeaseStatus
-  priority: number
-  sortOrder: number
-  createdAt: Date
-
-  applicationDate: Date
-  name: string
-}
-
-type OfferWithSelectedApplicants = Omit<Offer, 'selectedApplicants'> & {
-  selectedApplicants: Array<OfferApplicant>
-}
-
-export type CreateOfferApplicantParams = {
-  listingId: number
-  applicantId: number
-  status: ApplicantStatus
-  applicationType: 'Replace' | 'Additional'
-  queuePoints: number
-  address: string
-  hasParkingSpace: boolean
-  housingLeaseStatus: LeaseStatus
-  priority: number
-}
-
-type CreateOfferParams = {
-  status: OfferStatus
-  expiresAt: Date
-  listingId: number
-  applicantId: number
-  selectedApplicants: Array<CreateOfferApplicantParams>
-}
-
 const createOffer = async (
   params: CreateOfferParams
 ): Promise<AdapterResult<Omit<Offer, 'selectedApplicants'>, 'unknown'>> => {
@@ -592,7 +551,7 @@ const getOfferByOfferId = async (
 
 const getOffersByListingId = async (
   listingId: number
-): Promise<AdapterResult<Array<OfferWithSelectedApplicants>, 'unknown'>> => {
+): Promise<AdapterResult<Array<OfferWithOfferApplicants>, 'unknown'>> => {
   try {
     const res = await axios(
       `${tenantsLeasesServiceUrl}/offers/listing-id/${listingId}`
