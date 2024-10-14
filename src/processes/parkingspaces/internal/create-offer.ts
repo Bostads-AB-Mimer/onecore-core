@@ -172,12 +172,14 @@ function mapDetailedApplicantsToCreateOfferSelectedApplicants(
       : 'Additional', //TODO: Fix this
     queuePoints: a.queuePoints,
     hasParkingSpace: Boolean(a.parkingSpaceContracts?.length),
-    // TODO: Ended is not a valid status for a lease, should be Upcoming or
-    // Current but we don't have a good way of determining that at the moment
+    // TODO: Ended is not a good fallback here
+    // because if the applicant doesnt have at least one current or upcoming
+    // contract they can't apply in the first place.
+    // But we don't have a good way of determining that at the moment
     housingLeaseStatus: a.upcomingHousingContract
-      ? LeaseStatus.Upcoming
+      ? a.upcomingHousingContract.status
       : a.currentHousingContract
-        ? LeaseStatus.Current
+        ? a.currentHousingContract.status
         : LeaseStatus.Ended,
   }
 }
