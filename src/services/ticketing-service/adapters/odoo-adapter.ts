@@ -45,6 +45,10 @@ export interface OdooPostTicket {
   master_key: boolean
 }
 
+export interface OdooUpdateTicketBody {
+  stage_id: number
+}
+
 interface OdooPostTicketImage {
   Filename: string
   ImageType: number
@@ -238,6 +242,14 @@ const createTicket = async (ticket: OdooPostTicket): Promise<number> => {
   return await odoo.create('maintenance.request', ticket)
 }
 
+const updateTicket = async (
+  ticketId: string,
+  params: OdooUpdateTicketBody
+): Promise<boolean> => {
+  await odoo.connect()
+  return await odoo.update('maintenance.request', parseInt(ticketId), params)
+}
+
 const getMaintenanceTeamId = async (teamName: string): Promise<number> => {
   await odoo.connect()
 
@@ -256,6 +268,7 @@ const healthCheck = async () => {
 
 export {
   createTicket,
+  updateTicket,
   createRentalPropertyRecord,
   createLeaseRecord,
   createTenantRecord,
