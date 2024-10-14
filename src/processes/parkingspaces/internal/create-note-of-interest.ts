@@ -24,10 +24,30 @@ import {
   validatePropertyRentalRules,
 } from '../../../adapters/leasing-adapter'
 import { getPublishedParkingSpace } from '../../../adapters/property-management-adapter'
-import { ProcessResult, ProcessStatus } from '../../../common/types'
+import {
+  ProcessError,
+  ProcessResult,
+  ProcessStatus,
+} from '../../../common/types'
 import { makeProcessError, validateRentalRules } from '../utils'
 import { sendNotificationToRole } from '../../../adapters/communication-adapter'
 
+const endFailingProcess = (
+  log: any[],
+  error: string,
+  httpStatus: number,
+  details: string
+): ProcessError => {
+  log.push(details)
+  logger.debug(log)
+  sendNotificationToRole(
+    'dev',
+    `Create Note of Interest - ${error}`,
+    log.join('\n')
+  )
+
+  return makeProcessError(error, httpStatus, { message: details })
+}
 // PROCESS Part 1 - Create Note of Interest for Scored Parking Space
 export const createNoteOfInterestForInternalParkingSpace = async (
   parkingSpaceId: string,
@@ -47,20 +67,12 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     const parkingSpace = await getPublishedParkingSpace(parkingSpaceId)
     // step 1 - get parking space
     if (!parkingSpace || !parkingSpace.districtCode) {
-      const errorMessage = `The parking space ${parkingSpaceId} does not exist or is no longer available.`
-      logAndNotifyTheTeam(
-        'Create Note of Interest - Exception',
-        errorMessage,
-        log
+      return endFailingProcess(
+        log,
+        'parkingspace-not-found',
+        404,
+        `The parking space ${parkingSpaceId} does not exist or is no longer available.`
       )
-      return {
-        processStatus: ProcessStatus.failed,
-        error: 'parkingspace-not-found',
-        httpStatus: 404,
-        response: {
-          message: errorMessage,
-        },
-      }
     }
 
     const parkingSpaceApplicationType = parkingSpace.waitingListType
@@ -70,29 +82,23 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     if (
       parkingSpaceApplicationType != ParkingSpaceApplicationCategory.internal
     ) {
-      const errorMessage = `This process currently only handles internal parking spaces. The parking space provided is not internal (it is ${parkingSpaceApplicationType}, ${parkingSpaceApplicationCategoryTranslation.internal}).`
-      logAndNotifyTheTeam(
-        'Create Note of Interest - Exception',
-        errorMessage,
-        log
+      return endFailingProcess(
+        log,
+        'parkingspace-not-internal',
+        400,
+        `This process currently only handles internal parking spaces. The parking space provided is not internal (it is ${parkingSpaceApplicationType}, ${parkingSpaceApplicationCategoryTranslation.internal}).`
       )
-      return makeProcessError('parkingspace-not-internal', 400, {
-        message: errorMessage,
-      })
     }
 
     // Step 2. Get information about applicant and contracts
     const getApplicantContact = await getContact(contactCode)
     if (!getApplicantContact.ok) {
-      const errorMessage = `Applicant ${contactCode} could not be retrieved.`
-      logAndNotifyTheTeam(
-        'Create Note of Interest - Exception',
-        errorMessage,
-        log
+      return endFailingProcess(
+        log,
+        'applicant-not-found',
+        400,
+        `Applicant ${contactCode} could not be retrieved.`
       )
-      return makeProcessError('applicant-not-found', 404, {
-        message: errorMessage,
-      })
     }
 
     const applicantContact = getApplicantContact.data
@@ -103,15 +109,12 @@ export const createNoteOfInterestForInternalParkingSpace = async (
       undefined
     )
     if (leases.length < 1) {
-      const errorMessage = `Applicant ${contactCode} is not a tenant`
-      logAndNotifyTheTeam(
-        'Create Note of Interest - Exception',
-        errorMessage,
-        log
+      return endFailingProcess(
+        log,
+        'applicant-not-tenant',
+        400,
+        `Applicant ${contactCode} is not a tenant`
       )
-      return makeProcessError('applicant-not-tenant', 403, {
-        message: errorMessage,
-      })
     }
     //Check if applicant is eligible for renting in area with specific rental rule
     const [validationResultResArea, validationResultProperty] =
@@ -126,20 +129,20 @@ export const createNoteOfInterestForInternalParkingSpace = async (
       )
 
     if (!validationResultResArea.ok) {
-      logAndNotifyTheTeam(
-        'Create Note of Interest - Exception',
-        `Applicant ${contactCode} is not eligible for renting due to Residential Area Rental Rules`,
-        log
+      return endFailingProcess(
+        log,
+        'not-eligible-to-rent',
+        400,
+        `Applicant ${contactCode} is not eligible for renting due to Residential Area Rental Rules`
       )
-      return makeProcessError(validationResultResArea.err, 400)
     }
     if (!validationResultProperty.ok) {
-      logAndNotifyTheTeam(
-        'Create Note of Interest - Exception',
-        `Applicant ${contactCode} is not eligible for renting due to Property Rental Rules`,
-        log
+      return endFailingProcess(
+        log,
+        'not-eligible-to-rent',
+        400,
+        `Applicant ${contactCode} is not eligible for renting due to Property Rental Rules`
       )
-      return makeProcessError(validationResultProperty.err, 400)
     }
 
     //step 3.a.1. Perform credit check
@@ -223,15 +226,12 @@ export const createNoteOfInterestForInternalParkingSpace = async (
         log.push(`Annons skapad i onecore-leasing`)
         listingAdapterResult = createListingResult
       } else {
-        const errorMessage = `Listing could not be created`
-        logAndNotifyTheTeam(
-          'Create Note of Interest - Exception',
-          errorMessage,
-          log
+        return endFailingProcess(
+          log,
+          'internal-error',
+          500,
+          `Listing could not be created`
         )
-        return makeProcessError('internal-error', 500, {
-          message: errorMessage,
-        })
       }
     }
 
@@ -282,15 +282,12 @@ export const createNoteOfInterestForInternalParkingSpace = async (
             },
           }
         } else {
-          const errorMessage = `Application could not be created`
-          logAndNotifyTheTeam(
-            'Create Note of Interest - Exception',
-            errorMessage,
-            log
+          return endFailingProcess(
+            log,
+            'internal-error',
+            500,
+            `Application could not be created`
           )
-          return makeProcessError('internal-error', 500, {
-            message: errorMessage,
-          })
         }
       }
 
@@ -341,35 +338,21 @@ export const createNoteOfInterestForInternalParkingSpace = async (
       }
     }
 
-    const errorMessage =
+    return endFailingProcess(
+      log,
+      'internal-error',
+      500,
       'Create not of interest for internal parking space failed due to unknown error'
-    logAndNotifyTheTeam(
-      'Create Note of Interest - Exception',
-      errorMessage,
-      log
     )
-
-    return makeProcessError('internal-error', 500, {
-      message: errorMessage,
-    })
   } catch (error: any) {
     const errorMessage =
-      'Create not of interest for internal parking space failed'
-    logAndNotifyTheTeam(
-      'Create Note of Interest - Exception',
-      errorMessage,
-      log
-    )
-    return makeProcessError('internal-error', 500, {
-      message: error.message,
-    })
-  }
-}
+      error instanceof Error
+        ? 'Create not of interest for internal parking space failed: ' +
+          error.message
+        : 'Create not of interest for internal parking space failed: ' + error
 
-const logAndNotifyTheTeam = (title: string, message: string, log: any[]) => {
-  log.push(message)
-  logger.debug(log)
-  sendNotificationToRole('dev', title, log.join('\n'))
+    return endFailingProcess(log, 'internal-error', 500, errorMessage)
+  }
 }
 
 const createApplicantRequestBody = (
