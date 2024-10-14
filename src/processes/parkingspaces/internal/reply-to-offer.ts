@@ -17,6 +17,7 @@ type ReplyToOfferError =
   | 'create-lease-failed'
   | 'unknown'
 
+// PROCESS Part 3 - Accept Offer for Scored Parking Space
 export const acceptOffer = async (
   offerId: number
 ): Promise<ProcessResult<null, ReplyToOfferError>> => {
@@ -159,6 +160,7 @@ export const acceptOffer = async (
   }
 }
 
+// PROCESS Part 3 - Deny Offer for Scored Parking Space
 export const denyOffer = async (
   offerId: number
 ): Promise<ProcessResult<{ listingId: number }, ReplyToOfferError>> => {
@@ -199,6 +201,7 @@ export const denyOffer = async (
   }
 }
 
+// PROCESS Part 3 - Expire Offer for Scored Parking Space
 export const expireOffer = async (
   offerId: number
 ): Promise<ProcessResult<null, ReplyToOfferError>> => {

@@ -28,18 +28,7 @@ import { ProcessResult, ProcessStatus } from '../../../common/types'
 import { makeProcessError, validateRentalRules } from '../utils'
 import { sendNotificationToRole } from '../../../adapters/communication-adapter'
 
-// PROCESS Part 1 - Create note of interest for internal parking space
-//
-// Description: Applicant adds note of interest to parking space marked as internal, automatic check is performed at due date/time of ad, contract is created in Xpand when "most" fitting applicant accepts offer
-// Steps:
-// 1.  Get parking space from SOAP-service or xpand database (best buck for bang approach to be investigated)
-// 2.  Get applicant from onecore-leasing
-// 3.a Check that applicant is a tenant
-// 3.b Check if applicant is in queue for parking spaces, if not add to queue. Use SOAP-service
-// 4.a Pass parking space ad and applicant data to onecore-leasing for further processing. onoecore-leasing has tables for keeping track of ads and applicants.
-// 4.b onecore-leasing adds the parking space to internal db if not already existing.
-// 4.c onecore-leasing adds applicants to the list of applicants for this particular ad
-
+// PROCESS Part 1 - Create Note of Interest for Scored Parking Space
 export const createNoteOfInterestForInternalParkingSpace = async (
   parkingSpaceId: string,
   contactCode: string,
@@ -364,9 +353,12 @@ export const createNoteOfInterestForInternalParkingSpace = async (
       message: errorMessage,
     })
   } catch (error: any) {
-    logger.error(
-      error,
+    const errorMessage =
       'Create not of interest for internal parking space failed'
+    logAndNotifyTheTeam(
+      'Create Note of Interest - Exception',
+      errorMessage,
+      log
     )
     return makeProcessError('internal-error', 500, {
       message: error.message,

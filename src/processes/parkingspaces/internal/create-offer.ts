@@ -24,6 +24,7 @@ type CreateOfferError =
   | 'send-email'
   | 'unknown'
 
+// PROCESS Part 2 - Create Offer for Scored Parking Space
 export const createOfferForInternalParkingSpace = async (
   listingId: number
 ): Promise<ProcessResult<null, CreateOfferError>> => {
