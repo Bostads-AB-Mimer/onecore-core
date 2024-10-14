@@ -171,7 +171,13 @@ function mapDetailedApplicantsToCreateOfferSelectedApplicants(
       ? (a.applicationType as 'Replace' | 'Additional')
       : 'Additional', //TODO: Fix this
     queuePoints: a.queuePoints,
-    hasParkingSpace: Boolean(a.parkingSpaceContracts?.length), // TODO: We need to calculate the right value here
-    housingLeaseStatus: LeaseStatus.Current, //TODO: We need to calculate the right lease status
+    hasParkingSpace: Boolean(a.parkingSpaceContracts?.length),
+    // TODO: Ended is not a valid status for a lease, should be Upcoming or
+    // Current but we don't have a good way of determining that at the moment
+    housingLeaseStatus: a.upcomingHousingContract
+      ? LeaseStatus.Upcoming
+      : a.currentHousingContract
+        ? LeaseStatus.Current
+        : LeaseStatus.Ended,
   }
 }
