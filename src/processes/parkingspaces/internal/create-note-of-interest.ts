@@ -32,22 +32,6 @@ import {
 import { makeProcessError, validateRentalRules } from '../utils'
 import { sendNotificationToRole } from '../../../adapters/communication-adapter'
 
-const endFailingProcess = (
-  log: any[],
-  error: string,
-  httpStatus: number,
-  details: string
-): ProcessError => {
-  log.push(details)
-  logger.debug(log)
-  sendNotificationToRole(
-    'dev',
-    `Create Note of Interest - ${error}`,
-    log.join('\n')
-  )
-
-  return makeProcessError(error, httpStatus, { message: details })
-}
 // PROCESS Part 1 - Create Note of Interest for Scored Parking Space
 export const createNoteOfInterestForInternalParkingSpace = async (
   parkingSpaceId: string,
@@ -96,7 +80,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
       return endFailingProcess(
         log,
         'applicant-not-found',
-        400,
+        404,
         `Applicant ${contactCode} could not be retrieved.`
       )
     }
@@ -112,7 +96,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
       return endFailingProcess(
         log,
         'applicant-not-tenant',
-        400,
+        403,
         `Applicant ${contactCode} is not a tenant`
       )
     }
@@ -131,7 +115,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     if (!validationResultResArea.ok) {
       return endFailingProcess(
         log,
-        'not-eligible-to-rent',
+        validationResultResArea.err ?? 'not-eligible-to-rent',
         400,
         `Applicant ${contactCode} is not eligible for renting due to Residential Area Rental Rules`
       )
@@ -139,7 +123,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     if (!validationResultProperty.ok) {
       return endFailingProcess(
         log,
-        'not-eligible-to-rent',
+        validationResultProperty.err ?? 'not-eligible-to-rent',
         400,
         `Applicant ${contactCode} is not eligible for renting due to Property Rental Rules`
       )
@@ -353,6 +337,23 @@ export const createNoteOfInterestForInternalParkingSpace = async (
 
     return endFailingProcess(log, 'internal-error', 500, errorMessage)
   }
+}
+
+const endFailingProcess = (
+  log: any[],
+  error: string,
+  httpStatus: number,
+  details: string
+): ProcessError => {
+  log.push(details)
+  logger.debug(log)
+  sendNotificationToRole(
+    'dev',
+    `Create Note of Interest - ${error}`,
+    log.join('\n')
+  )
+
+  return makeProcessError(error, httpStatus, { message: details })
 }
 
 const createApplicantRequestBody = (

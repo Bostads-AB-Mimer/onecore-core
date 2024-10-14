@@ -1,6 +1,7 @@
 import axios, { AxiosResponse, HttpStatusCode } from 'axios'
 import * as propertyManagementAdapter from '../../../../adapters/property-management-adapter'
 import * as leasingAdapter from '../../../../adapters/leasing-adapter'
+import * as communicationAdapter from '../../../../adapters/communication-adapter'
 import { ProcessStatus } from '../../../../common/types'
 import * as parkingProcesses from '../index'
 import { ApplicantStatus, ListingStatus } from 'onecore-types'
@@ -21,6 +22,7 @@ const createAxiosResponse = (status: number, data: any): AxiosResponse => {
 }
 
 describe('createNoteOfInterestForInternalParkingSpace', () => {
+  // Den här verkar inte funka. Pga LoggedAxios??
   // Mock out all top level functions, such as get, put, delete and post:
   jest.mock('axios')
 
@@ -108,6 +110,10 @@ describe('createNoteOfInterestForInternalParkingSpace', () => {
     })
 
   const validateRentalRules = jest.spyOn(processUtils, 'validateRentalRules')
+
+  jest
+    .spyOn(communicationAdapter, 'sendNotificationToRole')
+    .mockResolvedValue({})
 
   jest.spyOn(leasingAdapter, 'getListingByRentalObjectCode').mockResolvedValue({
     ok: true,
@@ -235,7 +241,10 @@ describe('createNoteOfInterestForInternalParkingSpace', () => {
       processStatus: ProcessStatus.failed,
       httpStatus: 400,
       error: 'not-allowed-to-rent-additional',
-      response: undefined,
+      response: {
+        message:
+          'Applicant bar is not eligible for renting due to Residential Area Rental Rules',
+      },
     })
   })
 
