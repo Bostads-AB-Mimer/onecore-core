@@ -45,6 +45,7 @@ describe('replyToOffer', () => {
         httpStatus: 404,
         response: {
           message: 'The offer 123 does not exist or could not be retrieved.',
+          errorCode: 'no-offer',
         },
       })
     })
@@ -65,6 +66,7 @@ describe('replyToOffer', () => {
         httpStatus: 404,
         response: {
           message: `The parking space ${offer.rentalObjectCode} does not exist or is no longer available.`,
+          errorCode: 'no-listing',
         },
       })
     })
@@ -92,6 +94,7 @@ describe('replyToOffer', () => {
         httpStatus: 500,
         response: {
           message: 'Something went wrong when closing the offer.',
+          errorCode: 'close-offer',
         },
       })
     })
@@ -119,6 +122,7 @@ describe('replyToOffer', () => {
         httpStatus: 500,
         response: {
           message: `Other offers for ${offer.offeredApplicant.contactCode} could not be retrieved.`,
+          errorCode: 'get-other-offers',
         },
       })
     })
@@ -177,6 +181,7 @@ describe('replyToOffer', () => {
         httpStatus: 500,
         response: {
           message: `Create Lease for ${offer.id} failed.`,
+          errorCode: 'create-lease-failed',
         },
       })
     })
@@ -270,6 +275,7 @@ describe('replyToOffer', () => {
         httpStatus: 404,
         response: {
           message: 'The offer 123 does not exist or could not be retrieved.',
+          errorCode: 'no-offer',
         },
       })
     })
@@ -290,6 +296,7 @@ describe('replyToOffer', () => {
         httpStatus: 404,
         response: {
           message: `The parking space ${offer.listingId} does not exist or is no longer available.`,
+          errorCode: 'no-listing',
         },
       })
     })
@@ -307,6 +314,7 @@ describe('replyToOffer', () => {
         httpStatus: 404,
         response: {
           message: 'The offer 123 does not exist or could not be retrieved.',
+          errorCode: 'no-offer',
         },
       })
     })
@@ -327,6 +335,7 @@ describe('replyToOffer', () => {
         httpStatus: 404,
         response: {
           message: `The parking space ${offer.listingId} does not exist or is no longer available.`,
+          errorCode: 'no-listing',
         },
       })
     })

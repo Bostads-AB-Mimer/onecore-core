@@ -1,4 +1,4 @@
-import { ListingStatus } from 'onecore-types'
+import { CreateNoteOfInterestErrorCodes, ListingStatus } from 'onecore-types'
 
 import { createOfferForInternalParkingSpace } from '../create-offer'
 import * as leasingAdapter from '../../../../adapters/leasing-adapter'
@@ -27,6 +27,7 @@ describe('createOfferForInternalParkingSpace', () => {
       error: 'no-listing',
       httpStatus: 500,
       response: {
+        errorCode: 'no-listing',
         message: 'Listing with id 123 not found',
       },
     })
@@ -47,6 +48,7 @@ describe('createOfferForInternalParkingSpace', () => {
       httpStatus: 500,
       response: {
         message: 'Listing with id 123 not expired',
+        errorCode: 'listing-not-expired',
       },
     })
   })
@@ -69,6 +71,7 @@ describe('createOfferForInternalParkingSpace', () => {
       httpStatus: 500,
       response: {
         message: 'No eligible applicants found, cannot create new offer',
+        errorCode: 'no-applicants',
       },
     })
   })
@@ -154,6 +157,7 @@ describe('createOfferForInternalParkingSpace', () => {
       httpStatus: 500,
       response: {
         message: 'Could not find contact P158773',
+        errorCode: 'get-contact',
       },
     })
   })
@@ -180,7 +184,10 @@ describe('createOfferForInternalParkingSpace', () => {
       processStatus: ProcessStatus.failed,
       error: 'update-applicant-status',
       httpStatus: 500,
-      response: { message: 'Update Applicant Status failed' },
+      response: {
+        message: 'Update Applicant Status failed',
+        errorCode: 'update-applicant-status',
+      },
     })
   })
 
@@ -209,7 +216,7 @@ describe('createOfferForInternalParkingSpace', () => {
       processStatus: ProcessStatus.failed,
       error: 'create-offer',
       httpStatus: 500,
-      response: { message: 'Create Offer failed' },
+      response: { message: 'Create Offer failed', errorCode: 'create-offer' },
     })
   })
 

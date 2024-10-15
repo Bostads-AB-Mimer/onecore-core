@@ -244,6 +244,7 @@ describe('createNoteOfInterestForInternalParkingSpace', () => {
       response: {
         message:
           'Applicant bar is not eligible for renting due to Residential Area Rental Rules',
+        errorCode: 'not-allowed-to-rent-additional',
       },
     })
   })
