@@ -45,10 +45,6 @@ export interface OdooPostTicket {
   master_key: boolean
 }
 
-export interface OdooUpdateTicketBody {
-  stage_id: number
-}
-
 interface OdooPostTicketImage {
   Filename: string
   ImageType: number
