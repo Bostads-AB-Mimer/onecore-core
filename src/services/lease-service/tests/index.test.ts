@@ -5,6 +5,7 @@ import bodyParser from 'koa-bodyparser'
 import { routes } from '../index'
 import * as tenantLeaseAdapter from '../../../adapters/leasing-adapter'
 import * as replyToOffer from '../../../processes/parkingspaces/internal/reply-to-offer'
+import * as offerProcess from '../../../processes/parkingspaces/internal/create-offer'
 
 import { Lease, ConsumerReport } from 'onecore-types'
 import * as factory from '../../../../test/factories'
@@ -267,6 +268,13 @@ describe('lease-service', () => {
         httpStatus: 202,
         data: { listingId: 123 },
       })
+      jest
+        .spyOn(offerProcess, 'createOfferForInternalParkingSpace')
+        .mockResolvedValue({
+          processStatus: ProcessStatus.successful,
+          data: null,
+          httpStatus: 200,
+        })
 
       const result = await request(app.callback()).post('/offers/123/deny')
 
