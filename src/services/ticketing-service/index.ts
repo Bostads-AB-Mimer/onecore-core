@@ -654,7 +654,7 @@ export const routes = (router: KoaRouter) => {
     if (!ticketId) {
       ctx.status = 400
       ctx.body = {
-        reason: 'Ticket ID is missing from the request URL',
+        reason: 'ticketId is missing from the request URL',
         ...metadata,
       }
 
