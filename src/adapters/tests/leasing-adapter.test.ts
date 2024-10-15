@@ -1,16 +1,16 @@
 import { HttpStatusCode } from 'axios'
 import assert from 'node:assert'
 import nock from 'nock'
+import { OfferStatus } from 'onecore-types'
+
 import config from '../../common/config'
 import * as leasingAdapter from '../leasing-adapter'
 import {
   mockedInvoices,
   mockedOldProblematicInvoices,
   mockedProblematicInvoices,
-  mockedWaitingList,
 } from './leasing-adapter.mocks'
 import * as factory from '../../../test/factories'
-import { OfferStatus } from 'onecore-types'
 
 describe('leasing-adapter', () => {
   describe(leasingAdapter.getInternalCreditInformation, () => {
@@ -50,19 +50,21 @@ describe('leasing-adapter', () => {
 
   describe(leasingAdapter.getWaitingList, () => {
     it('should return waiting list', async () => {
+      const waitingList = factory.waitingList.build()
       nock(config.tenantsLeasesService.url)
         .get(/contact\/waitingList\//)
-        .reply(200, { content: mockedWaitingList })
+        .reply(200, { content: [waitingList] })
 
       const result = await leasingAdapter.getWaitingList('P123456')
 
-      expect(result).toEqual(
-        mockedWaitingList.map((v) => ({
-          ...v,
-          contractFromApartment: v.contractFromApartment.toISOString(),
-          waitingListFrom: v.waitingListFrom.toISOString(),
-        }))
-      )
+      expect(result).toEqual([
+        {
+          ...waitingList,
+          contractFromApartment:
+            waitingList.contractFromApartment.toISOString(),
+          waitingListFrom: waitingList.waitingListFrom.toISOString(),
+        },
+      ])
     })
   })
 
