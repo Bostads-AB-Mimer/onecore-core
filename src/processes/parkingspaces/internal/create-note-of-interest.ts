@@ -6,6 +6,7 @@ import {
   ApplicantStatus,
   Contact,
   Listing,
+  CreateNoteOfInterestErrorCodes,
 } from 'onecore-types'
 import { logger } from 'onecore-utilities'
 
@@ -53,7 +54,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     if (!parkingSpace || !parkingSpace.districtCode) {
       return endFailingProcess(
         log,
-        'parkingspace-not-found',
+        CreateNoteOfInterestErrorCodes.ParkingspaceNotFound,
         404,
         `The parking space ${parkingSpaceId} does not exist or is no longer available.`
       )
@@ -68,7 +69,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     ) {
       return endFailingProcess(
         log,
-        'parkingspace-not-internal',
+        CreateNoteOfInterestErrorCodes.ParkingspaceNotInternal,
         400,
         `This process currently only handles internal parking spaces. The parking space provided is not internal (it is ${parkingSpaceApplicationType}, ${parkingSpaceApplicationCategoryTranslation.internal}).`
       )
@@ -79,7 +80,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     if (!getApplicantContact.ok) {
       return endFailingProcess(
         log,
-        'applicant-not-found',
+        CreateNoteOfInterestErrorCodes.ApplicantNotFound,
         404,
         `Applicant ${contactCode} could not be retrieved.`
       )
@@ -95,7 +96,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     if (leases.length < 1) {
       return endFailingProcess(
         log,
-        'applicant-not-tenant',
+        CreateNoteOfInterestErrorCodes.ApplicantNotTenant,
         403,
         `Applicant ${contactCode} is not a tenant`
       )
@@ -115,7 +116,8 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     if (!validationResultResArea.ok) {
       return endFailingProcess(
         log,
-        validationResultResArea.err ?? 'not-eligible-to-rent',
+        validationResultResArea.err ??
+          CreateNoteOfInterestErrorCodes.NotEligibleToRent,
         400,
         `Applicant ${contactCode} is not eligible for renting due to Residential Area Rental Rules`
       )
@@ -123,7 +125,8 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     if (!validationResultProperty.ok) {
       return endFailingProcess(
         log,
-        validationResultProperty.err ?? 'not-eligible-to-rent',
+        validationResultProperty.err ??
+          CreateNoteOfInterestErrorCodes.NotEligibleToRent,
         400,
         `Applicant ${contactCode} is not eligible for renting due to Property Rental Rules`
       )
@@ -151,10 +154,13 @@ export const createNoteOfInterestForInternalParkingSpace = async (
         log.join('\n')
       )
 
-      return makeProcessError('application-rejected', 400, {
-        reason: 'Internal check failed',
-        message: 'The parking space lease application has been rejected',
-      })
+      return makeProcessError(
+        CreateNoteOfInterestErrorCodes.InternalCreditCheckFailed,
+        400,
+        {
+          message: 'The parking space lease application has been rejected',
+        }
+      )
     }
 
     //step 3.b Check if applicant is in queue for parking spaces, if not add to queue
@@ -212,7 +218,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
       } else {
         return endFailingProcess(
           log,
-          'internal-error',
+          CreateNoteOfInterestErrorCodes.InternalError,
           500,
           `Listing could not be created`
         )
@@ -268,7 +274,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
         } else {
           return endFailingProcess(
             log,
-            'internal-error',
+            CreateNoteOfInterestErrorCodes.InternalError,
             500,
             `Application could not be created`
           )
@@ -324,7 +330,7 @@ export const createNoteOfInterestForInternalParkingSpace = async (
 
     return endFailingProcess(
       log,
-      'internal-error',
+      CreateNoteOfInterestErrorCodes.InternalError,
       500,
       'Create not of interest for internal parking space failed due to unknown error'
     )
