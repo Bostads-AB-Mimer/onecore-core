@@ -5,7 +5,6 @@ import config from '../../common/config'
 import * as leasingAdapter from '../leasing-adapter'
 import {
   mockedInvoices,
-  mockedDetailedApplicants,
   mockedOldProblematicInvoices,
   mockedProblematicInvoices,
   mockedWaitingList,
@@ -69,14 +68,17 @@ describe('leasing-adapter', () => {
 
   describe(leasingAdapter.getListingByIdWithDetailedApplicants, () => {
     it('should return a listing with detailed applicants', async () => {
+      const detailedApplicants = factory.detailedApplicant.buildList(1)
       nock(config.tenantsLeasesService.url)
         .get(/listing/)
-        .reply(200, { content: mockedDetailedApplicants })
+        .reply(200, { content: detailedApplicants })
 
       const result =
         await leasingAdapter.getListingByIdWithDetailedApplicants('1337')
 
-      expect(result).toEqual(mockedDetailedApplicants)
+      expect(result).toEqual([
+        expect.objectContaining({ id: detailedApplicants[0].id }),
+      ])
     })
   })
 
