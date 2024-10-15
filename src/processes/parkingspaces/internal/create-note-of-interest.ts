@@ -134,8 +134,14 @@ export const createNoteOfInterestForInternalParkingSpace = async (
         `Ansökan kunde inte beviljas på grund av ouppfyllda kreditkrav (se ovan).`
       )
 
+      //todo: import from types when merged
+      enum CreateNoteOfInterestErrorCodes {
+        InternalCreditCheckFailed = 'internal-credit-check-failed',
+        Unknown = 'unknown',
+      }
+
       return makeProcessError('application-rejected', 400, {
-        reason: 'Internal check failed',
+        reason: CreateNoteOfInterestErrorCodes.InternalCreditCheckFailed,
         message: 'The parking space lease application has been rejected',
       })
     }
