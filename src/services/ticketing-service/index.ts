@@ -20,7 +20,7 @@ import {
   getMaintenanceTeamId,
   getTicketByContactCode,
   transformEquipmentCode,
-  updateTicket,
+  closeTicket,
 } from './adapters/odoo-adapter'
 import { logger, generateRouteMetadata } from 'onecore-utilities'
 
@@ -647,10 +647,9 @@ export const routes = (router: KoaRouter) => {
     }
   })
 
-  router.post('(.*)/updateTicket/:ticketId', async (ctx) => {
+  router.post('(.*)/closeTicket/:ticketId', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
     const { ticketId } = ctx.params
-    const { stage_id } = ctx.request.body
 
     if (!ticketId) {
       ctx.status = 400
@@ -662,17 +661,7 @@ export const routes = (router: KoaRouter) => {
       return
     }
 
-    if (!stage_id) {
-      ctx.status = 400
-      ctx.body = {
-        reason: 'stage_id is missing from the request body',
-        ...metadata,
-      }
-
-      return
-    }
-
-    const success = await updateTicket(ticketId, { stage_id })
+    const success = await closeTicket(ticketId)
 
     if (success) {
       ctx.status = 200
