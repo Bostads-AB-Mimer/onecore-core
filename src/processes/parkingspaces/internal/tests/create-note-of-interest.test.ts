@@ -514,7 +514,7 @@ describe('createNoteOfInterestForInternalParkingSpace', () => {
         'bar',
         'Additional'
       )
-    console.log(response)
+
     expect(response.processStatus).toBe(ProcessStatus.successful)
     expect(response.response.message).toBe(
       'Applicant bar already has application for foo'
