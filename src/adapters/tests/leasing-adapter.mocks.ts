@@ -94,33 +94,3 @@ export const mockedOldProblematicInvoices: Invoice[] = [
     ...mockedInvoices[2],
   },
 ]
-
-export const mockedWaitingList: WaitingList[] = [
-  {
-    applicantCaption: 'Foo Bar',
-    contactCode: 'P12345',
-    contractFromApartment: new Date('2024-02-29T23:00:00.000Z'),
-    queuePoints: 45,
-    queuePointsSocialConnection: 0,
-    waitingListFrom: new Date('2024-01-31T23:00:00.000Z'),
-    waitingListTypeCaption: 'Bostad',
-  },
-  {
-    applicantCaption: 'Foo Bar',
-    contactCode: 'P12345',
-    contractFromApartment: new Date('2024-02-29T23:00:00.000Z'),
-    queuePoints: 45,
-    queuePointsSocialConnection: 0,
-    waitingListFrom: new Date('2024-01-31T23:00:00.000Z'),
-    waitingListTypeCaption: 'Bilplats (intern)',
-  },
-  {
-    applicantCaption: 'Foo Bar',
-    contactCode: 'P12345',
-    contractFromApartment: new Date('2024-02-29T23:00:00.000Z'),
-    queuePoints: 45,
-    queuePointsSocialConnection: 0,
-    waitingListFrom: new Date('2024-01-31T23:00:00.000Z'),
-    waitingListTypeCaption: 'Bilplats (extern)',
-  },
-]
