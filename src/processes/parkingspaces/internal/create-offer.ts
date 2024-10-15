@@ -8,11 +8,16 @@ import {
 } from 'onecore-types'
 import { logger } from 'onecore-utilities'
 
-import { ProcessResult, ProcessStatus } from '../../../common/types'
+import {
+  ProcessResult,
+  ProcessStatus,
+  ProcessError,
+} from '../../../common/types'
 import * as leasingAdapter from '../../../adapters/leasing-adapter'
 import * as utils from '../../../utils'
 import * as communicationAdapter from '../../../adapters/communication-adapter'
 import { makeProcessError } from '../utils'
+import { sendNotificationToRole } from '../../../adapters/communication-adapter'
 
 type CreateOfferError =
   | 'no-listing'
@@ -37,12 +42,20 @@ export const createOfferForInternalParkingSpace = async (
   try {
     const listing = await leasingAdapter.getListingByListingId(listingId)
     if (!listing) {
-      logger.error('Listing not found')
-      return makeProcessError('no-listing', 500)
+      return endFailingProcess(
+        log,
+        'no-listing',
+        500,
+        `Listing with id ${listingId} not found`
+      )
     }
     if (listing.status !== ListingStatus.Expired) {
-      logger.error(listing, 'Listing not expired')
-      return makeProcessError('listing-not-expired', 500)
+      return endFailingProcess(
+        log,
+        'listing-not-expired',
+        500,
+        `Listing with id ${listingId} not expired`
+      )
     }
 
     const eligibleApplicants = await leasingAdapter
@@ -53,27 +66,35 @@ export const createOfferForInternalParkingSpace = async (
           (
             detailedApplicant
           ): detailedApplicant is DetailedApplicant & { priority: number } => {
-            return detailedApplicant.priority != undefined
+            return (
+              detailedApplicant.priority != undefined &&
+              detailedApplicant.status === ApplicantStatus.Active
+            )
           }
         )
       })
 
-    const pickableApplicants = eligibleApplicants?.filter(
-      (a) => a.status === ApplicantStatus.Active
-    )
-    if (!pickableApplicants?.length) {
-      logger.error('No pickable applicants found, cannot create new offer')
-      return makeProcessError('no-applicants', 500)
+    if (!eligibleApplicants?.length) {
+      return endFailingProcess(
+        log,
+        'no-applicants',
+        500,
+        `No eligible applicants found, cannot create new offer`
+      )
     }
 
-    const [applicant, ...restApplicants] = pickableApplicants
+    const [applicant, ...restApplicants] = eligibleApplicants
 
     // TODO: Maybe we want to make a credit check here?
 
     const getContact = await leasingAdapter.getContact(applicant.contactCode)
     if (!getContact.ok) {
-      logger.error('Could not find contact')
-      return makeProcessError('get-contact', 500)
+      return endFailingProcess(
+        log,
+        'get-contact',
+        500,
+        `Could not find contact ${applicant.contactCode}`
+      )
     }
 
     const contact = getContact.data
@@ -88,11 +109,13 @@ export const createOfferForInternalParkingSpace = async (
       })
       log.push(`Updated status for applicant ${applicant.id}`)
     } catch (_err) {
-      logger.error(
-        _err,
-        'Error creating offer for internal parking space - could not update applicant status'
+      return endFailingProcess(
+        log,
+        'update-applicant-status',
+        500,
+        `Update Applicant Status failed`,
+        _err
       )
-      return makeProcessError('update-applicant-status', 500)
     }
 
     const updatedApplicant: DetailedApplicant & { priority: number } = {
@@ -110,17 +133,15 @@ export const createOfferForInternalParkingSpace = async (
     })
 
     if (!offer.ok) {
-      logger.error(
-        offer.err,
-        'Error creating offer for internal parking space - could not create offer'
+      sendNotificationToRole(
+        'leasing',
+        `Skapa erbjudande misslyckades - ${offer.err}`,
+        log.join('\n')
       )
-
-      return makeProcessError('create-offer', 500)
+      return endFailingProcess(log, 'create-offer', 500, `Create Offer failed`)
     }
 
     log.push(`Created offer ${offer.data.id}`)
-    console.log(log)
-    logger.debug(log)
 
     try {
       if (!contact.emailAddress)
@@ -141,11 +162,18 @@ export const createOfferForInternalParkingSpace = async (
         hasParkingSpace: false,
       })
     } catch (_err) {
-      logger.error(
-        _err,
-        'Error creating offer for internal parking space - could not send email'
+      sendNotificationToRole(
+        'leasing',
+        `Skapa erbjudande - skicka bekräftelse till kund misslyckades - ${_err}`,
+        log.join('\n')
       )
-      return makeProcessError('send-email', 500)
+      return endFailingProcess(
+        log,
+        'send-email',
+        500,
+        `Send Parking Space Offer Email failed`,
+        _err
+      )
     }
     return {
       processStatus: ProcessStatus.successful,
@@ -155,8 +183,37 @@ export const createOfferForInternalParkingSpace = async (
 
     // step 5 - notify winning applicant
   } catch (err) {
-    return makeProcessError('unknown', 500)
+    return endFailingProcess(
+      log,
+      'unknown',
+      500,
+      `Create Offer failed - unknown error`,
+      err
+    )
   }
+}
+
+// Ends a process gracefully by debugging log, logging the error, sending the error to the dev team and return a process error with the error code and details
+const endFailingProcess = (
+  log: any[],
+  processErrorCode: string,
+  httpStatus: number,
+  details: string,
+  error?: any
+): ProcessError => {
+  log.push(details)
+  if (error) log.push(error)
+
+  logger.debug(log)
+  logger.error(error ?? processErrorCode, details)
+
+  sendNotificationToRole(
+    'dev',
+    `Create Note of Interest - ${processErrorCode}`,
+    log.join('\n')
+  )
+
+  return makeProcessError(processErrorCode, httpStatus, { message: details })
 }
 
 function mapDetailedApplicantsToCreateOfferSelectedApplicants(

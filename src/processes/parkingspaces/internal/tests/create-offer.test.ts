@@ -11,6 +11,10 @@ describe('createOfferForInternalParkingSpace', () => {
     jest.clearAllMocks()
   })
 
+  jest
+    .spyOn(communicationAdapter, 'sendNotificationToRole')
+    .mockResolvedValue(null)
+
   it('fails if there is no listing', async () => {
     jest
       .spyOn(leasingAdapter, 'getListingByListingId')
@@ -22,6 +26,9 @@ describe('createOfferForInternalParkingSpace', () => {
       processStatus: ProcessStatus.failed,
       error: 'no-listing',
       httpStatus: 500,
+      response: {
+        message: 'Listing with id 123 not found',
+      },
     })
   })
 
@@ -38,6 +45,9 @@ describe('createOfferForInternalParkingSpace', () => {
       processStatus: ProcessStatus.failed,
       error: 'listing-not-expired',
       httpStatus: 500,
+      response: {
+        message: 'Listing with id 123 not expired',
+      },
     })
   })
 
@@ -57,6 +67,9 @@ describe('createOfferForInternalParkingSpace', () => {
       processStatus: ProcessStatus.failed,
       error: 'no-applicants',
       httpStatus: 500,
+      response: {
+        message: 'No eligible applicants found, cannot create new offer',
+      },
     })
   })
 
@@ -139,6 +152,9 @@ describe('createOfferForInternalParkingSpace', () => {
       processStatus: ProcessStatus.failed,
       error: 'get-contact',
       httpStatus: 500,
+      response: {
+        message: 'Could not find contact P158773',
+      },
     })
   })
 
@@ -164,6 +180,7 @@ describe('createOfferForInternalParkingSpace', () => {
       processStatus: ProcessStatus.failed,
       error: 'update-applicant-status',
       httpStatus: 500,
+      response: { message: 'Update Applicant Status failed' },
     })
   })
 
@@ -192,6 +209,7 @@ describe('createOfferForInternalParkingSpace', () => {
       processStatus: ProcessStatus.failed,
       error: 'create-offer',
       httpStatus: 500,
+      response: { message: 'Create Offer failed' },
     })
   })
 

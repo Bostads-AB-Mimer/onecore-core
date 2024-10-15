@@ -339,21 +339,27 @@ export const createNoteOfInterestForInternalParkingSpace = async (
   }
 }
 
+// Ends a process gracefully by debugging log, logging the error, sending the error to the dev team and return a process error with the error code and details
 const endFailingProcess = (
   log: any[],
-  error: string,
+  processErrorCode: string,
   httpStatus: number,
-  details: string
+  details: string,
+  error?: any
 ): ProcessError => {
   log.push(details)
+  if (error) log.push(error)
+
   logger.debug(log)
+  logger.error(error ?? processErrorCode, details)
+
   sendNotificationToRole(
     'dev',
-    `Create Note of Interest - ${error}`,
+    `Create Note of Interest - ${processErrorCode}`,
     log.join('\n')
   )
 
-  return makeProcessError(error, httpStatus, { message: details })
+  return makeProcessError(processErrorCode, httpStatus, { message: details })
 }
 
 const createApplicantRequestBody = (
