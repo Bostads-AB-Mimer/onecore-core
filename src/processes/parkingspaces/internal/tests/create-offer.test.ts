@@ -1,4 +1,4 @@
-import { ListingStatus } from 'onecore-types'
+import { CreateOfferErrorCodes, ListingStatus } from 'onecore-types'
 
 import { createOfferForInternalParkingSpace } from '../create-offer'
 import * as leasingAdapter from '../../../../adapters/leasing-adapter'
@@ -24,10 +24,10 @@ describe('createOfferForInternalParkingSpace', () => {
 
     expect(result).toEqual({
       processStatus: ProcessStatus.failed,
-      error: 'no-listing',
+      error: CreateOfferErrorCodes.NoListing,
       httpStatus: 500,
       response: {
-        errorCode: 'no-listing',
+        errorCode: CreateOfferErrorCodes.NoListing,
         message: 'Listing with id 123 not found',
       },
     })
@@ -44,11 +44,11 @@ describe('createOfferForInternalParkingSpace', () => {
 
     expect(result).toEqual({
       processStatus: ProcessStatus.failed,
-      error: 'listing-not-expired',
+      error: CreateOfferErrorCodes.ListingNotExpired,
       httpStatus: 500,
       response: {
         message: 'Listing with id 123 not expired',
-        errorCode: 'listing-not-expired',
+        errorCode: CreateOfferErrorCodes.ListingNotExpired,
       },
     })
   })
@@ -67,11 +67,11 @@ describe('createOfferForInternalParkingSpace', () => {
 
     expect(result).toEqual({
       processStatus: ProcessStatus.failed,
-      error: 'no-applicants',
+      error: CreateOfferErrorCodes.NoApplicants,
       httpStatus: 500,
       response: {
         message: 'No eligible applicants found, cannot create new offer',
-        errorCode: 'no-applicants',
+        errorCode: CreateOfferErrorCodes.NoApplicants,
       },
     })
   })
@@ -153,11 +153,11 @@ describe('createOfferForInternalParkingSpace', () => {
 
     expect(result).toEqual({
       processStatus: ProcessStatus.failed,
-      error: 'no-contact',
+      error: CreateOfferErrorCodes.NoContact,
       httpStatus: 500,
       response: {
         message: 'Could not find contact P158773',
-        errorCode: 'no-contact',
+        errorCode: CreateOfferErrorCodes.NoContact,
       },
     })
   })
@@ -182,11 +182,11 @@ describe('createOfferForInternalParkingSpace', () => {
 
     expect(result).toEqual({
       processStatus: ProcessStatus.failed,
-      error: 'update-applicant-status-failure',
+      error: CreateOfferErrorCodes.UpdateApplicantStatusFailure,
       httpStatus: 500,
       response: {
         message: 'Update Applicant Status failed',
-        errorCode: 'update-applicant-status-failure',
+        errorCode: CreateOfferErrorCodes.UpdateApplicantStatusFailure,
       },
     })
   })
@@ -214,11 +214,11 @@ describe('createOfferForInternalParkingSpace', () => {
 
     expect(result).toEqual({
       processStatus: ProcessStatus.failed,
-      error: 'create-offer-failure',
+      error: CreateOfferErrorCodes.CreateOfferFailure,
       httpStatus: 500,
       response: {
         message: 'Create Offer failed',
-        errorCode: 'create-offer-failure',
+        errorCode: CreateOfferErrorCodes.CreateOfferFailure,
       },
     })
   })

@@ -2,7 +2,7 @@ import * as leasingAdapter from '../../../../adapters/leasing-adapter'
 // import * as propertyManagementAdapter from '../../../../adapters/property-management-adapter'
 import * as communicationAdapter from '../../../../adapters/communication-adapter'
 
-import { OfferStatus } from 'onecore-types'
+import { OfferStatus, ReplyToOfferErrorCodes } from 'onecore-types'
 
 import { ProcessResult, ProcessStatus } from '../../../../common/types'
 import * as replyProcesses from '../reply-to-offer'
@@ -41,11 +41,11 @@ describe('replyToOffer', () => {
 
       expect(result).toEqual({
         processStatus: ProcessStatus.failed,
-        error: 'no-offer',
+        error: ReplyToOfferErrorCodes.NoOffer,
         httpStatus: 404,
         response: {
           message: 'The offer 123 does not exist or could not be retrieved.',
-          errorCode: 'no-offer',
+          errorCode: ReplyToOfferErrorCodes.NoOffer,
         },
       })
     })
@@ -62,11 +62,11 @@ describe('replyToOffer', () => {
 
       expect(result).toEqual({
         processStatus: ProcessStatus.failed,
-        error: 'no-listing',
+        error: ReplyToOfferErrorCodes.NoListing,
         httpStatus: 404,
         response: {
           message: `The listing ${offer.rentalObjectCode} does not exist or is no longer available.`,
-          errorCode: 'no-listing',
+          errorCode: ReplyToOfferErrorCodes.NoListing,
         },
       })
     })
@@ -121,11 +121,11 @@ describe('replyToOffer', () => {
 
       expect(result).toEqual({
         processStatus: ProcessStatus.failed,
-        error: 'create-lease-failure',
+        error: ReplyToOfferErrorCodes.CreateLeaseFailure,
         httpStatus: 500,
         response: {
           message: `Create Lease for ${offer.id} failed.`,
-          errorCode: 'create-lease-failure',
+          errorCode: ReplyToOfferErrorCodes.CreateLeaseFailure,
         },
       })
     })
@@ -221,11 +221,11 @@ describe('replyToOffer', () => {
 
       expect(result).toEqual({
         processStatus: ProcessStatus.failed,
-        error: 'no-offer',
+        error: ReplyToOfferErrorCodes.NoOffer,
         httpStatus: 404,
         response: {
           message: 'The offer 123 does not exist or could not be retrieved.',
-          errorCode: 'no-offer',
+          errorCode: ReplyToOfferErrorCodes.NoOffer,
         },
       })
     })
@@ -242,11 +242,11 @@ describe('replyToOffer', () => {
 
       expect(result).toEqual({
         processStatus: ProcessStatus.failed,
-        error: 'no-listing',
+        error: ReplyToOfferErrorCodes.NoListing,
         httpStatus: 404,
         response: {
           message: `The listing ${offer.listingId} does not exist or is no longer available.`,
-          errorCode: 'no-listing',
+          errorCode: ReplyToOfferErrorCodes.NoListing,
         },
       })
     })
@@ -260,11 +260,11 @@ describe('replyToOffer', () => {
 
       expect(result).toEqual({
         processStatus: ProcessStatus.failed,
-        error: 'no-offer',
+        error: ReplyToOfferErrorCodes.NoOffer,
         httpStatus: 404,
         response: {
           message: 'The offer 123 does not exist or could not be retrieved.',
-          errorCode: 'no-offer',
+          errorCode: ReplyToOfferErrorCodes.NoOffer,
         },
       })
     })
@@ -281,11 +281,11 @@ describe('replyToOffer', () => {
 
       expect(result).toEqual({
         processStatus: ProcessStatus.failed,
-        error: 'no-listing',
+        error: ReplyToOfferErrorCodes.NoListing,
         httpStatus: 404,
         response: {
           message: `The listing ${offer.listingId} does not exist or is no longer available.`,
-          errorCode: 'no-listing',
+          errorCode: ReplyToOfferErrorCodes.NoListing,
         },
       })
     })
