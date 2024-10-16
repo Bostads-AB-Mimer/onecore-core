@@ -1,4 +1,5 @@
 import Odoo from 'odoo-await'
+import striptags from 'striptags'
 import Config from '../../../common/config'
 import {
   ApartmentInfo,
@@ -49,6 +50,10 @@ interface OdooPostTicketImage {
   Filename: string
   ImageType: number
   Base64String: string
+}
+
+interface OdooAddMessage {
+  body: string
 }
 
 const odoo = new Odoo({
@@ -261,6 +266,21 @@ const closeTicket = async (ticketId: string): Promise<boolean> => {
   })
 }
 
+const addMessageToTicket = async (
+  ticketId: string,
+  message: OdooAddMessage
+): Promise<number> => {
+  await odoo.connect()
+  return await odoo.create('mail.message', {
+    res_id: parseInt(ticketId),
+    model: 'maintenance.request',
+    body: striptags(message.body),
+    message_type: 'notification',
+    email_from: 'Kund',
+    author_id: false,
+  })
+}
+
 const getMaintenanceTeamId = async (teamName: string): Promise<number> => {
   await odoo.connect()
 
@@ -280,6 +300,7 @@ const healthCheck = async () => {
 export {
   createTicket,
   closeTicket,
+  addMessageToTicket,
   createRentalPropertyRecord,
   createLeaseRecord,
   createTenantRecord,
