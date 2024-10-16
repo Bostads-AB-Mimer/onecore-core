@@ -684,7 +684,7 @@ export const routes = (router: KoaRouter) => {
     const { ticketId } = ctx.params
     const { message } = ctx.request.body
 
-    if (!ticketId) {
+    if (ticketId === undefined) {
       ctx.status = 400
       ctx.body = {
         reason: 'ticketId is missing from the request URL',
@@ -705,7 +705,7 @@ export const routes = (router: KoaRouter) => {
     }
 
     try {
-      await addMessageToTicket(ticketId, { body: message })
+      await addMessageToTicket(parseInt(ticketId), { body: message })
 
       ctx.status = 200
       ctx.body = {

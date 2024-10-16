@@ -267,12 +267,12 @@ const closeTicket = async (ticketId: string): Promise<boolean> => {
 }
 
 const addMessageToTicket = async (
-  ticketId: string,
+  ticketId: number,
   message: OdooAddMessage
 ): Promise<number> => {
   await odoo.connect()
   return await odoo.create('mail.message', {
-    res_id: parseInt(ticketId),
+    res_id: ticketId,
     model: 'maintenance.request',
     body: striptags(message.body),
     message_type: 'notification',
