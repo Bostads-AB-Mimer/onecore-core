@@ -243,14 +243,13 @@ const closeTicket = async (ticketId: string): Promise<boolean> => {
 
   const doneMaintenanceStages = await odoo.searchRead<{
     id: number
-    name: string
   }>(
     'maintenance.stage',
     [
       ['done', '=', true],
       ['name', '=', 'Avslutad'],
     ],
-    ['id', 'name']
+    ['id']
   )
 
   if (doneMaintenanceStages.length === 0) {
