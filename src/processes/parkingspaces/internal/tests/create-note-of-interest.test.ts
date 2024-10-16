@@ -22,7 +22,6 @@ const createAxiosResponse = (status: number, data: any): AxiosResponse => {
 }
 
 describe('createNoteOfInterestForInternalParkingSpace', () => {
-  // Den här verkar inte funka. Pga LoggedAxios??
   // Mock out all top level functions, such as get, put, delete and post:
   jest.mock('axios')
 
