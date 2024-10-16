@@ -7,7 +7,7 @@ import * as tenantLeaseAdapter from '../../../adapters/leasing-adapter'
 import * as replyToOffer from '../../../processes/parkingspaces/internal/reply-to-offer'
 import * as offerProcess from '../../../processes/parkingspaces/internal/create-offer'
 
-import { Lease, ConsumerReport } from 'onecore-types'
+import { Lease, ConsumerReport, ReplyToOfferErrorCodes } from 'onecore-types'
 import * as factory from '../../../../test/factories'
 import { ProcessStatus } from '../../../common/types'
 
@@ -251,7 +251,7 @@ describe('lease-service', () => {
       jest.spyOn(replyToOffer, 'acceptOffer').mockResolvedValue({
         processStatus: ProcessStatus.failed,
         httpStatus: 404,
-        error: 'no-offer',
+        error: ReplyToOfferErrorCodes.NoOffer,
       })
 
       const result = await request(app.callback()).post('/offers/123/accept')
@@ -285,7 +285,7 @@ describe('lease-service', () => {
       jest.spyOn(replyToOffer, 'denyOffer').mockResolvedValue({
         processStatus: ProcessStatus.failed,
         httpStatus: 404,
-        error: 'no-offer',
+        error: ReplyToOfferErrorCodes.NoOffer,
       })
 
       const result = await request(app.callback()).post('/offers/123/deny')
@@ -312,7 +312,7 @@ describe('lease-service', () => {
       jest.spyOn(replyToOffer, 'expireOffer').mockResolvedValue({
         processStatus: ProcessStatus.failed,
         httpStatus: 404,
-        error: 'no-offer',
+        error: ReplyToOfferErrorCodes.NoOffer,
       })
 
       const result = await request(app.callback()).get('/offers/123/expire')

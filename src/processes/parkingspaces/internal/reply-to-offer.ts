@@ -1,4 +1,9 @@
-import { OfferStatus, OfferWithRentalObjectCode } from 'onecore-types'
+import {
+  CreateOfferErrorCodes,
+  OfferStatus,
+  OfferWithRentalObjectCode,
+  ReplyToOfferErrorCodes,
+} from 'onecore-types'
 import { logger } from 'onecore-utilities'
 
 import {
@@ -12,14 +17,12 @@ import { makeProcessError } from '../utils'
 import { AdapterResult } from '../../../adapters/types'
 
 type ReplyToOfferError =
-  | 'no-offer'
-  | 'no-active-offer'
-  | 'no-listing'
-  | 'close-offer'
-  | 'get-other-offers'
-  | 'send-email'
-  | 'create-lease-failed'
-  | 'unknown'
+  | ReplyToOfferErrorCodes.NoOffer
+  | ReplyToOfferErrorCodes.NoActiveOffer
+  | ReplyToOfferErrorCodes.NoListing
+  | ReplyToOfferErrorCodes.CreateLeaseFailure
+  | ReplyToOfferErrorCodes.CloseOfferFailure
+  | ReplyToOfferErrorCodes.Unknown
 
 // PROCESS Part 3 - Accept Offer for Scored Parking Space
 export const acceptOffer = async (
@@ -40,7 +43,7 @@ export const acceptOffer = async (
     if (!res.ok) {
       return endFailingProcess(
         log,
-        'no-offer',
+        ReplyToOfferErrorCodes.NoOffer,
         404,
         `The offer ${offerId} does not exist or could not be retrieved.`
       )
@@ -51,7 +54,7 @@ export const acceptOffer = async (
     if (offer.status != OfferStatus.Active) {
       return endFailingProcess(
         log,
-        'no-active-offer',
+        ReplyToOfferErrorCodes.NoActiveOffer,
         404,
         `The offer ${offerId} is not active.`
       )
@@ -67,7 +70,7 @@ export const acceptOffer = async (
     if (!listing || !listing.districtCode) {
       return endFailingProcess(
         log,
-        'no-listing',
+        ReplyToOfferErrorCodes.NoListing,
         404,
         `The listing ${offer.listingId.toString()} does not exist or is no longer available.`
       )
@@ -92,7 +95,7 @@ export const acceptOffer = async (
     } catch (err) {
       return endFailingProcess(
         log,
-        'create-lease-failed',
+        ReplyToOfferErrorCodes.CreateLeaseFailure,
         500,
         `Create Lease for ${offerId} failed.`,
         err
@@ -181,7 +184,7 @@ export const acceptOffer = async (
   } catch (err) {
     return endFailingProcess(
       log,
-      'unknown',
+      ReplyToOfferErrorCodes.Unknown,
       500,
       `Accept offer of parking space uncaught error`,
       err
@@ -208,7 +211,7 @@ export const denyOffer = async (
     if (!res.ok) {
       return endFailingProcess(
         log,
-        'no-offer',
+        ReplyToOfferErrorCodes.NoOffer,
         404,
         `The offer ${offerId} does not exist or could not be retrieved.`
       )
@@ -220,7 +223,7 @@ export const denyOffer = async (
     if (!listing || !listing.districtCode) {
       return endFailingProcess(
         log,
-        'no-listing',
+        ReplyToOfferErrorCodes.NoListing,
         404,
         `The listing ${offer.listingId.toString()} does not exist or is no longer available.`
       )
@@ -231,7 +234,7 @@ export const denyOffer = async (
     if (!closeOffer.ok) {
       return endFailingProcess(
         log,
-        'close-offer',
+        ReplyToOfferErrorCodes.CloseOfferFailure,
         500,
         `Something went wrong when denying the offer ${offer.id}`
       )
@@ -245,7 +248,7 @@ export const denyOffer = async (
   } catch (err) {
     return endFailingProcess(
       log,
-      'unknown',
+      ReplyToOfferErrorCodes.Unknown,
       500,
       `Deny offer for internal parking space - unknown error`,
       err
@@ -272,7 +275,7 @@ export const expireOffer = async (
     if (!res.ok) {
       return endFailingProcess(
         log,
-        'no-offer',
+        ReplyToOfferErrorCodes.NoOffer,
         404,
         `The offer ${offerId} does not exist or could not be retrieved.`
       )
@@ -284,7 +287,7 @@ export const expireOffer = async (
     if (!listing || !listing.districtCode) {
       return endFailingProcess(
         log,
-        'no-listing',
+        ReplyToOfferErrorCodes.NoListing,
         404,
         `The listing ${offer.listingId.toString()} does not exist or is no longer available.`
       )
@@ -298,7 +301,7 @@ export const expireOffer = async (
   } catch (err) {
     return endFailingProcess(
       log,
-      'unknown',
+      ReplyToOfferErrorCodes.Unknown,
       404,
       `Expire offer for internal parking space - unknown error`,
       err
@@ -342,7 +345,7 @@ const endFailingProcess = (
 
   communicationAdapter.sendNotificationToRole(
     'dev',
-    `Create Note of Interest - ${processErrorCode}`,
+    `Reply to Offer - ${processErrorCode}`,
     log.join('\n')
   )
 

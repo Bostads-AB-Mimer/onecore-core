@@ -1,4 +1,4 @@
-import { CreateNoteOfInterestErrorCodes, ListingStatus } from 'onecore-types'
+import { ListingStatus } from 'onecore-types'
 
 import { createOfferForInternalParkingSpace } from '../create-offer'
 import * as leasingAdapter from '../../../../adapters/leasing-adapter'
@@ -153,11 +153,11 @@ describe('createOfferForInternalParkingSpace', () => {
 
     expect(result).toEqual({
       processStatus: ProcessStatus.failed,
-      error: 'get-contact',
+      error: 'no-contact',
       httpStatus: 500,
       response: {
         message: 'Could not find contact P158773',
-        errorCode: 'get-contact',
+        errorCode: 'no-contact',
       },
     })
   })
@@ -182,11 +182,11 @@ describe('createOfferForInternalParkingSpace', () => {
 
     expect(result).toEqual({
       processStatus: ProcessStatus.failed,
-      error: 'update-applicant-status',
+      error: 'update-applicant-status-failure',
       httpStatus: 500,
       response: {
         message: 'Update Applicant Status failed',
-        errorCode: 'update-applicant-status',
+        errorCode: 'update-applicant-status-failure',
       },
     })
   })
@@ -214,9 +214,12 @@ describe('createOfferForInternalParkingSpace', () => {
 
     expect(result).toEqual({
       processStatus: ProcessStatus.failed,
-      error: 'create-offer',
+      error: 'create-offer-failure',
       httpStatus: 500,
-      response: { message: 'Create Offer failed', errorCode: 'create-offer' },
+      response: {
+        message: 'Create Offer failed',
+        errorCode: 'create-offer-failure',
+      },
     })
   })
 

@@ -1,6 +1,7 @@
 import {
   ApplicantStatus,
   CreateOfferApplicantParams,
+  CreateOfferErrorCodes,
   DetailedApplicant,
   LeaseStatus,
   ListingStatus,
@@ -20,14 +21,14 @@ import { makeProcessError } from '../utils'
 import { sendNotificationToRole } from '../../../adapters/communication-adapter'
 
 type CreateOfferError =
-  | 'no-listing'
-  | 'listing-not-expired'
-  | 'no-applicants'
-  | 'create-offer'
-  | 'update-applicant-status'
-  | 'get-contact'
-  | 'send-email'
-  | 'unknown'
+  | CreateOfferErrorCodes.NoListing
+  | CreateOfferErrorCodes.ListingNotExpired
+  | CreateOfferErrorCodes.NoApplicants
+  | CreateOfferErrorCodes.CreateOfferFailure
+  | CreateOfferErrorCodes.UpdateApplicantStatusFailure
+  | CreateOfferErrorCodes.NoContact
+  | CreateOfferErrorCodes.SendEmailFailure
+  | CreateOfferErrorCodes.Unknown
 
 // PROCESS Part 2 - Create Offer for Scored Parking Space
 export const createOfferForInternalParkingSpace = async (
@@ -44,7 +45,7 @@ export const createOfferForInternalParkingSpace = async (
     if (!listing) {
       return endFailingProcess(
         log,
-        'no-listing',
+        CreateOfferErrorCodes.NoListing,
         500,
         `Listing with id ${listingId} not found`
       )
@@ -52,7 +53,7 @@ export const createOfferForInternalParkingSpace = async (
     if (listing.status !== ListingStatus.Expired) {
       return endFailingProcess(
         log,
-        'listing-not-expired',
+        CreateOfferErrorCodes.ListingNotExpired,
         500,
         `Listing with id ${listingId} not expired`
       )
@@ -77,7 +78,7 @@ export const createOfferForInternalParkingSpace = async (
     if (!eligibleApplicants?.length) {
       return endFailingProcess(
         log,
-        'no-applicants',
+        CreateOfferErrorCodes.NoApplicants,
         500,
         `No eligible applicants found, cannot create new offer`
       )
@@ -91,7 +92,7 @@ export const createOfferForInternalParkingSpace = async (
     if (!getContact.ok) {
       return endFailingProcess(
         log,
-        'get-contact',
+        CreateOfferErrorCodes.NoContact,
         500,
         `Could not find contact ${applicant.contactCode}`
       )
@@ -111,7 +112,7 @@ export const createOfferForInternalParkingSpace = async (
     } catch (_err) {
       return endFailingProcess(
         log,
-        'update-applicant-status',
+        CreateOfferErrorCodes.UpdateApplicantStatusFailure,
         500,
         `Update Applicant Status failed`,
         _err
@@ -138,7 +139,12 @@ export const createOfferForInternalParkingSpace = async (
         `Skapa erbjudande misslyckades - ${offer.err}`,
         log.join('\n')
       )
-      return endFailingProcess(log, 'create-offer', 500, `Create Offer failed`)
+      return endFailingProcess(
+        log,
+        CreateOfferErrorCodes.CreateOfferFailure,
+        500,
+        `Create Offer failed`
+      )
     }
 
     log.push(`Created offer ${offer.data.id}`)
@@ -169,7 +175,7 @@ export const createOfferForInternalParkingSpace = async (
       )
       return endFailingProcess(
         log,
-        'send-email',
+        CreateOfferErrorCodes.SendEmailFailure,
         500,
         `Send Parking Space Offer Email failed`,
         _err
@@ -185,7 +191,7 @@ export const createOfferForInternalParkingSpace = async (
   } catch (err) {
     return endFailingProcess(
       log,
-      'unknown',
+      CreateOfferErrorCodes.Unknown,
       500,
       `Create Offer failed - unknown error`,
       err
@@ -209,7 +215,7 @@ const endFailingProcess = (
 
   sendNotificationToRole(
     'dev',
-    `Create Note of Interest - ${processErrorCode}`,
+    `Create Offer - ${processErrorCode}`,
     log.join('\n')
   )
 

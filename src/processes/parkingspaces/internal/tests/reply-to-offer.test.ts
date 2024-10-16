@@ -121,11 +121,11 @@ describe('replyToOffer', () => {
 
       expect(result).toEqual({
         processStatus: ProcessStatus.failed,
-        error: 'create-lease-failed',
+        error: 'create-lease-failure',
         httpStatus: 500,
         response: {
           message: `Create Lease for ${offer.id} failed.`,
-          errorCode: 'create-lease-failed',
+          errorCode: 'create-lease-failure',
         },
       })
     })
