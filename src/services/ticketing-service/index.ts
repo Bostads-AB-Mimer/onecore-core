@@ -652,7 +652,7 @@ export const routes = (router: KoaRouter) => {
     const metadata = generateRouteMetadata(ctx)
     const { ticketId } = ctx.params
 
-    if (!ticketId) {
+    if (ticketId === undefined) {
       ctx.status = 400
       ctx.body = {
         reason: 'ticketId is missing from the request URL',
@@ -662,7 +662,7 @@ export const routes = (router: KoaRouter) => {
       return
     }
 
-    const success = await closeTicket(ticketId)
+    const success = await closeTicket(parseInt(ticketId))
 
     if (success) {
       ctx.status = 200
