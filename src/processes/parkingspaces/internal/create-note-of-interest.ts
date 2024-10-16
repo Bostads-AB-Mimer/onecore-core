@@ -341,7 +341,12 @@ export const createNoteOfInterestForInternalParkingSpace = async (
           error.message
         : 'Create not of interest for internal parking space failed: ' + error
 
-    return endFailingProcess(log, 'internal-error', 500, errorMessage)
+    return endFailingProcess(
+      log,
+      CreateNoteOfInterestErrorCodes.InternalError,
+      500,
+      errorMessage
+    )
   }
 }
 
