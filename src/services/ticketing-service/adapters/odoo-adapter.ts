@@ -274,7 +274,7 @@ const addMessageToTicket = async (
   return await odoo.create('mail.message', {
     res_id: ticketId,
     model: 'maintenance.request',
-    body: striptags(message.body),
+    body: striptags(message.body).replaceAll('\n', '<br>'),
     message_type: 'notification',
     email_from: 'Kund',
     author_id: false,
