@@ -562,6 +562,21 @@ const getOffersByListingId = async (
   }
 }
 
+const getActiveOfferByListingId = async (
+  listingId: number
+): Promise<AdapterResult<Offer, 'unknown'>> => {
+  try {
+    const res = await axios(
+      `${tenantsLeasesServiceUrl}/offers/listing-id/${listingId}/active`
+    )
+
+    return { ok: true, data: res.data.content }
+  } catch (err) {
+    logger.error({ err }, 'leasing-adapter.getOffersByListingId')
+    return { ok: false, err: 'unknown' }
+  }
+}
+
 const updateApplicantStatus = async (params: {
   contactCode: string
   applicantId: number
@@ -835,4 +850,5 @@ export {
   getOffersByListingId,
   closeOfferByDeny,
   handleExpiredOffers,
+  getActiveOfferByListingId,
 }
