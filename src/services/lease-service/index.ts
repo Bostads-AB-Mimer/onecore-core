@@ -304,6 +304,30 @@ export const routes = (router: KoaRouter) => {
     ctx.body = { content: result.data, ...metadata }
   })
 
+  /**
+   * @swagger
+   * /offers/listing-id/{listingId}:
+   *   get:
+   *     summary: Gets active offer for a specific listing
+   *     description: Get an offer for a listing.
+   *     tags: [Offer]
+   *     parameters:
+   *       - in: path
+   *         name: listingId
+   *         required: true
+   *         schema:
+   *           type: integer
+   *         description: The unique ID of the listing.
+   *     responses:
+   *       200:
+   *         description: The active offer.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *       500:
+   *         description: Internal server error.
+   */
   router.get('/offers/listing-id/:listingId/active', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
     const result = await leasingAdapter.getActiveOfferByListingId(
@@ -311,6 +335,10 @@ export const routes = (router: KoaRouter) => {
     )
 
     if (!result.ok) {
+      if (result.err === 'not-found') {
+        ctx.status = 404
+        return
+      }
       ctx.status = 500
       ctx.body = { error: 'Internal server error', ...metadata }
       return

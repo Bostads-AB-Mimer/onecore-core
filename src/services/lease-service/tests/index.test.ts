@@ -10,7 +10,6 @@ import * as offerProcess from '../../../processes/parkingspaces/internal/create-
 import { Lease, ConsumerReport, ReplyToOfferErrorCodes } from 'onecore-types'
 import * as factory from '../../../../test/factories'
 import { ProcessStatus } from '../../../common/types'
-
 const app = new Koa()
 const router = new KoaRouter()
 routes(router)
@@ -500,6 +499,60 @@ describe('lease-service', () => {
         'type=published'
       )
       expect(res.body).toMatchObject({ content: expect.any(Array) })
+    })
+  })
+
+  describe('GET /offers/listing-id/:listingId/active', () => {
+    const getActiveOfferByListingIdSpy = jest.spyOn(
+      tenantLeaseAdapter,
+      'getActiveOfferByListingId'
+    )
+
+    beforeEach(jest.resetAllMocks)
+    it('responds with 500 if adapter fails', async () => {
+      getActiveOfferByListingIdSpy.mockResolvedValueOnce({
+        ok: false,
+        err: 'unknown',
+      })
+
+      const res = await request(app.callback()).get(
+        `/offers/listing-id/${1}/active`
+      )
+
+      expect(res.status).toBe(500)
+      expect(getActiveOfferByListingIdSpy).toHaveBeenCalled()
+      expect(res.body).toMatchObject({ error: expect.any(String) })
+    })
+
+    it('responds with 404 if not found', async () => {
+      getActiveOfferByListingIdSpy.mockResolvedValueOnce({
+        ok: false,
+        err: 'not-found',
+      })
+
+      const res = await request(app.callback()).get(
+        `/offers/listing-id/${1}/active`
+      )
+
+      expect(res.status).toBe(404)
+      expect(getActiveOfferByListingIdSpy).toHaveBeenCalled()
+    })
+
+    it('responds with 200 and listings', async () => {
+      getActiveOfferByListingIdSpy.mockResolvedValueOnce({
+        ok: true,
+        data: factory.offer.build(),
+      })
+
+      const res = await request(app.callback()).get(
+        `/offers/listing-id/${1}/active`
+      )
+
+      expect(res.status).toBe(200)
+      expect(getActiveOfferByListingIdSpy).toHaveBeenCalled()
+      expect(res.body).toMatchObject({
+        content: expect.objectContaining({ id: expect.any(Number) }),
+      })
     })
   })
 })

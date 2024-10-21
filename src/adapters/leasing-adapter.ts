@@ -564,12 +564,15 @@ const getOffersByListingId = async (
 
 const getActiveOfferByListingId = async (
   listingId: number
-): Promise<AdapterResult<Offer, 'unknown'>> => {
+): Promise<AdapterResult<Offer, 'not-found' | 'unknown'>> => {
   try {
     const res = await axios(
       `${tenantsLeasesServiceUrl}/offers/listing-id/${listingId}/active`
     )
 
+    if (!res.data.content) {
+      return { ok: false, err: 'not-found' }
+    }
     return { ok: true, data: res.data.content }
   } catch (err) {
     logger.error({ err }, 'leasing-adapter.getActiveOfferByListingId')
