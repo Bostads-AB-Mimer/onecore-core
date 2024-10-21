@@ -572,7 +572,7 @@ const getActiveOfferByListingId = async (
 
     return { ok: true, data: res.data.content }
   } catch (err) {
-    logger.error({ err }, 'leasing-adapter.getOffersByListingId')
+    logger.error({ err }, 'leasing-adapter.getActiveOfferByListingId')
     return { ok: false, err: 'unknown' }
   }
 }
