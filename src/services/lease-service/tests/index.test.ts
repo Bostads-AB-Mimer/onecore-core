@@ -7,7 +7,12 @@ import * as tenantLeaseAdapter from '../../../adapters/leasing-adapter'
 import * as replyToOffer from '../../../processes/parkingspaces/internal/reply-to-offer'
 import * as offerProcess from '../../../processes/parkingspaces/internal/create-offer'
 
-import { Lease, ConsumerReport, ReplyToOfferErrorCodes } from 'onecore-types'
+import {
+  Lease,
+  ConsumerReport,
+  ReplyToOfferErrorCodes,
+  GetActiveOfferByListingIdErrorCodes,
+} from 'onecore-types'
 import * as factory from '../../../../test/factories'
 import { ProcessStatus } from '../../../common/types'
 const app = new Koa()
@@ -512,7 +517,7 @@ describe('lease-service', () => {
     it('responds with 500 if adapter fails', async () => {
       getActiveOfferByListingIdSpy.mockResolvedValueOnce({
         ok: false,
-        err: 'unknown',
+        err: GetActiveOfferByListingIdErrorCodes.Unknown,
       })
 
       const res = await request(app.callback()).get(
@@ -527,7 +532,7 @@ describe('lease-service', () => {
     it('responds with 404 if not found', async () => {
       getActiveOfferByListingIdSpy.mockResolvedValueOnce({
         ok: false,
-        err: 'not-found',
+        err: GetActiveOfferByListingIdErrorCodes.NotFound,
       })
 
       const res = await request(app.callback()).get(

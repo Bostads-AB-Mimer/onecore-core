@@ -6,6 +6,7 @@
  * course, there are always exceptions).
  */
 import KoaRouter from '@koa/router'
+import { GetActiveOfferByListingIdErrorCodes } from 'onecore-types'
 import { logger, generateRouteMetadata } from 'onecore-utilities'
 
 import * as leasingAdapter from '../../adapters/leasing-adapter'
@@ -335,12 +336,14 @@ export const routes = (router: KoaRouter) => {
     )
 
     if (!result.ok) {
-      if (result.err === 'not-found') {
+      if (result.err === GetActiveOfferByListingIdErrorCodes.NotFound) {
         ctx.status = 404
+        ctx.body = { error: result.err, ...metadata }
         return
       }
+
       ctx.status = 500
-      ctx.body = { error: 'Internal server error', ...metadata }
+      ctx.body = { error: result.err, ...metadata }
       return
     }
 

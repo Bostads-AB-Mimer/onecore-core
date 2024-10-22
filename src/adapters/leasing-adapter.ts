@@ -20,6 +20,7 @@ import {
   InternalParkingSpaceSyncSuccessResponse,
   CreateOfferParams,
   OfferWithOfferApplicants,
+  GetActiveOfferByListingIdErrorCodes,
 } from 'onecore-types'
 
 import config from '../common/config'
@@ -564,19 +565,20 @@ const getOffersByListingId = async (
 
 const getActiveOfferByListingId = async (
   listingId: number
-): Promise<AdapterResult<Offer, 'not-found' | 'unknown'>> => {
+): Promise<AdapterResult<Offer, GetActiveOfferByListingIdErrorCodes>> => {
   try {
     const res = await axios(
       `${tenantsLeasesServiceUrl}/offers/listing-id/${listingId}/active`
     )
 
     if (!res.data.content) {
-      return { ok: false, err: 'not-found' }
+      return { ok: false, err: GetActiveOfferByListingIdErrorCodes.NotFound }
     }
+
     return { ok: true, data: res.data.content }
   } catch (err) {
     logger.error({ err }, 'leasing-adapter.getActiveOfferByListingId')
-    return { ok: false, err: 'unknown' }
+    return { ok: false, err: GetActiveOfferByListingIdErrorCodes.Unknown }
   }
 }
 
