@@ -337,17 +337,17 @@ export const routes = (router: KoaRouter) => {
 
     if (!result.ok) {
       if (result.err === GetActiveOfferByListingIdErrorCodes.NotFound) {
-        ctx.status = 404
+        ctx.status = result.statusCode ?? 404
         ctx.body = { error: result.err, ...metadata }
         return
       }
 
-      ctx.status = 500
+      ctx.status = result.statusCode ?? 500
       ctx.body = { error: result.err, ...metadata }
       return
     }
 
-    ctx.status = 200
+    ctx.status = result.statusCode ?? 200
     ctx.body = { content: result.data, ...metadata }
   })
 

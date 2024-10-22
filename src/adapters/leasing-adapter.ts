@@ -1,5 +1,5 @@
 import { loggedAxios as axios, logger } from 'onecore-utilities'
-import { HttpStatusCode } from 'axios'
+import { AxiosError, HttpStatusCode } from 'axios'
 import dayjs from 'dayjs'
 import {
   ConsumerReport,
@@ -572,13 +572,29 @@ const getActiveOfferByListingId = async (
     )
 
     if (!res.data.content) {
-      return { ok: false, err: GetActiveOfferByListingIdErrorCodes.NotFound }
+      return {
+        ok: false,
+        err: GetActiveOfferByListingIdErrorCodes.NotFound,
+        statusCode: res.status,
+      }
     }
 
-    return { ok: true, data: res.data.content }
+    return { ok: true, data: res.data.content, statusCode: res.status }
   } catch (err) {
     logger.error({ err }, 'leasing-adapter.getActiveOfferByListingId')
-    return { ok: false, err: GetActiveOfferByListingIdErrorCodes.Unknown }
+    if (err instanceof AxiosError) {
+      return {
+        ok: false,
+        err: GetActiveOfferByListingIdErrorCodes.Unknown,
+        statusCode: err.response?.status ?? 500,
+      }
+    } else {
+      return {
+        ok: false,
+        err: GetActiveOfferByListingIdErrorCodes.Unknown,
+        statusCode: 500,
+      }
+    }
   }
 }
 
