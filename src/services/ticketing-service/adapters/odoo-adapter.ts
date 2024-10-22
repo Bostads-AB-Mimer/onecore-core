@@ -276,8 +276,6 @@ const addMessageToTicket = async (
     model: 'maintenance.request',
     body: striptags(message.body).replaceAll('\n', '<br>'),
     message_type: 'notification',
-    email_from: 'Kund',
-    author_id: false,
   })
 }
 
