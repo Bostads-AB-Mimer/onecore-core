@@ -21,6 +21,7 @@ import {
   CreateOfferParams,
   OfferWithOfferApplicants,
   GetActiveOfferByListingIdErrorCodes,
+  ListingStatus,
 } from 'onecore-types'
 
 import config from '../common/config'
@@ -787,6 +788,31 @@ const deleteListing = async (
   return { ok: false, err: { tag: 'unknown', data: res.data } }
 }
 
+async function updateListingStatus(
+  listingId: number,
+  status: ListingStatus
+): Promise<AdapterResult<null, 'not-found' | 'unknown'>> {
+  try {
+    const res = await axios.put(
+      `${tenantsLeasesServiceUrl}/listings/${listingId}/status`,
+      { status }
+    )
+
+    if (res.status !== 200) {
+      if (res.status === 404) {
+        return { ok: false, err: 'not-found' }
+      } else {
+        return { ok: false, err: 'unknown' }
+      }
+    }
+
+    return { ok: true, data: null }
+  } catch (err) {
+    logger.error({ err }, 'leasingAdapter.updateListingStatus')
+    return { ok: false, err: 'unknown' }
+  }
+}
+
 async function closeOfferByAccept(
   offerId: number
 ): Promise<AdapterResult<null, 'offer-not-found' | 'unknown'>> {
@@ -877,4 +903,5 @@ export {
   closeOfferByDeny,
   handleExpiredOffers,
   getActiveOfferByListingId,
+  updateListingStatus,
 }
