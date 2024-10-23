@@ -60,7 +60,7 @@ describe('createOfferForInternalParkingSpace', () => {
         factory.listing.build({ status: ListingStatus.Expired })
       )
     jest
-      .spyOn(leasingAdapter, 'getListingByIdWithDetailedApplicants')
+      .spyOn(leasingAdapter, 'getDetailedApplicantsByListingId')
       .mockResolvedValueOnce([])
 
     const result = await createOfferForInternalParkingSpace(123)
@@ -102,7 +102,7 @@ describe('createOfferForInternalParkingSpace', () => {
     ]
 
     jest
-      .spyOn(leasingAdapter, 'getListingByIdWithDetailedApplicants')
+      .spyOn(leasingAdapter, 'getDetailedApplicantsByListingId')
       .mockResolvedValueOnce(applicants)
     jest
       .spyOn(leasingAdapter, 'getContact')
@@ -143,7 +143,7 @@ describe('createOfferForInternalParkingSpace', () => {
         factory.listing.build({ status: ListingStatus.Expired })
       )
     jest
-      .spyOn(leasingAdapter, 'getListingByIdWithDetailedApplicants')
+      .spyOn(leasingAdapter, 'getDetailedApplicantsByListingId')
       .mockResolvedValueOnce(factory.detailedApplicant.buildList(1))
     jest
       .spyOn(leasingAdapter, 'getContact')
@@ -169,7 +169,7 @@ describe('createOfferForInternalParkingSpace', () => {
         factory.listing.build({ status: ListingStatus.Expired })
       )
     jest
-      .spyOn(leasingAdapter, 'getListingByIdWithDetailedApplicants')
+      .spyOn(leasingAdapter, 'getDetailedApplicantsByListingId')
       .mockResolvedValueOnce(factory.detailedApplicant.buildList(1))
     jest
       .spyOn(leasingAdapter, 'getContact')
@@ -198,7 +198,7 @@ describe('createOfferForInternalParkingSpace', () => {
         factory.listing.build({ status: ListingStatus.Expired })
       )
     jest
-      .spyOn(leasingAdapter, 'getListingByIdWithDetailedApplicants')
+      .spyOn(leasingAdapter, 'getDetailedApplicantsByListingId')
       .mockResolvedValueOnce(factory.detailedApplicant.buildList(1))
     jest
       .spyOn(leasingAdapter, 'getContact')
@@ -230,7 +230,7 @@ describe('createOfferForInternalParkingSpace', () => {
         factory.listing.build({ status: ListingStatus.Expired })
       )
     jest
-      .spyOn(leasingAdapter, 'getListingByIdWithDetailedApplicants')
+      .spyOn(leasingAdapter, 'getDetailedApplicantsByListingId')
       .mockResolvedValueOnce(factory.detailedApplicant.buildList(1))
     jest
       .spyOn(leasingAdapter, 'getContact')

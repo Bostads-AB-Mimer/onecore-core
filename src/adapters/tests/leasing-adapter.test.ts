@@ -68,7 +68,7 @@ describe('leasing-adapter', () => {
     })
   })
 
-  describe(leasingAdapter.getListingByIdWithDetailedApplicants, () => {
+  describe(leasingAdapter.getDetailedApplicantsByListingId, () => {
     it('should return a listing with detailed applicants', async () => {
       const detailedApplicants = factory.detailedApplicant.buildList(1)
       nock(config.tenantsLeasesService.url)
@@ -76,7 +76,7 @@ describe('leasing-adapter', () => {
         .reply(200, { content: detailedApplicants })
 
       const result =
-        await leasingAdapter.getListingByIdWithDetailedApplicants('1337')
+        await leasingAdapter.getDetailedApplicantsByListingId('1337')
 
       expect(result).toEqual([
         expect.objectContaining({ id: detailedApplicants[0].id }),
