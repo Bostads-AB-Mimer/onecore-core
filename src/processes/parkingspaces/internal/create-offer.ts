@@ -59,21 +59,7 @@ export const createOfferForInternalParkingSpace = async (
       )
     }
 
-    const eligibleApplicants = await leasingAdapter
-      .getListingByIdWithDetailedApplicants(String(listing.id))
-      .then((applicants) => {
-        // filter out any applicants that has no priority. They are not eligible to rent the object of this listing
-        return applicants?.filter(
-          (
-            detailedApplicant
-          ): detailedApplicant is DetailedApplicant & { priority: number } => {
-            return (
-              detailedApplicant.priority != undefined &&
-              detailedApplicant.status === ApplicantStatus.Active
-            )
-          }
-        )
-      })
+    const eligibleApplicants = await getEligibleApplicants(listing.id)
 
     if (!eligibleApplicants?.length) {
       return endFailingProcess(
@@ -197,6 +183,24 @@ export const createOfferForInternalParkingSpace = async (
       err
     )
   }
+}
+
+async function getEligibleApplicants(listingId: number) {
+  return leasingAdapter
+    .getListingByIdWithDetailedApplicants(String(listingId))
+    .then((applicants) => {
+      // filter out any applicants that has no priority. They are not eligible to rent the object of this listing
+      return applicants?.filter(
+        (
+          detailedApplicant
+        ): detailedApplicant is DetailedApplicant & { priority: number } => {
+          return (
+            detailedApplicant.priority != undefined &&
+            detailedApplicant.status === ApplicantStatus.Active
+          )
+        }
+      )
+    })
 }
 
 // Ends a process gracefully by debugging log, logging the error, sending the error to the dev team and return a process error with the error code and details
