@@ -1149,10 +1149,9 @@ export const routes = (router: KoaRouter) => {
    */
   router.get('/listing/:listingId/applicants/details', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
-    const responseData =
-      await leasingAdapter.getListingByIdWithDetailedApplicants(
-        ctx.params.listingId
-      )
+    const responseData = await leasingAdapter.getDetailedApplicantsByListingId(
+      ctx.params.listingId
+    )
 
     ctx.body = { content: responseData, ...metadata }
   })

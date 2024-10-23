@@ -187,7 +187,7 @@ export const createOfferForInternalParkingSpace = async (
 
 async function getEligibleApplicants(listingId: number) {
   return leasingAdapter
-    .getListingByIdWithDetailedApplicants(String(listingId))
+    .getDetailedApplicantsByListingId(String(listingId))
     .then((applicants) => {
       // filter out any applicants that has no priority. They are not eligible to rent the object of this listing
       return applicants?.filter(

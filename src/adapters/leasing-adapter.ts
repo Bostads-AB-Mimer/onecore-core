@@ -447,8 +447,7 @@ const getApplicantByContactCodeAndListingId = async (
   }
 }
 
-// TODO: This function does not actually get the listing. Rename and describe function?
-const getListingByIdWithDetailedApplicants = async (
+const getDetailedApplicantsByListingId = async (
   listingId: string
 ): Promise<DetailedApplicant[] | undefined> => {
   try {
@@ -851,7 +850,7 @@ export {
   getApplicantsByContactCode,
   getApplicantsAndListingByContactCode,
   getApplicantByContactCodeAndListingId,
-  getListingByIdWithDetailedApplicants,
+  getDetailedApplicantsByListingId,
   withdrawApplicantByManager,
   withdrawApplicantByUser,
   setApplicantStatusActive,
