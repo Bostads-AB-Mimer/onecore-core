@@ -149,7 +149,7 @@ const deleteListing = async (
 async function updateListingStatus(
   listingId: number,
   status: ListingStatus
-): Promise<AdapterResult<null, 'not-found' | 'unknown'>> {
+): Promise<AdapterResult<null, 'not-found' | 'bad-request' | 'unknown'>> {
   try {
     const res = await axios.put(
       `${tenantsLeasesServiceUrl}/listings/${listingId}/status`,
@@ -159,9 +159,12 @@ async function updateListingStatus(
     if (res.status !== 200) {
       if (res.status === 404) {
         return { ok: false, err: 'not-found' }
-      } else {
-        return { ok: false, err: 'unknown' }
       }
+      if (res.status === 400) {
+        return { ok: false, err: 'bad-request' }
+      }
+
+      return { ok: false, err: 'unknown' }
     }
 
     return { ok: true, data: null }
