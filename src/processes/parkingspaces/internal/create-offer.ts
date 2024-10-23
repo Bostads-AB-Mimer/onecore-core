@@ -50,6 +50,7 @@ export const createOfferForInternalParkingSpace = async (
         `Listing with id ${listingId} not found`
       )
     }
+
     if (listing.status !== ListingStatus.Expired) {
       return endFailingProcess(
         log,
@@ -61,7 +62,21 @@ export const createOfferForInternalParkingSpace = async (
 
     const eligibleApplicants = await getEligibleApplicants(listing.id)
 
-    if (!eligibleApplicants?.length) {
+    if (!eligibleApplicants.length) {
+      const updateListingStatus = await leasingAdapter.updateListingStatus(
+        listing.id,
+        ListingStatus.NoApplicants
+      )
+
+      if (!updateListingStatus.ok) {
+        return endFailingProcess(
+          log,
+          CreateOfferErrorCodes.UpdateListingStatusFailure,
+          500,
+          `Error updating listing status to NoApplicants`
+        )
+      }
+
       return endFailingProcess(
         log,
         CreateOfferErrorCodes.NoApplicants,
@@ -71,8 +86,6 @@ export const createOfferForInternalParkingSpace = async (
     }
 
     const [applicant, ...restApplicants] = eligibleApplicants
-
-    // TODO: Maybe we want to make a credit check here?
 
     const getContact = await leasingAdapter.getContact(applicant.contactCode)
     if (!getContact.ok) {
