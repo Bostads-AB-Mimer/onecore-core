@@ -75,8 +75,7 @@ describe('leasing-adapter', () => {
         .get(/listing/)
         .reply(200, { content: detailedApplicants })
 
-      const result =
-        await leasingAdapter.getDetailedApplicantsByListingId('1337')
+      const result = await leasingAdapter.getDetailedApplicantsByListingId(1337)
 
       expect(result).toEqual([
         expect.objectContaining({ id: detailedApplicants[0].id }),

@@ -462,20 +462,26 @@ const getApplicantByContactCodeAndListingId = async (
 }
 
 const getDetailedApplicantsByListingId = async (
-  listingId: string
-): Promise<DetailedApplicant[] | undefined> => {
+  listingId: number
+): Promise<AdapterResult<DetailedApplicant[], 'unknown' | 'not-found'>> => {
   try {
     const response = await axios(
       `${tenantsLeasesServiceUrl}/listing/${listingId}/applicants/details`
     )
-    return response.data.content
+
+    return { ok: true, data: response.data.content }
   } catch (error) {
-    logger.error(
-      error,
-      'Error fetching listing with detailed applicant data:',
-      error
-    )
-    return undefined
+    logger.error(error, 'Error fetching detailed applicant data by listing id')
+
+    if (!(error instanceof AxiosError)) {
+      return { ok: false, err: 'unknown' }
+    }
+
+    if (error.response?.status === 404) {
+      return { ok: false, err: 'not-found' }
+    } else {
+      return { ok: false, err: 'unknown' }
+    }
   }
 }
 

@@ -61,7 +61,7 @@ describe('createOfferForInternalParkingSpace', () => {
       )
     jest
       .spyOn(leasingAdapter, 'getDetailedApplicantsByListingId')
-      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce({ ok: true, data: [] })
 
     const result = await createOfferForInternalParkingSpace(123)
 
@@ -103,7 +103,7 @@ describe('createOfferForInternalParkingSpace', () => {
 
     jest
       .spyOn(leasingAdapter, 'getDetailedApplicantsByListingId')
-      .mockResolvedValueOnce(applicants)
+      .mockResolvedValueOnce({ ok: true, data: applicants })
     jest
       .spyOn(leasingAdapter, 'getContact')
       .mockResolvedValueOnce({ ok: true, data: factory.contact.build() })
@@ -144,7 +144,10 @@ describe('createOfferForInternalParkingSpace', () => {
       )
     jest
       .spyOn(leasingAdapter, 'getDetailedApplicantsByListingId')
-      .mockResolvedValueOnce(factory.detailedApplicant.buildList(1))
+      .mockResolvedValueOnce({
+        ok: true,
+        data: factory.detailedApplicant.buildList(1),
+      })
     jest
       .spyOn(leasingAdapter, 'getContact')
       .mockResolvedValueOnce({ ok: false, err: 'unknown' })
@@ -170,7 +173,10 @@ describe('createOfferForInternalParkingSpace', () => {
       )
     jest
       .spyOn(leasingAdapter, 'getDetailedApplicantsByListingId')
-      .mockResolvedValueOnce(factory.detailedApplicant.buildList(1))
+      .mockResolvedValueOnce({
+        ok: true,
+        data: factory.detailedApplicant.buildList(1),
+      })
     jest
       .spyOn(leasingAdapter, 'getContact')
       .mockResolvedValueOnce({ ok: true, data: factory.contact.build() })
@@ -199,7 +205,10 @@ describe('createOfferForInternalParkingSpace', () => {
       )
     jest
       .spyOn(leasingAdapter, 'getDetailedApplicantsByListingId')
-      .mockResolvedValueOnce(factory.detailedApplicant.buildList(1))
+      .mockResolvedValueOnce({
+        ok: true,
+        data: factory.detailedApplicant.buildList(1),
+      })
     jest
       .spyOn(leasingAdapter, 'getContact')
       .mockResolvedValueOnce({ ok: true, data: factory.contact.build() })
@@ -231,7 +240,10 @@ describe('createOfferForInternalParkingSpace', () => {
       )
     jest
       .spyOn(leasingAdapter, 'getDetailedApplicantsByListingId')
-      .mockResolvedValueOnce(factory.detailedApplicant.buildList(1))
+      .mockResolvedValueOnce({
+        ok: true,
+        data: factory.detailedApplicant.buildList(1),
+      })
     jest
       .spyOn(leasingAdapter, 'getContact')
       .mockResolvedValueOnce({ ok: true, data: factory.contact.build() })
