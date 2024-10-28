@@ -1,4 +1,8 @@
-import { CreateOfferErrorCodes, ListingStatus } from 'onecore-types'
+import {
+  CreateOfferErrorCodes,
+  ListingStatus,
+  UpdateListingStatusErrorCodes,
+} from 'onecore-types'
 
 import { createOfferForInternalParkingSpace } from '../create-offer'
 import * as leasingAdapter from '../../../../adapters/leasing-adapter'
@@ -92,7 +96,10 @@ describe('createOfferForInternalParkingSpace', () => {
 
     jest
       .spyOn(leasingAdapter, 'updateListingStatus')
-      .mockResolvedValueOnce({ ok: false, err: 'not-found' })
+      .mockResolvedValueOnce({
+        ok: false,
+        err: UpdateListingStatusErrorCodes.NotFound,
+      })
 
     const result = await createOfferForInternalParkingSpace(123)
 
