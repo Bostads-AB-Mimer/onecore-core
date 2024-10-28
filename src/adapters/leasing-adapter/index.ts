@@ -13,9 +13,6 @@ import {
   ApplicantWithListing,
   DetailedApplicant,
   Tenant,
-  InternalParkingSpaceSyncSuccessResponse,
-  ListingStatus,
-  UpdateListingStatusErrorCodes,
 } from 'onecore-types'
 
 import { AdapterResult } from './../types'
