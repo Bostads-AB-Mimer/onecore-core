@@ -174,6 +174,20 @@ async function updateListingStatus(
   }
 }
 
+const getExpiredListingsWithNoOffers = async (): Promise<
+  AdapterResult<Listing[], 'unknown'>
+> => {
+  try {
+    const response = await axios.get(
+      `${tenantsLeasesServiceUrl}/listings/readyforoffers`
+    )
+    return { ok: true, data: response.data.content }
+  } catch (error) {
+    logger.error(error, 'Error fetching exired listings without offers:')
+    return { ok: false, err: 'unknown' }
+  }
+}
+
 export {
   getListingByRentalObjectCode,
   getListingsWithApplicants,
@@ -183,4 +197,5 @@ export {
   syncInternalParkingSpacesFromXpand,
   deleteListing,
   updateListingStatus,
+  getExpiredListingsWithNoOffers,
 }
