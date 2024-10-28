@@ -1271,20 +1271,8 @@ export const routes = (router: KoaRouter) => {
     )
 
     if (!result.ok) {
-      if (result.err === 'not-found') {
-        ctx.status = 404
-        ctx.body = { reason: 'Listing not found', ...metadata }
-        return
-      }
-
-      if (result.err === 'bad-request') {
-        ctx.status = 400
-        ctx.body = { reason: 'Bad request params', ...metadata }
-        return
-      }
-
-      ctx.status = 500
-      ctx.body = { error: 'Internal server error', ...metadata }
+      ctx.status = result.statusCode ?? 500
+      ctx.body = { ...metadata, error: result.err }
       return
     }
 

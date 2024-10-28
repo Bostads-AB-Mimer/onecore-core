@@ -5,6 +5,7 @@ import {
   InternalParkingSpaceSyncSuccessResponse,
   Listing,
   ListingStatus,
+  UpdateListingStatusErrorCodes,
 } from 'onecore-types'
 
 import { AdapterResult } from '../types'
@@ -149,7 +150,7 @@ const deleteListing = async (
 async function updateListingStatus(
   listingId: number,
   status: ListingStatus
-): Promise<AdapterResult<null, 'not-found' | 'bad-request' | 'unknown'>> {
+): Promise<AdapterResult<null, UpdateListingStatusErrorCodes>> {
   try {
     const res = await axios.put(
       `${tenantsLeasesServiceUrl}/listings/${listingId}/status`,
@@ -158,19 +159,36 @@ async function updateListingStatus(
 
     if (res.status !== 200) {
       if (res.status === 404) {
-        return { ok: false, err: 'not-found' }
-      }
-      if (res.status === 400) {
-        return { ok: false, err: 'bad-request' }
+        return {
+          ok: false,
+          err: UpdateListingStatusErrorCodes.NotFound,
+          statusCode: 404,
+        }
       }
 
-      return { ok: false, err: 'unknown' }
+      if (res.status === 400) {
+        return {
+          ok: false,
+          err: UpdateListingStatusErrorCodes.BadRequest,
+          statusCode: 400,
+        }
+      }
+
+      return {
+        ok: false,
+        err: UpdateListingStatusErrorCodes.Unknown,
+        statusCode: 500,
+      }
     }
 
     return { ok: true, data: null }
   } catch (err) {
     logger.error({ err }, 'leasingAdapter.updateListingStatus')
-    return { ok: false, err: 'unknown' }
+    return {
+      ok: false,
+      err: UpdateListingStatusErrorCodes.Unknown,
+      statusCode: 500,
+    }
   }
 }
 

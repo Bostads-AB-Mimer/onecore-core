@@ -1,5 +1,5 @@
 import nock from 'nock'
-import { ListingStatus } from 'onecore-types'
+import { ListingStatus, UpdateListingStatusErrorCodes } from 'onecore-types'
 
 import config from '../../../common/config'
 import * as leasingAdapter from '../../leasing-adapter'
@@ -41,7 +41,26 @@ describe(leasingAdapter.updateListingStatus, () => {
       ListingStatus.Expired
     )
 
-    expect(result).toEqual({ ok: false, err: 'not-found' })
+    expect(result).toEqual({
+      ok: false,
+      err: UpdateListingStatusErrorCodes.NotFound,
+      statusCode: 404,
+    })
+  })
+
+  it('returns err if leasing responds with 400', async () => {
+    nock(config.tenantsLeasesService.url).put('/listings/123/status').reply(400)
+
+    const result = await leasingAdapter.updateListingStatus(
+      123,
+      ListingStatus.Expired
+    )
+
+    expect(result).toEqual({
+      ok: false,
+      err: UpdateListingStatusErrorCodes.BadRequest,
+      statusCode: 400,
+    })
   })
 
   it('returns err if leasing responds with 500', async () => {
@@ -52,7 +71,11 @@ describe(leasingAdapter.updateListingStatus, () => {
       ListingStatus.Expired
     )
 
-    expect(result).toEqual({ ok: false, err: 'unknown' })
+    expect(result).toEqual({
+      ok: false,
+      err: UpdateListingStatusErrorCodes.Unknown,
+      statusCode: 500,
+    })
   })
 
   it('returns ok if leasing responds with 200', async () => {

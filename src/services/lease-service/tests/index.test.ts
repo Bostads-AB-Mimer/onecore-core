@@ -13,6 +13,7 @@ import {
   ReplyToOfferErrorCodes,
   GetActiveOfferByListingIdErrorCodes,
   ListingStatus,
+  UpdateListingStatusErrorCodes,
 } from 'onecore-types'
 import * as factory from '../../../../test/factories'
 import { ProcessStatus } from '../../../common/types'
@@ -567,7 +568,11 @@ describe('lease-service', () => {
     it('responds with 400 if leasing responds with 400', async () => {
       const updateListingStatus = jest
         .spyOn(tenantLeaseAdapter, 'updateListingStatus')
-        .mockResolvedValueOnce({ ok: false, err: 'bad-request' })
+        .mockResolvedValueOnce({
+          ok: false,
+          err: UpdateListingStatusErrorCodes.BadRequest,
+          statusCode: 400,
+        })
 
       const res = await request(app.callback())
         .put('/listings/1/status')
@@ -580,7 +585,11 @@ describe('lease-service', () => {
     it('responds with 404 if listing was not found', async () => {
       const updateListingStatus = jest
         .spyOn(tenantLeaseAdapter, 'updateListingStatus')
-        .mockResolvedValueOnce({ ok: false, err: 'not-found' })
+        .mockResolvedValueOnce({
+          ok: false,
+          err: UpdateListingStatusErrorCodes.NotFound,
+          statusCode: 404,
+        })
 
       const res = await request(app.callback())
         .put('/listings/1/status')
