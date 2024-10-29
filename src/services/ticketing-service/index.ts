@@ -628,7 +628,8 @@ export const routes = (router: KoaRouter) => {
           name:
             'Felanmäld tvättstuga - ' +
             transformEquipmentCode(ticket.PartOfBuildingCode),
-          master_key: AccessOptions.MasterKey,
+          // AccessOptions.Type is an enum where 0 means master key
+          master_key: AccessOptions.Type === 0,
           space_caption: type,
           maintenance_team_id: maintenanceTeamId,
           creation_origin: 'mimer-nu',
