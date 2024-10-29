@@ -616,7 +616,8 @@ export const routes = (router: KoaRouter) => {
           lease_id: newLeaseRecord.toString(),
           tenant_id: newTenantRecord.toString(),
           maintenance_unit_id: newMaintenanceUnitRecord.toString(),
-          hearing_impaired: AccessOptions.Type === 1,
+          // In the web ui, email can only be set if the user claims to be hearing impaired
+          hearing_impaired: !!AccessOptions.Email,
           phone_number: AccessOptions.PhoneNumber || tenants[0].phoneNumbers[0],
           call_between: AccessOptions.CallBetween,
           pet: Pet,
