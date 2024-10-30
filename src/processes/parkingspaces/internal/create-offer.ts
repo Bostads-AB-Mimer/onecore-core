@@ -185,8 +185,6 @@ export const createOfferForInternalParkingSpace = async (
       httpStatus: 200,
       data: null,
     }
-
-    // step 5 - notify winning applicant
   } catch (err) {
     return endFailingProcess(
       log,
