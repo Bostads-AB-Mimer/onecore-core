@@ -175,7 +175,7 @@ export const createOfferForInternalParkingSpace = async (
         log.push(`Updated sent at for offer ${offer.data.id}`)
       } else {
         sendNotificationToRole(
-          'leasing',
+          'dev',
           `Uppdatera erbjudande - uppdatera SentAt misslyckades - ${updateOfferSentAt.err}`,
           log.join('\n')
         )
