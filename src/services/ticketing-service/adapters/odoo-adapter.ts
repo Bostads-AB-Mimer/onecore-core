@@ -1,4 +1,5 @@
 import Odoo from 'odoo-await'
+import striptags from 'striptags'
 import Config from '../../../common/config'
 import {
   ApartmentInfo,
@@ -43,12 +44,17 @@ export interface OdooPostTicket {
   space_caption: string
   maintenance_team_id: number
   master_key: boolean
+  creation_origin: string
 }
 
 interface OdooPostTicketImage {
   Filename: string
   ImageType: number
   Base64String: string
+}
+
+interface OdooAddMessage {
+  body: string
 }
 
 const odoo = new Odoo({
@@ -88,6 +94,8 @@ const transformTicket = (ticket: OdooGetTicket) => {
   const equipmentCode = transformEquipmentCode(ticket.equipment_code)
   const description = removePTags(ticket.description)
 
+  const descriptionWithMoreInfo = `${description}\r\nHusdjur: ${ticket.pet ? 'Ja' : 'Nej'}${ticket.call_between ? `\r\n Kund nås enklast mellan ${ticket.call_between} \r\n på telefonnummer: ${ticket.phone_number}.` : ''}`
+
   return {
     AccessCaption: 'Huvudnyckel',
     Caption:
@@ -98,9 +106,8 @@ const transformTicket = (ticket: OdooGetTicket) => {
     ContactCode: ticket.contact_code,
     Description:
       spaceCode && equipmentCode
-        ? `${spaceCode}, ${equipmentCode}: ${description}\r\nHusdjur: ${ticket.pet}\r\n Kund nås enklast mellan ${ticket.call_between} \r\n på telefonnummer: ${ticket.phone_number}.`
-        : ticket.name +
-          ` ${description}\r\nHusdjur: ${ticket.pet}\r\n Kund nås enklast mellan ${ticket.call_between} \r\n på telefonnummer: ${ticket.phone_number}.`,
+        ? `${spaceCode}, ${equipmentCode}: ${descriptionWithMoreInfo}`
+        : ticket.name + ` ${descriptionWithMoreInfo}`,
     DetailsCaption:
       spaceCode && equipmentCode
         ? `${spaceCode}, ${equipmentCode}`
@@ -238,7 +245,7 @@ const createTicket = async (ticket: OdooPostTicket): Promise<number> => {
   return await odoo.create('maintenance.request', ticket)
 }
 
-const closeTicket = async (ticketId: string): Promise<boolean> => {
+const closeTicket = async (ticketId: number): Promise<boolean> => {
   await odoo.connect()
 
   const doneMaintenanceStages = await odoo.searchRead<{
@@ -256,9 +263,25 @@ const closeTicket = async (ticketId: string): Promise<boolean> => {
     throw new Error('No done maintenance stages found')
   }
 
-  return await odoo.update('maintenance.request', parseInt(ticketId), {
+  return await odoo.update('maintenance.request', ticketId, {
     stage_id: doneMaintenanceStages[0].id,
   })
+}
+
+const addMessageToTicket = async (
+  ticketId: number,
+  message: OdooAddMessage
+): Promise<number> => {
+  await odoo.connect()
+
+  return await odoo.execute_kw('maintenance.request', 'message_post', [
+    [ticketId],
+    {
+      body: striptags(message.body).replaceAll('\n', '<br>'),
+      message_type: 'comment',
+      body_is_html: true,
+    },
+  ])
 }
 
 const getMaintenanceTeamId = async (teamName: string): Promise<number> => {
@@ -280,6 +303,7 @@ const healthCheck = async () => {
 export {
   createTicket,
   closeTicket,
+  addMessageToTicket,
   createRentalPropertyRecord,
   createLeaseRecord,
   createTenantRecord,

@@ -6,6 +6,7 @@
  * course, there are always exceptions).
  */
 import KoaRouter from '@koa/router'
+import { GetActiveOfferByListingIdErrorCodes } from 'onecore-types'
 import { logger, generateRouteMetadata } from 'onecore-utilities'
 
 import * as leasingAdapter from '../../adapters/leasing-adapter'
@@ -301,6 +302,52 @@ export const routes = (router: KoaRouter) => {
     }
 
     ctx.status = 200
+    ctx.body = { content: result.data, ...metadata }
+  })
+
+  /**
+   * @swagger
+   * /offers/listing-id/{listingId}:
+   *   get:
+   *     summary: Gets active offer for a specific listing
+   *     description: Get an offer for a listing.
+   *     tags: [Offer]
+   *     parameters:
+   *       - in: path
+   *         name: listingId
+   *         required: true
+   *         schema:
+   *           type: integer
+   *         description: The unique ID of the listing.
+   *     responses:
+   *       200:
+   *         description: The active offer.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *       500:
+   *         description: Internal server error.
+   */
+  router.get('/offers/listing-id/:listingId/active', async (ctx) => {
+    const metadata = generateRouteMetadata(ctx)
+    const result = await leasingAdapter.getActiveOfferByListingId(
+      Number.parseInt(ctx.params.listingId)
+    )
+
+    if (!result.ok) {
+      if (result.err === GetActiveOfferByListingIdErrorCodes.NotFound) {
+        ctx.status = result.statusCode ?? 404
+        ctx.body = { error: result.err, ...metadata }
+        return
+      }
+
+      ctx.status = result.statusCode ?? 500
+      ctx.body = { error: result.err, ...metadata }
+      return
+    }
+
+    ctx.status = result.statusCode ?? 200
     ctx.body = { content: result.data, ...metadata }
   })
 
@@ -656,7 +703,7 @@ export const routes = (router: KoaRouter) => {
       return
     }
 
-    ctx.status = 500
+    ctx.status = result.httpStatus
     ctx.body = { error: result.error, ...metadata }
   })
 
@@ -690,7 +737,7 @@ export const routes = (router: KoaRouter) => {
     )
 
     if (denyOffer.processStatus !== ProcessStatus.successful) {
-      ctx.status = 500
+      ctx.status = denyOffer.httpStatus
       ctx.body = { error: denyOffer.error, ...metadata }
       return
     }
@@ -1102,12 +1149,24 @@ export const routes = (router: KoaRouter) => {
    */
   router.get('/listing/:listingId/applicants/details', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
-    const responseData =
-      await leasingAdapter.getListingByIdWithDetailedApplicants(
-        ctx.params.listingId
-      )
+    const result = await leasingAdapter.getDetailedApplicantsByListingId(
+      Number(ctx.params.listingId)
+    )
 
-    ctx.body = { content: responseData, ...metadata }
+    if (!result.ok) {
+      if (result.err === 'not-found') {
+        ctx.status = 404
+        ctx.body = { reason: 'Listing not found', ...metadata }
+        return
+      } else {
+        ctx.status = 500
+        ctx.body = { error: 'Internal server error', ...metadata }
+        return
+      }
+    }
+
+    ctx.status = 200
+    ctx.body = { content: result.data, ...metadata }
   })
 
   /**
@@ -1156,6 +1215,64 @@ export const routes = (router: KoaRouter) => {
 
       ctx.status = 500
       ctx.body = { error: result.err, ...metadata }
+      return
+    }
+
+    ctx.status = 200
+    ctx.body = { ...metadata }
+  })
+
+  /**
+   * @swagger
+   * /listings/{listingId}/status:
+   *   put:
+   *     summary: Update a listings status by ID
+   *     description: Updates a listing status by it's ID.
+   *     tags:
+   *       - Listings
+   *     parameters:
+   *       - in: path
+   *         name: listingId
+   *         required: true
+   *         schema:
+   *           type: number
+   *         description: ID of the listing to delete.
+   *     requestBody:
+   *       required: true
+   *       content:
+   *          application/json:
+   *             schema:
+   *               type: object
+   *       properties:
+   *         status:
+   *           type: number
+   *           description: The listing status.
+   *     responses:
+   *       '200':
+   *         description: Successfully updated listing.
+   *       '404':
+   *         description: Listing not found.
+   *       '500':
+   *         description: Internal server error.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 error:
+   *                   type: string
+   *                   description: The error message.
+   */
+  router.put('(.*)/listings/:listingId/status', async (ctx) => {
+    const metadata = generateRouteMetadata(ctx)
+    const result = await leasingAdapter.updateListingStatus(
+      Number(ctx.params.listingId),
+      ctx.request.body.status
+    )
+
+    if (!result.ok) {
+      ctx.status = result.statusCode ?? 500
+      ctx.body = { ...metadata, error: result.err }
       return
     }
 

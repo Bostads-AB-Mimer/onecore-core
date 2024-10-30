@@ -7,16 +7,23 @@ import * as tenantLeaseAdapter from '../../../adapters/leasing-adapter'
 import * as replyToOffer from '../../../processes/parkingspaces/internal/reply-to-offer'
 import * as offerProcess from '../../../processes/parkingspaces/internal/create-offer'
 
-import { Lease, ConsumerReport, ReplyToOfferErrorCodes } from 'onecore-types'
+import {
+  Lease,
+  ConsumerReport,
+  ReplyToOfferErrorCodes,
+  GetActiveOfferByListingIdErrorCodes,
+  ListingStatus,
+  UpdateListingStatusErrorCodes,
+} from 'onecore-types'
 import * as factory from '../../../../test/factories'
 import { ProcessStatus } from '../../../common/types'
-
 const app = new Koa()
 const router = new KoaRouter()
 routes(router)
 app.use(bodyParser())
 app.use(router.routes())
 
+beforeEach(jest.clearAllMocks)
 describe('lease-service', () => {
   let leaseMock: Lease, consumerReportMock: ConsumerReport
 
@@ -256,7 +263,7 @@ describe('lease-service', () => {
 
       const result = await request(app.callback()).post('/offers/123/accept')
 
-      expect(result.status).toBe(500)
+      expect(result.status).toBe(404)
       expect(result.body.error).toBe('no-offer')
     })
   })
@@ -290,7 +297,7 @@ describe('lease-service', () => {
 
       const result = await request(app.callback()).post('/offers/123/deny')
 
-      expect(result.status).toBe(500)
+      expect(result.status).toBe(404)
       expect(result.body.error).toBe('no-offer')
     })
   })
@@ -347,8 +354,8 @@ describe('lease-service', () => {
         factory.detailedApplicant.build(),
       ]
       const getListingByIdWithDetailedApplicantsSpy = jest
-        .spyOn(tenantLeaseAdapter, 'getListingByIdWithDetailedApplicants')
-        .mockResolvedValue(detailedApplicants)
+        .spyOn(tenantLeaseAdapter, 'getDetailedApplicantsByListingId')
+        .mockResolvedValue({ ok: true, data: detailedApplicants })
 
       const res = await request(app.callback()).get(
         '/listing/1337/applicants/details'
@@ -500,6 +507,109 @@ describe('lease-service', () => {
         'type=published'
       )
       expect(res.body).toMatchObject({ content: expect.any(Array) })
+    })
+  })
+
+  describe('GET /offers/listing-id/:listingId/active', () => {
+    const getActiveOfferByListingIdSpy = jest.spyOn(
+      tenantLeaseAdapter,
+      'getActiveOfferByListingId'
+    )
+
+    beforeEach(jest.resetAllMocks)
+    it('responds with 500 if adapter fails', async () => {
+      getActiveOfferByListingIdSpy.mockResolvedValueOnce({
+        ok: false,
+        err: GetActiveOfferByListingIdErrorCodes.Unknown,
+      })
+
+      const res = await request(app.callback()).get(
+        `/offers/listing-id/${1}/active`
+      )
+
+      expect(res.status).toBe(500)
+      expect(getActiveOfferByListingIdSpy).toHaveBeenCalled()
+      expect(res.body).toMatchObject({ error: expect.any(String) })
+    })
+
+    it('responds with 404 if not found', async () => {
+      getActiveOfferByListingIdSpy.mockResolvedValueOnce({
+        ok: false,
+        err: GetActiveOfferByListingIdErrorCodes.NotFound,
+      })
+
+      const res = await request(app.callback()).get(
+        `/offers/listing-id/${1}/active`
+      )
+
+      expect(res.status).toBe(404)
+      expect(getActiveOfferByListingIdSpy).toHaveBeenCalled()
+    })
+
+    it('responds with 200 and listings', async () => {
+      getActiveOfferByListingIdSpy.mockResolvedValueOnce({
+        ok: true,
+        data: factory.offer.build(),
+      })
+
+      const res = await request(app.callback()).get(
+        `/offers/listing-id/${1}/active`
+      )
+
+      expect(res.status).toBe(200)
+      expect(getActiveOfferByListingIdSpy).toHaveBeenCalled()
+      expect(res.body).toMatchObject({
+        content: expect.objectContaining({ id: expect.any(Number) }),
+      })
+    })
+  })
+
+  describe('PUT /listings/:listingId/status', () => {
+    it('responds with 400 if leasing responds with 400', async () => {
+      const updateListingStatus = jest
+        .spyOn(tenantLeaseAdapter, 'updateListingStatus')
+        .mockResolvedValueOnce({
+          ok: false,
+          err: UpdateListingStatusErrorCodes.BadRequest,
+          statusCode: 400,
+        })
+
+      const res = await request(app.callback())
+        .put('/listings/1/status')
+        .send({ status: 'foo' })
+
+      expect(res.status).toBe(400)
+      expect(updateListingStatus).toHaveBeenCalledTimes(1)
+    })
+
+    it('responds with 404 if listing was not found', async () => {
+      const updateListingStatus = jest
+        .spyOn(tenantLeaseAdapter, 'updateListingStatus')
+        .mockResolvedValueOnce({
+          ok: false,
+          err: UpdateListingStatusErrorCodes.NotFound,
+          statusCode: 404,
+        })
+
+      const res = await request(app.callback())
+        .put('/listings/1/status')
+        .send({ status: ListingStatus.Expired })
+
+      expect(res.status).toBe(404)
+      expect(updateListingStatus).toHaveBeenCalledTimes(1)
+    })
+
+    it('responds with 200 on success', async () => {
+      const updateListingStatus = jest
+        .spyOn(tenantLeaseAdapter, 'updateListingStatus')
+        .mockResolvedValueOnce({ ok: true, data: null })
+
+      const res = await request(app.callback())
+        .put('/listings/1/status')
+        .send({ status: ListingStatus.Expired })
+
+      expect(res.status).toBe(200)
+      expect(updateListingStatus).toHaveBeenCalledTimes(1)
     })
   })
 })
