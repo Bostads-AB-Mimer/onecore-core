@@ -166,6 +166,20 @@ export const createOfferForInternalParkingSpace = async (
         objectId: listing.id.toString(),
         hasParkingSpace: false,
       })
+      const updateOfferSentAt = await leasingAdapter.updateOfferSentAt(
+        offer.data.id,
+        new Date()
+      )
+
+      if (updateOfferSentAt.ok) {
+        log.push(`Updated sent at for offer ${offer.data.id}`)
+      } else {
+        sendNotificationToRole(
+          'leasing',
+          `Uppdatera erbjudande - uppdatera SentAt misslyckades - ${updateOfferSentAt.err}`,
+          log.join('\n')
+        )
+      }
     } catch (_err) {
       sendNotificationToRole(
         'leasing',

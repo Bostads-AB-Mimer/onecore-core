@@ -19,6 +19,10 @@ describe('createOfferForInternalParkingSpace', () => {
     .spyOn(communicationAdapter, 'sendNotificationToRole')
     .mockResolvedValue(null)
 
+  const updateOfferSentAtSpy = jest
+    .spyOn(leasingAdapter, 'updateOfferSentAt')
+    .mockResolvedValue({ ok: true, data: null })
+
   it('fails if there is no listing', async () => {
     jest
       .spyOn(leasingAdapter, 'getListingByListingId')
@@ -302,5 +306,6 @@ describe('createOfferForInternalParkingSpace', () => {
       data: null,
       httpStatus: 200,
     })
+    expect(updateOfferSentAtSpy).toHaveBeenCalledTimes(1)
   })
 })
