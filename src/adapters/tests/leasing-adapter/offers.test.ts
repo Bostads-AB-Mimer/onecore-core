@@ -77,6 +77,51 @@ describe(leasingAdapter.getOffersForContact, () => {
     assert(result.ok)
     expect(result.data).toEqual([expect.objectContaining({ id: offer.id })])
   })
+
+  it('should return 404 on not found', async () => {
+    nock(config.tenantsLeasesService.url)
+      .get('/contacts/P174965/offers')
+      .reply(404, {
+        content: {
+          ok: false,
+          err: 'not-found',
+        },
+      })
+
+    const res = await leasingAdapter.getOffersForContact('P174965')
+
+    expect(res.ok).toBe(false)
+    if (!res.ok) expect(res.err).toBe('not-found')
+  })
+
+  it('should return an empty array if no offers are found', async () => {
+    nock(config.tenantsLeasesService.url)
+      .get('/contacts/P174965/offers')
+      .reply(200, {
+        content: [],
+      })
+
+    const res = await leasingAdapter.getOffersForContact('P174965')
+
+    expect(res.ok).toBe(true)
+    if (res.ok) expect(res.data).toEqual([])
+  })
+
+  it('should handle server errors gracefully', async () => {
+    nock(config.tenantsLeasesService.url)
+      .get('/contacts/P174965/offers')
+      .reply(500, {
+        content: {
+          ok: false,
+          err: 'unknown',
+        },
+      })
+
+    const res = await leasingAdapter.getOffersForContact('P174965')
+
+    expect(res.ok).toBe(false)
+    if (!res.ok) expect(res.err).toBe('unknown')
+  })
 })
 
 describe(leasingAdapter.updateOfferSentAt, () => {
