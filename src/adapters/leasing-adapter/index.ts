@@ -13,6 +13,7 @@ import {
   ApplicantWithListing,
   DetailedApplicant,
   Tenant,
+  ApplicationProfile,
 } from 'onecore-types'
 
 import { AdapterResult } from './../types'
@@ -510,12 +511,36 @@ const validatePropertyRentalRules = async (
   }
 }
 
+async function getApplicationProfileByContactCode(
+  contactCode: string
+): Promise<AdapterResult<ApplicationProfile, 'unknown' | 'not-found'>> {
+  try {
+    const response = await axios.get<{ content: ApplicationProfile }>(
+      `${tenantsLeasesServiceUrl}/applicants/${contactCode}/application-profile`
+    )
+
+    if (response.status === 200) {
+      return { ok: true, data: response.data.content }
+    }
+
+    if (response.status === 404) {
+      return { ok: false, err: 'not-found' }
+    }
+
+    return { ok: false, err: 'unknown' }
+  } catch (err) {
+    logger.error(err, 'Error fetching application profile by contact code:')
+    return { ok: false, err: 'unknown' }
+  }
+}
+
 export {
   addApplicantToWaitingList,
   createLease,
   getApplicantByContactCodeAndListingId,
   getApplicantsAndListingByContactCode,
   getApplicantsByContactCode,
+  getApplicationProfileByContactCode,
   getContact,
   getContactByContactCode,
   getContactByPhoneNumber,
