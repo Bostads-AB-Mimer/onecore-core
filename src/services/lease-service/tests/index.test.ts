@@ -13,6 +13,7 @@ import {
   GetActiveOfferByListingIdErrorCodes,
   ListingStatus,
   UpdateListingStatusErrorCodes,
+  core,
 } from 'onecore-types'
 import * as factory from '../../../../test/factories'
 import { ProcessStatus } from '../../../common/types'
@@ -642,7 +643,9 @@ describe('lease-service', () => {
       )
 
       expect(res.status).toBe(200)
-      expect(res.body.content).toEqual(expect.objectContaining({ id: 1 }))
+      expect(() =>
+        core.GetApplicationProfileResponseDataSchema.parse(res.body.content)
+      ).not.toThrow()
     })
   })
 })
