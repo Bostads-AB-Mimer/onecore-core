@@ -516,7 +516,7 @@ async function getApplicationProfileByContactCode(
 ): Promise<AdapterResult<ApplicationProfile, 'unknown' | 'not-found'>> {
   try {
     const response = await axios.get<{ content: ApplicationProfile }>(
-      `${tenantsLeasesServiceUrl}/applicants/${contactCode}/application-profile`
+      `${tenantsLeasesServiceUrl}/contacts/${contactCode}/application-profile`
     )
 
     if (response.status === 200) {

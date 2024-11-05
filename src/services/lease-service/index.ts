@@ -6,11 +6,7 @@
  * course, there are always exceptions).
  */
 import KoaRouter from '@koa/router'
-import {
-  core,
-  GetActiveOfferByListingIdErrorCodes,
-  leasing,
-} from 'onecore-types'
+import { core, GetActiveOfferByListingIdErrorCodes } from 'onecore-types'
 import { logger, generateRouteMetadata } from 'onecore-utilities'
 import { z } from 'zod'
 
@@ -1478,10 +1474,13 @@ export const routes = (router: KoaRouter) => {
    *         description: Internal server error. Failed to retrieve application profile information.
    */
 
+  type GetApplicationProfileResponseData = z.infer<
+    typeof core.GetApplicationProfileResponseDataSchema
+  >
+
   router.get('(.*)/contacts/:contactCode/application-profile', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
-    const profile = await applicationProfileAdapter.getByContactCode(
-      db,
+    const profile = await leasingAdapter.getApplicationProfileByContactCode(
       ctx.params.contactCode
     )
 
@@ -1504,7 +1503,3 @@ export const routes = (router: KoaRouter) => {
     }
   })
 }
-
-type GetApplicationProfileResponseData = z.infer<
-  typeof core.GetApplicationProfileResponseDataSchema
->
