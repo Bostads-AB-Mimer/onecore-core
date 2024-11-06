@@ -119,8 +119,7 @@ describe(leasingAdapter.getOffersForContact, () => {
 
     const res = await leasingAdapter.getOffersForContact('P174965')
 
-    expect(res.ok).toBe(false)
-    if (!res.ok) expect(res.err).toBe('unknown')
+    expect(res).toEqual({ ok: false, err: 'unknown' })
   })
 })
 
