@@ -48,19 +48,10 @@ describe(leasingAdapter.getOfferByOfferId, () => {
   })
 
   it('should return 404 on not found', async () => {
-    nock(config.tenantsLeasesService.url)
-      .get('/offers/123')
-      .reply(404, {
-        content: {
-          ok: false,
-          err: 'not-found',
-        },
-      })
+    nock(config.tenantsLeasesService.url).get('/offers/123').reply(404)
 
     const res = await leasingAdapter.getOfferByOfferId(123)
-
-    expect(res.ok).toBe(false)
-    if (!res.ok) expect(res.err).toBe('not-found')
+    expect(res).toEqual({ ok: false, err: 'not-found' })
   })
 })
 
@@ -81,17 +72,10 @@ describe(leasingAdapter.getOffersForContact, () => {
   it('should return 404 on not found', async () => {
     nock(config.tenantsLeasesService.url)
       .get('/contacts/P174965/offers')
-      .reply(404, {
-        content: {
-          ok: false,
-          err: 'not-found',
-        },
-      })
+      .reply(404)
 
     const res = await leasingAdapter.getOffersForContact('P174965')
-
-    expect(res.ok).toBe(false)
-    if (!res.ok) expect(res.err).toBe('not-found')
+    expect(res).toEqual({ ok: false, err: 'not-found' })
   })
 
   it('should return an empty array if no offers are found', async () => {
@@ -102,25 +86,16 @@ describe(leasingAdapter.getOffersForContact, () => {
       })
 
     const res = await leasingAdapter.getOffersForContact('P174965')
-
-    expect(res.ok).toBe(true)
-    if (res.ok) expect(res.data).toEqual([])
+    expect(res).toEqual({ ok: true, data: [] })
   })
 
   it('should handle server errors gracefully', async () => {
     nock(config.tenantsLeasesService.url)
       .get('/contacts/P174965/offers')
-      .reply(500, {
-        content: {
-          ok: false,
-          err: 'unknown',
-        },
-      })
+      .reply(500)
 
     const res = await leasingAdapter.getOffersForContact('P174965')
-
-    expect(res.ok).toBe(false)
-    if (!res.ok) expect(res.err).toBe('unknown')
+    expect(res).toEqual({ ok: false, err: 'unknown' })
   })
 })
 
