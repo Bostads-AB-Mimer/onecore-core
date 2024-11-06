@@ -29,8 +29,7 @@ const getActiveListingByRentalObjectCode = async (
   } catch (error) {
     logger.error(
       error,
-      'Error fetching active listing by rental object code:',
-      error
+      'Error fetching active listing by rental object code:'
     )
     return { ok: false, err: 'unknown' }
   }
