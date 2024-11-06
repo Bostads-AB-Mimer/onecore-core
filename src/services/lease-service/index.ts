@@ -6,6 +6,7 @@
  * course, there are always exceptions).
  */
 import KoaRouter from '@koa/router'
+import dayjs from 'dayjs'
 import { GetActiveOfferByListingIdErrorCodes, leasing } from 'onecore-types'
 import { logger, generateRouteMetadata } from 'onecore-utilities'
 import { z } from 'zod'
@@ -1553,14 +1554,23 @@ export const routes = (router: KoaRouter) => {
     typeof leasing.UpdateApplicationProfileResponseDataSchema
   >
 
+  const UpdateApplicationProfileRequestParams =
+    leasing.UpdateApplicationProfileRequestParamsSchema.pick({
+      numAdults: true,
+      numChildren: true,
+    })
+
   router.put(
     '(.*)/contacts/:contactCode/application-profile',
-    parseRequestBody(leasing.UpdateApplicationProfileRequestParamsSchema),
+    parseRequestBody(UpdateApplicationProfileRequestParams),
     async (ctx) => {
       const metadata = generateRouteMetadata(ctx)
       const update = await leasingAdapter.updateApplicationProfileByContactCode(
         ctx.params.contactCode,
-        ctx.request.body
+        {
+          ...ctx.request.body,
+          expiresAt: dayjs(new Date()).add(6, 'months').toDate(),
+        }
       )
 
       if (!update.ok) {
