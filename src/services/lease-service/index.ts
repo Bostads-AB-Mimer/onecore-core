@@ -1455,8 +1455,7 @@ export const routes = (router: KoaRouter) => {
    *         required: true
    *         schema:
    *           type: string
-   *         description: The contact code associated with the application
-   *         profile.
+   *         description: The contact code associated with the application profile.
    *     responses:
    *       200:
    *         description: Successfully retrieved application profile.
