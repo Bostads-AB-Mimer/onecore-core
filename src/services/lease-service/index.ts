@@ -6,7 +6,7 @@
  * course, there are always exceptions).
  */
 import KoaRouter from '@koa/router'
-import { core, GetActiveOfferByListingIdErrorCodes } from 'onecore-types'
+import { GetActiveOfferByListingIdErrorCodes, leasing } from 'onecore-types'
 import { logger, generateRouteMetadata } from 'onecore-utilities'
 import { z } from 'zod'
 
@@ -1475,7 +1475,7 @@ export const routes = (router: KoaRouter) => {
    */
 
   type GetApplicationProfileResponseData = z.infer<
-    typeof core.GetApplicationProfileResponseDataSchema
+    typeof leasing.GetApplicationProfileResponseDataSchema
   >
 
   router.get('(.*)/contacts/:contactCode/application-profile', async (ctx) => {

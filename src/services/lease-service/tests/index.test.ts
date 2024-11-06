@@ -2,10 +2,6 @@ import request from 'supertest'
 import Koa from 'koa'
 import KoaRouter from '@koa/router'
 import bodyParser from 'koa-bodyparser'
-import { routes } from '../index'
-import * as tenantLeaseAdapter from '../../../adapters/leasing-adapter'
-import * as replyToOffer from '../../../processes/parkingspaces/internal/reply-to-offer'
-
 import {
   Lease,
   ConsumerReport,
@@ -13,10 +9,16 @@ import {
   GetActiveOfferByListingIdErrorCodes,
   ListingStatus,
   UpdateListingStatusErrorCodes,
-  core,
+  leasing,
 } from 'onecore-types'
+
+import { routes } from '../index'
+import * as tenantLeaseAdapter from '../../../adapters/leasing-adapter'
+import * as replyToOffer from '../../../processes/parkingspaces/internal/reply-to-offer'
+
 import * as factory from '../../../../test/factories'
 import { ProcessStatus } from '../../../common/types'
+
 const app = new Koa()
 const router = new KoaRouter()
 routes(router)
@@ -644,7 +646,7 @@ describe('lease-service', () => {
 
       expect(res.status).toBe(200)
       expect(() =>
-        core.GetApplicationProfileResponseDataSchema.parse(res.body.content)
+        leasing.GetApplicationProfileResponseDataSchema.parse(res.body.content)
       ).not.toThrow()
     })
   })
