@@ -90,8 +90,7 @@ describe(leasingAdapter.getOffersForContact, () => {
 
     const res = await leasingAdapter.getOffersForContact('P174965')
 
-    expect(res.ok).toBe(false)
-    if (!res.ok) expect(res.err).toBe('not-found')
+    expect(res).toEqual({ ok: false, err: 'not-found' })
   })
 
   it('should return an empty array if no offers are found', async () => {
