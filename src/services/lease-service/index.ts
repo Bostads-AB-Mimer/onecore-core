@@ -12,6 +12,7 @@ import { z } from 'zod'
 
 import * as leasingAdapter from '../../adapters/leasing-adapter'
 import { ProcessStatus } from '../../common/types'
+import { parseRequestBody } from '../../middlewares/parse-request-body'
 import * as internalParkingSpaceProcesses from '../../processes/parkingspaces/internal'
 
 const getLeaseWithRelatedEntities = async (rentalId: string) => {
@@ -1442,6 +1443,7 @@ export const routes = (router: KoaRouter) => {
       }
     }
   )
+
   /**
    * @swagger
    * /contacts/{contactCode}/application-profile:
@@ -1501,4 +1503,83 @@ export const routes = (router: KoaRouter) => {
       ...metadata,
     }
   })
+
+  /**
+   * @swagger
+   * /contacts/{contactCode}/application-profile:
+   *   put:
+   *     summary: Updates an application profile by contact code
+   *     description: Update application profile information by contact code.
+   *     tags: [Contacts]
+   *     parameters:
+   *       - in: path
+   *         name: contactCode
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: The contact code associated with the application
+   *         profile.
+   *     requestBody:
+   *       required: true
+   *       content:
+   *          application/json:
+   *             schema:
+   *               type: object
+   *       properties:
+   *         numAdults:
+   *           type: number
+   *           description: Number of adults in the current housing.
+   *         numChildren:
+   *           type: number
+   *           description: Number of children in the current housing.
+   *     responses:
+   *       200:
+   *         description: Successfully updated application profile.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 data:
+   *                   type: object
+   *                   description: The application profile data.
+   *       404:
+   *         description: Not found.
+   *       500:
+   *         description: Internal server error. Failed to update application profile information.
+   */
+
+  type UpdateApplicationProfileResponseData = z.infer<
+    typeof leasing.UpdateApplicationProfileResponseDataSchema
+  >
+
+  router.put(
+    '(.*)/contacts/:contactCode/application-profile',
+    parseRequestBody(leasing.UpdateApplicationProfileRequestParamsSchema),
+    async (ctx) => {
+      const metadata = generateRouteMetadata(ctx)
+      const update = await leasingAdapter.updateApplicationProfileByContactCode(
+        ctx.params.contactCode,
+        ctx.request.body
+      )
+
+      if (!update.ok) {
+        if (update.err === 'not-found') {
+          ctx.status = 404
+          ctx.body = { error: 'not-found', ...metadata }
+          return
+        }
+
+        ctx.status = 500
+        ctx.body = { error: 'unknown', ...metadata }
+        return
+      }
+
+      ctx.status = 200
+      ctx.body = {
+        content: update.data satisfies UpdateApplicationProfileResponseData,
+        ...metadata,
+      }
+    }
+  )
 }
