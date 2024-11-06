@@ -14,7 +14,9 @@ import {
   DetailedApplicant,
   Tenant,
   ApplicationProfile,
+  leasing,
 } from 'onecore-types'
+import { z } from 'zod'
 
 import { AdapterResult } from './../types'
 import config from '../../common/config'
@@ -511,13 +513,19 @@ const validatePropertyRentalRules = async (
   }
 }
 
+type GetApplicationProfileResponseData = z.infer<
+  typeof leasing.GetApplicationProfileResponseDataSchema
+>
+
 async function getApplicationProfileByContactCode(
   contactCode: string
-): Promise<AdapterResult<ApplicationProfile, 'unknown' | 'not-found'>> {
+): Promise<
+  AdapterResult<GetApplicationProfileResponseData, 'unknown' | 'not-found'>
+> {
   try {
-    const response = await axios.get<{ content: ApplicationProfile }>(
-      `${tenantsLeasesServiceUrl}/contacts/${contactCode}/application-profile`
-    )
+    const response = await axios.get<{
+      content: GetApplicationProfileResponseData
+    }>(`${tenantsLeasesServiceUrl}/contacts/${contactCode}/application-profile`)
 
     if (response.status === 200) {
       return { ok: true, data: response.data.content }
