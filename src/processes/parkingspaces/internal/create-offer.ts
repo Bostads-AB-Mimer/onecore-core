@@ -60,8 +60,16 @@ export const createOfferForInternalParkingSpace = async (
       )
     }
 
-    const eligibleApplicants = await getEligbleApplicants(listing.id)
-    const activeApplicants = await getActiveApplicants(listing.id)
+    const allApplicants =
+      await leasingAdapter.getDetailedApplicantsByListingId(listingId)
+
+    //todo: return as process error?
+    if (!allApplicants.ok) {
+      throw new Error('Could not get detailed applicants')
+    }
+
+    const eligibleApplicants = await getEligbleApplicants(allApplicants.data)
+    const activeApplicants = await getActiveApplicants(allApplicants.data)
 
     if (!eligibleApplicants.length) {
       const updateListingStatus = await leasingAdapter.updateListingStatus(
@@ -227,35 +235,21 @@ export const createOfferForInternalParkingSpace = async (
   }
 }
 
-async function getActiveApplicants(listingId: number) {
-  const applicants =
-    await leasingAdapter.getDetailedApplicantsByListingId(listingId)
-
-  if (!applicants.ok) {
-    throw new Error('Could not get detailed applicants')
-  }
-
-  //filter out applicants that are not active
-  //include applicants without priority
-  return applicants.data.filter(
-    (a): a is DetailedApplicant & { priority: number } => {
+async function getActiveApplicants(applicants: DetailedApplicant[]) {
+  //filter out applicants that are not active and include applicants without priority
+  return applicants.filter(
+    (a): a is DetailedApplicant & { priority: number | null } => {
       return a.status === ApplicantStatus.Active
     }
   )
 }
 
 //todo: refactor to just return first eligible applicant?
-//todo: list is redudant?
-async function getEligbleApplicants(listingId: number) {
-  const applicants =
-    await leasingAdapter.getDetailedApplicantsByListingId(listingId)
-
-  if (!applicants.ok) {
-    throw new Error('Could not get detailed applicants')
-  }
+//todo: because list is redudant?
+async function getEligbleApplicants(applicants: DetailedApplicant[]) {
   // Filter out any applicants that has no priority and are not active
   // as they are not eligible to rent the object of this listing
-  return applicants.data.filter(
+  return applicants.filter(
     (a): a is DetailedApplicant & { priority: number } => {
       return a.priority != undefined && a.status === ApplicantStatus.Active
     }
