@@ -1598,6 +1598,36 @@ export const routes = (router: KoaRouter) => {
     }
   )
 
+  /**
+   * @swagger
+   * /contacts/{contactCode}/{rentalObjectCode}/verify-application:
+   *   get:
+   *     summary: Validate max num residents.
+   *     description: Checks if application is allowed based on current number of residents.
+   *     tags: [Contacts]
+   *     parameters:
+   *       - in: path
+   *         name: contactCode
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: The contact code associated with the application profile.
+   *       - in: path
+   *         name: rentalObjectCode
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: The rental object code associated with the rental property.
+   *     responses:
+   *       200:
+   *         description: Application allowed.
+   *       403:
+   *         description: Application not allowed.
+   *       404:
+   *         description: Not found.
+   *       500:
+   *         description: Internal server error. Failed to retrieve application profile information.
+   */
   router.get(
     '(.*)/contacts/:contactCode/:rentalObjectCode/verify-application',
     async (ctx) => {
