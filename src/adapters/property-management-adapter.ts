@@ -1,4 +1,4 @@
-import { loggedAxios as axios } from 'onecore-utilities'
+import { loggedAxios as axios, logger } from 'onecore-utilities'
 import {
   ApartmentInfo,
   Listing,
@@ -9,8 +9,9 @@ import {
   RentalProperty,
   RentalPropertyInfo,
 } from 'onecore-types'
+import { AxiosError } from 'axios'
+
 import config from '../common/config'
-import { logger } from 'onecore-utilities'
 import { AdapterResult } from './types'
 
 const propertyManagementServiceUrl = config.propertyInfoService.url
@@ -53,15 +54,16 @@ const getApartmentRentalPropertyInfo = async (
       }
     }
 
-    if (result.status === 404) {
+    return { ok: false, err: 'unknown' }
+  } catch (err) {
+    logger.error(err, 'Error getting apartment rental property info')
+    if (err instanceof AxiosError && err.status === 404) {
       return {
         ok: false,
         err: 'not-found',
       }
     }
-    return { ok: false, err: 'unknown' }
-  } catch (err) {
-    logger.error(err, 'Error getting apartment rental property info')
+
     return { ok: false, err: 'unknown' }
   }
 }
