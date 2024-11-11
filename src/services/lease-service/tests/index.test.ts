@@ -26,114 +26,26 @@ routes(router)
 app.use(bodyParser())
 app.use(router.routes())
 
-beforeEach(jest.clearAllMocks)
+beforeEach(jest.resetAllMocks)
 describe('lease-service', () => {
-  let leaseMock: Lease, consumerReportMock: ConsumerReport
-
-  beforeEach(() => {
-    leaseMock = {
-      leaseId: '1',
-      leaseNumber: '9433',
-      leaseStartDate: new Date('2023-06-01T09:57:53.144Z'),
-      leaseEndDate: new Date('2023-06-01T09:57:53.144Z'),
-      status: 0,
-      tenantContactIds: ['P4417', 'P5602'],
-      address: undefined,
-      noticeGivenBy: undefined,
-      noticeDate: undefined,
-      noticeTimeTenant: undefined,
-      preferredMoveOutDate: undefined,
-      contractDate: undefined,
-      terminationDate: undefined,
-      lastDebitDate: undefined,
-      approvalDate: undefined,
-      tenants: [
-        {
-          contactCode: 'P4417',
-          contactKey: 'ABC',
-          firstName: 'Anneli',
-          lastName: 'Forsberg',
-          nationalRegistrationNumber: '20740522-7848',
-          birthDate: new Date('20740522'),
-          address: {
-            street: 'Gatvägen',
-            number: '29',
-            postalCode: '72489',
-            city: 'Västerås',
-          },
-          phoneNumbers: [
-            {
-              isMainNumber: true,
-              phoneNumber: '+465480978306',
-              type: 'mobile',
-            },
-            {
-              isMainNumber: false,
-              phoneNumber: '+460777174972',
-              type: 'home',
-            },
-          ],
-          emailAddress: 'test@test.se',
-          leaseIds: ['1'],
-          leases: undefined,
-          fullName: 'Anneli Forsberg',
-          isTenant: true,
-        },
-        {
-          contactCode: 'P5602',
-          contactKey: 'ABC',
-          firstName: 'Berit',
-          lastName: 'Holmgren',
-          nationalRegistrationNumber: '20850523-6536',
-          birthDate: new Date('20850523'),
-          address: {
-            street: 'Gatvägen',
-            number: '29',
-            postalCode: '72489',
-            city: 'Västerås',
-          },
-          phoneNumbers: [
-            {
-              isMainNumber: true,
-              phoneNumber: '+467932495313',
-              type: 'mobile',
-            },
-            {
-              isMainNumber: false,
-              phoneNumber: '+469731498801',
-              type: 'home',
-            },
-          ],
-          emailAddress: 'test@test.se',
-          leaseIds: ['1'],
-          leases: undefined,
-          fullName: 'Berit Holmgren',
-          isTenant: true,
-        },
-      ],
-      rentalPropertyId: '264',
-      rentalProperty: undefined,
-      type: 'type',
-      rentInfo: undefined,
-    }
-    consumerReportMock = {
-      pnr: '4512121122',
-      template: 'TEST_TEMPLATE',
-      status: '2',
-      status_text: 'Ej Godkänd',
-      errorList: [
-        {
-          Cause_of_Reject: 'P24',
-          Reject_comment: '',
-          Reject_text: 'Scoring',
-        },
-      ],
-      name: 'Erik Lundberg',
-      address: 'Gatvägen 56',
-      zip: '72266',
-      city: 'Västerås',
-    }
-  })
+  const leaseMock: Lease = factory.lease.build()
+  const consumerReportMock: ConsumerReport = {
+    pnr: '4512121122',
+    template: 'TEST_TEMPLATE',
+    status: '2',
+    status_text: 'Ej Godkänd',
+    errorList: [
+      {
+        Cause_of_Reject: 'P24',
+        Reject_comment: '',
+        Reject_text: 'Scoring',
+      },
+    ],
+    name: 'Erik Lundberg',
+    address: 'Gatvägen 56',
+    zip: '72266',
+    city: 'Västerås',
+  }
 
   describe('GET /leases/for/:pnr', () => {
     it('responds with a list of leases', async () => {
