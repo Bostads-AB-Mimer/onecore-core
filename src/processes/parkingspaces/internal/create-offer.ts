@@ -63,15 +63,21 @@ export const createOfferForInternalParkingSpace = async (
     const allApplicants =
       await leasingAdapter.getDetailedApplicantsByListingId(listingId)
 
-    //todo: return as process error?
     if (!allApplicants.ok) {
-      throw new Error('Could not get detailed applicants')
+      throw new Error('Could not get applicants')
     }
 
-    const eligibleApplicants = await getEligbleApplicants(allApplicants.data)
-    const activeApplicants = await getActiveApplicants(allApplicants.data)
+    const eligibleApplicant = await getFirstEligibleApplicant(
+      allApplicants.data
+    )
 
-    if (!eligibleApplicants.length) {
+    // discard the first applicant since that is our eligibleApplicant
+    // leasing currently guarantees that the list is sorted correctly
+    const [_first, ...activeApplicants] = await getActiveApplicants(
+      allApplicants.data
+    )
+
+    if (!eligibleApplicant) {
       const updateListingStatus = await leasingAdapter.updateListingStatus(
         listing.id,
         ListingStatus.NoApplicants
@@ -90,35 +96,19 @@ export const createOfferForInternalParkingSpace = async (
         log,
         CreateOfferErrorCodes.NoApplicants,
         500,
-        `No eligible applicants found, cannot create new offer`
-      )
-    }
-
-    //todo: the actual applicant cannot have a priority of null
-    //todo: the list is sorted, right?
-    //todo: if priority null for applicant, we have reached the end of eligble applicants
-    const nextEligibleApplicant = eligibleApplicants.shift()
-    activeApplicants.shift() //remove the first applicant from the list since that is nextEligibleApplicant
-
-    //todo: write test
-    if (nextEligibleApplicant == undefined) {
-      return endFailingProcess(
-        log,
-        CreateOfferErrorCodes.NoApplicants, //todo update error code
-        500,
-        `No eligible applicants found, cannot create new offer`
+        `No eligible applicant found, cannot create new offer`
       )
     }
 
     const getContact = await leasingAdapter.getContactByContactCode(
-      nextEligibleApplicant.contactCode
+      eligibleApplicant.contactCode
     )
     if (!getContact.ok) {
       return endFailingProcess(
         log,
         CreateOfferErrorCodes.NoContact,
         500,
-        `Could not find contact ${nextEligibleApplicant.contactCode}`
+        `Could not find contact ${eligibleApplicant.contactCode}`
       )
     }
 
@@ -128,11 +118,11 @@ export const createOfferForInternalParkingSpace = async (
       // TODO: Maybe this should happen in leasing so we dont get inconsintent
       // state if offer creation fails?
       await leasingAdapter.updateApplicantStatus({
-        applicantId: nextEligibleApplicant.id,
-        contactCode: nextEligibleApplicant.contactCode,
+        applicantId: eligibleApplicant.id,
+        contactCode: eligibleApplicant.contactCode,
         status: ApplicantStatus.Offered,
       })
-      log.push(`Updated status for applicant ${nextEligibleApplicant.id}`)
+      log.push(`Updated status for applicant ${eligibleApplicant.id}`)
     } catch (_err) {
       return endFailingProcess(
         log,
@@ -144,11 +134,11 @@ export const createOfferForInternalParkingSpace = async (
     }
 
     const updatedApplicant: DetailedApplicant & { priority: number } = {
-      ...nextEligibleApplicant,
+      ...eligibleApplicant,
       status: ApplicantStatus.Offered,
     }
     const offer = await leasingAdapter.createOffer({
-      applicantId: nextEligibleApplicant.id,
+      applicantId: eligibleApplicant.id,
       expiresAt: utils.date.addBusinessDays(new Date(), 2),
       listingId: listing.id,
       status: OfferStatus.Active,
@@ -182,7 +172,7 @@ export const createOfferForInternalParkingSpace = async (
         subject: 'Erbjudande om intern bilplats',
         text: 'Erbjudande om intern bilplats',
         address: listing.address,
-        firstName: nextEligibleApplicant.name,
+        firstName: eligibleApplicant.name,
         availableFrom: new Date(listing.vacantFrom).toISOString(),
         deadlineDate: new Date(offer.data.expiresAt).toISOString(),
         rent: String(listing.monthlyRent),
@@ -244,16 +234,11 @@ async function getActiveApplicants(applicants: DetailedApplicant[]) {
   )
 }
 
-//todo: refactor to just return first eligible applicant?
-//todo: because list is redudant?
-async function getEligbleApplicants(applicants: DetailedApplicant[]) {
-  // Filter out any applicants that has no priority and are not active
-  // as they are not eligible to rent the object of this listing
-  return applicants.filter(
-    (a): a is DetailedApplicant & { priority: number } => {
-      return a.priority != undefined && a.status === ApplicantStatus.Active
-    }
-  )
+async function getFirstEligibleApplicant(applicants: DetailedApplicant[]) {
+  // Find the first applicant who has a priority and is active
+  return applicants.find((a): a is DetailedApplicant & { priority: number } => {
+    return a.priority !== null && a.status === ApplicantStatus.Active
+  })
 }
 
 // Ends a process gracefully by debugging log, logging the error, sending the error to the dev team and return a process error with the error code and details
