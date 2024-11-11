@@ -1,5 +1,6 @@
 import { loggedAxios as axios } from 'onecore-utilities'
 import {
+  ApartmentInfo,
   Listing,
   MaintenanceUnitInfo,
   MaterialChoice,
@@ -10,6 +11,7 @@ import {
 } from 'onecore-types'
 import config from '../common/config'
 import { logger } from 'onecore-utilities'
+import { AdapterResult } from './types'
 
 const propertyManagementServiceUrl = config.propertyInfoService.url
 
@@ -35,6 +37,33 @@ const getRentalPropertyInfo = async (
   )
 
   return propertyResponse.data.content
+}
+
+const getApartmentRentalPropertyInfo = async (
+  rentalObjectCode: string
+): Promise<AdapterResult<ApartmentInfo, 'not-found' | 'unknown'>> => {
+  try {
+    const result = await axios.get(
+      `${propertyManagementServiceUrl}/rentalPropertyInfo/apartment/${rentalObjectCode}`
+    )
+    if (result.status === 200) {
+      return {
+        ok: true,
+        data: result.data.content,
+      }
+    }
+
+    if (result.status === 404) {
+      return {
+        ok: false,
+        err: 'not-found',
+      }
+    }
+    return { ok: false, err: 'unknown' }
+  } catch (err) {
+    logger.error(err, 'Error getting apartment rental property info')
+    return { ok: false, err: 'unknown' }
+  }
 }
 
 //todo: copy of getRentalPropertyInfo above
@@ -167,4 +196,5 @@ export {
   getParkingSpace,
   getPublishedParkingSpace,
   getRentalPropertyInfoFromXpand,
+  getApartmentRentalPropertyInfo,
 }

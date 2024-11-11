@@ -12,9 +12,11 @@ import { logger, generateRouteMetadata } from 'onecore-utilities'
 import { z } from 'zod'
 
 import * as leasingAdapter from '../../adapters/leasing-adapter'
+import * as propertyManagementAdapter from '../../adapters/property-management-adapter'
 import { ProcessStatus } from '../../common/types'
 import { parseRequestBody } from '../../middlewares/parse-request-body'
 import * as internalParkingSpaceProcesses from '../../processes/parkingspaces/internal'
+import { isAllowedNumResidents } from './services/is-allowed-num-residents'
 
 const getLeaseWithRelatedEntities = async (rentalId: string) => {
   const lease = await leasingAdapter.getLease(rentalId, 'true')
@@ -1593,6 +1595,66 @@ export const routes = (router: KoaRouter) => {
           createOrUpdate.data satisfies CreateOrUpdateApplicationProfileResponseData,
         ...metadata,
       }
+    }
+  )
+
+  router.get(
+    '(.*)/contacts/:contactCode/:rentalObjectCode/verify-application',
+    async (ctx) => {
+      const metadata = generateRouteMetadata(ctx)
+      const applicationProfile =
+        await leasingAdapter.getApplicationProfileByContactCode(
+          ctx.params.contactCode
+        )
+
+      if (!applicationProfile.ok) {
+        if (applicationProfile.err === 'not-found') {
+          ctx.status = 404
+          ctx.body = { reason: 'Application profile not found', ...metadata }
+          return
+        } else {
+          ctx.status = 500
+          ctx.body = { error: 'Error getting application profile', ...metadata }
+          return
+        }
+      }
+
+      const rentalPropertyInfo =
+        await propertyManagementAdapter.getApartmentRentalPropertyInfo(
+          ctx.params.rentalObjectCode
+        )
+
+      if (!rentalPropertyInfo.ok) {
+        if (rentalPropertyInfo.err === 'not-found') {
+          ctx.status = 404
+          ctx.body = { reason: 'Rental property info not found', ...metadata }
+          return
+        } else {
+          ctx.status = 500
+          ctx.body = {
+            error: 'Error getting rental property info',
+            ...metadata,
+          }
+          return
+        }
+      }
+
+      const isAllowedApplication = isAllowedNumResidents(
+        rentalPropertyInfo.data.typeCode,
+        applicationProfile.data.numAdults + applicationProfile.data.numChildren
+      )
+
+      if (!isAllowedApplication) {
+        ctx.status = 403
+        ctx.body = {
+          reason: 'Too many residents for this rental property',
+          ...metadata,
+        }
+        return
+      }
+
+      ctx.status = 200
+      ctx.body = { ...metadata }
     }
   )
 }
