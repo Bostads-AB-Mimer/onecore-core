@@ -133,7 +133,7 @@ export const createOfferForInternalParkingSpace = async (
       )
     }
 
-    const updatedApplicant: DetailedApplicant & { priority: number } = {
+    const updatedApplicant: DetailedApplicant = {
       ...eligibleApplicant,
       status: ApplicantStatus.Offered,
     }
@@ -227,16 +227,14 @@ export const createOfferForInternalParkingSpace = async (
 
 async function getActiveApplicants(applicants: DetailedApplicant[]) {
   //filter out applicants that are not active and include applicants without priority
-  return applicants.filter(
-    (a): a is DetailedApplicant & { priority: number | null } => {
-      return a.status === ApplicantStatus.Active
-    }
-  )
+  return applicants.filter((a): a is DetailedApplicant => {
+    return a.status === ApplicantStatus.Active
+  })
 }
 
 async function getFirstEligibleApplicant(applicants: DetailedApplicant[]) {
   // Find the first applicant who has a priority and is active
-  return applicants.find((a): a is DetailedApplicant & { priority: number } => {
+  return applicants.find((a): a is DetailedApplicant => {
     return a.priority !== null && a.status === ApplicantStatus.Active
   })
 }
@@ -265,7 +263,7 @@ const endFailingProcess = (
 }
 
 function mapDetailedApplicantsToCreateOfferSelectedApplicants(
-  a: DetailedApplicant & { priority: number }
+  a: DetailedApplicant
 ): CreateOfferApplicantParams {
   return {
     listingId: a.listingId,
