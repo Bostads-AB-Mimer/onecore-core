@@ -14,6 +14,7 @@ import {
 
 import { routes } from '../index'
 import * as tenantLeaseAdapter from '../../../adapters/leasing-adapter'
+import * as propertyManagementAdapter from '../../../adapters/property-management-adapter'
 import * as replyToOffer from '../../../processes/parkingspaces/internal/reply-to-offer'
 
 import * as factory from '../../../../test/factories'
@@ -689,5 +690,112 @@ describe('lease-service', () => {
         )
       ).not.toThrow()
     })
+  })
+})
+
+describe('GET /contacts/:contactCode/:rentalObjectCode/verify-application', () => {
+  it('responds with 404 if application profile was not found', async () => {
+    jest
+      .spyOn(tenantLeaseAdapter, 'getApplicationProfileByContactCode')
+      .mockResolvedValueOnce({ ok: false, err: 'not-found' })
+
+    const res = await request(app.callback()).get(
+      '/contacts/contact-code/rental-object-code/verify-application'
+    )
+
+    expect(res.status).toBe(404)
+    expect(res.body).toEqual({
+      reason: 'Application profile not found',
+    })
+  })
+
+  it('responds with 404 if apartment rental property info was not found', async () => {
+    jest
+      .spyOn(tenantLeaseAdapter, 'getApplicationProfileByContactCode')
+      .mockResolvedValueOnce({
+        ok: true,
+        data: {
+          contactCode: 'foo',
+          createdAt: new Date(),
+          expiresAt: new Date(),
+          id: 1,
+          numAdults: 0,
+          numChildren: 0,
+        },
+      })
+
+    jest
+      .spyOn(propertyManagementAdapter, 'getApartmentRentalPropertyInfo')
+      .mockResolvedValueOnce({ ok: false, err: 'not-found' })
+
+    const res = await request(app.callback()).get(
+      '/contacts/contact-code/rental-object-code/verify-application'
+    )
+
+    expect(res.status).toBe(404)
+    expect(res.body).toEqual({
+      reason: 'Rental property info not found',
+    })
+  })
+
+  it('responds with 403 if application not allowed', async () => {
+    jest
+      .spyOn(tenantLeaseAdapter, 'getApplicationProfileByContactCode')
+      .mockResolvedValueOnce({
+        ok: true,
+        data: {
+          contactCode: '1234',
+          createdAt: new Date(),
+          expiresAt: null,
+          id: 1,
+          numAdults: 2,
+          numChildren: 2,
+        },
+      })
+
+    jest
+      .spyOn(propertyManagementAdapter, 'getApartmentRentalPropertyInfo')
+      .mockResolvedValueOnce({
+        ok: true,
+        data: factory.apartmentInfo.build({ typeCode: '1RK' }),
+      })
+
+    const res = await request(app.callback()).get(
+      '/contacts/contact-code/rental-object-code/verify-application'
+    )
+
+    expect(res.status).toBe(403)
+    expect(res.body).toEqual({
+      reason: 'Too many residents for this rental property',
+    })
+  })
+
+  it('responds with 200 if application allowed', async () => {
+    jest
+      .spyOn(tenantLeaseAdapter, 'getApplicationProfileByContactCode')
+      .mockResolvedValueOnce({
+        ok: true,
+        data: {
+          contactCode: '1234',
+          createdAt: new Date(),
+          expiresAt: null,
+          id: 1,
+          numAdults: 2,
+          numChildren: 2,
+        },
+      })
+
+    jest
+      .spyOn(propertyManagementAdapter, 'getApartmentRentalPropertyInfo')
+      .mockResolvedValueOnce({
+        ok: true,
+        data: factory.apartmentInfo.build({ typeCode: '2RK' }),
+      })
+
+    const res = await request(app.callback()).get(
+      '/contacts/contact-code/rental-object-code/verify-application'
+    )
+
+    expect(res.status).toBe(200)
   })
 })
