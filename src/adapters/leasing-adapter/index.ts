@@ -519,41 +519,41 @@ async function getApplicationProfileByContactCode(
   }
 }
 
-type UpdateApplicationProfileResponseData = z.infer<
-  typeof leasing.UpdateApplicationProfileResponseDataSchema
+type CreateOrUpdateApplicationProfileResponseData = z.infer<
+  typeof leasing.CreateOrUpdateApplicationProfileResponseDataSchema
 >
 
-type UpdateApplicationProfileRequestParams = z.infer<
-  typeof leasing.UpdateApplicationProfileRequestParamsSchema
+type CreateOrUpdateApplicationProfileRequestParams = z.infer<
+  typeof leasing.CreateOrUpdateApplicationProfileRequestParamsSchema
 >
 
-async function updateApplicationProfileByContactCode(
+async function createOrUpdateApplicationProfileByContactCode(
   contactCode: string,
-  params: UpdateApplicationProfileRequestParams
+  params: CreateOrUpdateApplicationProfileRequestParams
 ): Promise<
   AdapterResult<
-    UpdateApplicationProfileResponseData,
-    'not-found' | 'bad-params' | 'unknown'
+    CreateOrUpdateApplicationProfileResponseData,
+    'bad-params' | 'unknown'
   >
 > {
   try {
-    const response = await axios.put<{
-      content: UpdateApplicationProfileResponseData
+    const response = await axios.post<{
+      content: CreateOrUpdateApplicationProfileResponseData
     }>(
       `${tenantsLeasesServiceUrl}/contacts/${contactCode}/application-profile`,
       params
     )
 
-    if (response.status === 200) {
-      return { ok: true, data: response.data.content }
+    if (response.status === 200 || response.status === 201) {
+      return {
+        ok: true,
+        data: response.data.content,
+        statusCode: response.status,
+      }
     }
 
     if (response.status === 400) {
       return { ok: false, err: 'bad-params' }
-    }
-
-    if (response.status === 404) {
-      return { ok: false, err: 'not-found' }
     }
 
     return { ok: false, err: 'unknown' }
@@ -583,7 +583,7 @@ export {
   getTenantByContactCode,
   resetWaitingList,
   setApplicantStatusActive,
-  updateApplicationProfileByContactCode,
+  createOrUpdateApplicationProfileByContactCode,
   updateApplicantStatus,
   validatePropertyRentalRules,
   validateResidentialAreaRentalRules,

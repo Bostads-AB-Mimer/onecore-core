@@ -651,33 +651,21 @@ describe('lease-service', () => {
     })
   })
 
-  describe('PUT /contacts/:contactCode/application-profile', () => {
+  describe('POST /contacts/:contactCode/application-profile', () => {
     it('responds with 400 if bad params', async () => {
-      const res = await request(app.callback()).put(
+      const res = await request(app.callback()).post(
         '/contacts/1234/application-profile'
       )
 
       expect(res.status).toBe(400)
     })
 
-    it('responds with 404 if not found', async () => {
-      jest
-        .spyOn(tenantLeaseAdapter, 'updateApplicationProfileByContactCode')
-        .mockResolvedValueOnce({ ok: false, err: 'not-found' })
-
-      const res = await request(app.callback())
-        .put('/contacts/1234/application-profile')
-        .send({ numAdults: 0, numChildren: 0 })
-
-      expect(res.status).toBe(404)
-      expect(res.body).toEqual({
-        error: 'not-found',
-      })
-    })
-
     it('responds with 200 and application profile', async () => {
       jest
-        .spyOn(tenantLeaseAdapter, 'updateApplicationProfileByContactCode')
+        .spyOn(
+          tenantLeaseAdapter,
+          'createOrUpdateApplicationProfileByContactCode'
+        )
         .mockResolvedValueOnce({
           ok: true,
           data: {
@@ -691,12 +679,12 @@ describe('lease-service', () => {
         })
 
       const res = await request(app.callback())
-        .put('/contacts/1234/application-profile')
+        .post('/contacts/1234/application-profile')
         .send({ numAdults: 0, numChildren: 0 })
 
       expect(res.status).toBe(200)
       expect(() =>
-        leasing.UpdateApplicationProfileResponseDataSchema.parse(
+        leasing.CreateOrUpdateApplicationProfileResponseDataSchema.parse(
           res.body.content
         )
       ).not.toThrow()

@@ -1508,9 +1508,9 @@ export const routes = (router: KoaRouter) => {
   /**
    * @swagger
    * /contacts/{contactCode}/application-profile:
-   *   put:
-   *     summary: Updates an application profile by contact code
-   *     description: Update application profile information by contact code.
+   *   post:
+   *     summary: Creates or updates an application profile by contact code
+   *     description: Create or update application profile information by contact code.
    *     tags: [Contacts]
    *     parameters:
    *       - in: path
@@ -1518,8 +1518,7 @@ export const routes = (router: KoaRouter) => {
    *         required: true
    *         schema:
    *           type: string
-   *         description: The contact code associated with the application
-   *         profile.
+   *         description: The contact code associated with the application profile.
    *     requestBody:
    *       required: true
    *       content:
@@ -1544,50 +1543,54 @@ export const routes = (router: KoaRouter) => {
    *                 data:
    *                   type: object
    *                   description: The application profile data.
-   *       404:
-   *         description: Not found.
+   *       201:
+   *         description: Successfully created application profile.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 data:
+   *                   type: object
+   *                   description: The application profile data.
    *       500:
    *         description: Internal server error. Failed to update application profile information.
    */
 
-  type UpdateApplicationProfileResponseData = z.infer<
-    typeof leasing.UpdateApplicationProfileResponseDataSchema
+  type CreateOrUpdateApplicationProfileResponseData = z.infer<
+    typeof leasing.CreateOrUpdateApplicationProfileResponseDataSchema
   >
 
   const UpdateApplicationProfileRequestParams =
-    leasing.UpdateApplicationProfileRequestParamsSchema.pick({
+    leasing.CreateOrUpdateApplicationProfileRequestParamsSchema.pick({
       numAdults: true,
       numChildren: true,
     })
 
-  router.put(
+  router.post(
     '(.*)/contacts/:contactCode/application-profile',
     parseRequestBody(UpdateApplicationProfileRequestParams),
     async (ctx) => {
       const metadata = generateRouteMetadata(ctx)
-      const update = await leasingAdapter.updateApplicationProfileByContactCode(
-        ctx.params.contactCode,
-        {
-          ...ctx.request.body,
-          expiresAt: dayjs(new Date()).add(6, 'months').toDate(),
-        }
-      )
+      const createOrUpdate =
+        await leasingAdapter.createOrUpdateApplicationProfileByContactCode(
+          ctx.params.contactCode,
+          {
+            ...ctx.request.body,
+            expiresAt: dayjs(new Date()).add(6, 'months').toDate(),
+          }
+        )
 
-      if (!update.ok) {
-        if (update.err === 'not-found') {
-          ctx.status = 404
-          ctx.body = { error: 'not-found', ...metadata }
-          return
-        }
-
+      if (!createOrUpdate.ok) {
         ctx.status = 500
         ctx.body = { error: 'unknown', ...metadata }
         return
       }
 
-      ctx.status = 200
+      ctx.status = createOrUpdate.statusCode ?? 200
       ctx.body = {
-        content: update.data satisfies UpdateApplicationProfileResponseData,
+        content:
+          createOrUpdate.data satisfies CreateOrUpdateApplicationProfileResponseData,
         ...metadata,
       }
     }

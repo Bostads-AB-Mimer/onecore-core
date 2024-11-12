@@ -222,49 +222,38 @@ describe('leasing-adapter', () => {
     })
   })
 
-  describe(leasingAdapter.updateApplicationProfileByContactCode, () => {
+  describe(leasingAdapter.createOrUpdateApplicationProfileByContactCode, () => {
     it('returns bad params when leasing responds with 400', async () => {
       nock(config.tenantsLeasesService.url)
-        .put('/contacts/123/application-profile')
+        .post('/contacts/123/application-profile')
         .reply(400)
 
-      const result = await leasingAdapter.updateApplicationProfileByContactCode(
-        '123',
-        { expiresAt: new Date(), numAdults: 0, numChildren: 0 }
-      )
+      const result =
+        await leasingAdapter.createOrUpdateApplicationProfileByContactCode(
+          '123',
+          { expiresAt: new Date(), numAdults: 0, numChildren: 0 }
+        )
 
       expect(result).toEqual({ ok: false, err: 'bad-params' })
     })
 
-    it('returns not found when leasing responds with 404', async () => {
-      nock(config.tenantsLeasesService.url)
-        .put('/contacts/123/application-profile')
-        .reply(404)
-
-      const result = await leasingAdapter.updateApplicationProfileByContactCode(
-        '123',
-        { expiresAt: new Date(), numAdults: 0, numChildren: 0 }
-      )
-
-      expect(result).toEqual({ ok: false, err: 'not-found' })
-    })
-
     it('returns unknown err when leasing responds with 500', async () => {
       nock(config.tenantsLeasesService.url)
-        .put('/contacts/123/application-profile')
+        .post('/contacts/123/application-profile')
         .reply(500)
 
-      const result = await leasingAdapter.updateApplicationProfileByContactCode(
-        '123',
-        { expiresAt: new Date(), numAdults: 0, numChildren: 0 }
-      )
+      const result =
+        await leasingAdapter.createOrUpdateApplicationProfileByContactCode(
+          '123',
+          { expiresAt: new Date(), numAdults: 0, numChildren: 0 }
+        )
 
       expect(result).toEqual({ ok: false, err: 'unknown' })
     })
 
     it('returns ok and application profile when leasing responds with 200', async () => {
       nock(config.tenantsLeasesService.url)
-        .get('/contacts/123/application-profile')
+        .post('/contacts/123/application-profile')
         .reply(200, {
           content: {
             contactCode: '1234',
@@ -277,11 +266,16 @@ describe('leasing-adapter', () => {
         })
 
       const result =
-        await leasingAdapter.getApplicationProfileByContactCode('123')
+        await leasingAdapter.createOrUpdateApplicationProfileByContactCode(
+          '123',
+          { expiresAt: new Date(), numAdults: 0, numChildren: 0 }
+        )
 
       assert(result.ok)
       expect(() =>
-        leasing.UpdateApplicationProfileResponseDataSchema.parse(result.data)
+        leasing.CreateOrUpdateApplicationProfileResponseDataSchema.parse(
+          result.data
+        )
       ).not.toThrow()
     })
   })
