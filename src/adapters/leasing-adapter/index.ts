@@ -558,7 +558,10 @@ async function createOrUpdateApplicationProfileByContactCode(
 
     return { ok: false, err: 'unknown' }
   } catch (err) {
-    logger.error(err, 'Error updating application profile by contact code:')
+    logger.error(
+      err,
+      `Error create or updating application profile by contact code: ${contactCode}`
+    )
     return { ok: false, err: 'unknown' }
   }
 }
