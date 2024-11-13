@@ -669,7 +669,7 @@ describe('GET /contacts/:contactCode/:rentalObjectCode/verify-application', () =
       .spyOn(propertyManagementAdapter, 'getApartmentRentalPropertyInfo')
       .mockResolvedValueOnce({
         ok: true,
-        data: factory.apartmentInfo.build({ typeCode: '1RK' }),
+        data: factory.apartmentInfo.build({ roomTypeCode: '1RK' }),
       })
 
     const res = await request(app.callback()).get(
@@ -701,7 +701,7 @@ describe('GET /contacts/:contactCode/:rentalObjectCode/verify-application', () =
       .spyOn(propertyManagementAdapter, 'getApartmentRentalPropertyInfo')
       .mockResolvedValueOnce({
         ok: true,
-        data: factory.apartmentInfo.build({ typeCode: '2RK' }),
+        data: factory.apartmentInfo.build({ roomTypeCode: '2RK' }),
       })
 
     const res = await request(app.callback()).get(

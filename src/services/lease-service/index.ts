@@ -1670,7 +1670,7 @@ export const routes = (router: KoaRouter) => {
       }
 
       const isAllowedApplication = isAllowedNumResidents(
-        rentalPropertyInfo.data.typeCode,
+        rentalPropertyInfo.data.roomTypeCode,
         applicationProfile.data.numAdults + applicationProfile.data.numChildren
       )
 

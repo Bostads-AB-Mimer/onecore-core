@@ -6,7 +6,7 @@ export const ApartmentInfoFactory = Factory.define<ApartmentInfo>(() => ({
   rentalType: 'Rental',
   address: 'Testgatan 1',
   code: 'TST',
-  typeCode: 'A',
+  roomTypeCode: '1RK',
   number: '1',
   type: 'Apartment',
   entrance: 'A',
