@@ -199,7 +199,7 @@ const getTicketByContactCode = async (contactCode: string): Promise<any> => {
     ...transformTicket(ticket),
     messages: messagesById[ticket.id]?.map((message) => ({
       id: message.id,
-      body: striptags(message.body),
+      body: striptags(message.body, ['br']).replaceAll('<br>', '\n'),
       messageType: message.message_type,
       author: last(message.author_id[1].split(', ')), // author name is in format "YourCompany, Mitchell Admin"
       createDate: message.create_date,
