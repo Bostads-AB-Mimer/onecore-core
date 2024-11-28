@@ -24,8 +24,8 @@ const maxResidents: Record<string, number> = {
   '8RK': 8, // does not exist according to excel file
   '6RKM': 10,
   '1RKOK': 2,
-  SAMLGH: 1, //not rented by Mimer but by the municipality
-  STUD: 1, //rented by Bostad Vås
+  SAMLGH: 1, //not rented out by Mimer but by the municipality
+  STUD: 1, //rented out by Bostad Vås
   '6RKE': 10,
   '5RKE': 8,
   '4RKE': 7,
@@ -36,7 +36,7 @@ const maxResidents: Record<string, number> = {
   '2RKS': 4,
   '2RKVS': 4,
   '2RKVMS': 4,
-  '1RKDEL': 2, //does not exist within Mimer, rented by Bostad Vås
+  '1RKDEL': 2, //does not exist within Mimer, rented out by Bostad Vås
   '3RKV': 5,
   '3RKS': 5,
   '1,5 R': 2, //does not exist within Mimer
