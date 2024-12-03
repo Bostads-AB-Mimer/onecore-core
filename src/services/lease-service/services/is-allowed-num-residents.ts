@@ -20,12 +20,8 @@ const maxResidents: Record<string, number> = {
   '5RK': 8,
   '5RKM': 8,
   '6RK': 10,
-  ATELJE: 8, //do these exists? check in db - no cap in excel file
-  '8RK': 8, // does not exist according to excel file
   '6RKM': 10,
   '1RKOK': 2,
-  SAMLGH: 1, //not rented out by Mimer but by the municipality
-  STUD: 1, //rented out by Bostad Vås
   '6RKE': 10,
   '5RKE': 8,
   '4RKE': 7,
@@ -36,12 +32,18 @@ const maxResidents: Record<string, number> = {
   '2RKS': 4,
   '2RKVS': 4,
   '2RKVMS': 4,
-  '1RKDEL': 2, //does not exist within Mimer, rented out by Bostad Vås
   '3RKV': 5,
   '3RKS': 5,
-  '1,5 R': 2, //does not exist within Mimer
-  '2,5 ROK': 4, //does not exist within Mimer
-  '3,5ROK': 5, //does not exist within Mimer
+
+  //property types that exists in Xpand but not in Mimer
+  ATELJE: 8,
+  SAMLGH: 1,
+  STUD: 1,
+  '1,5 R': 2,
+  '1RKDEL': 2,
+  '2,5 ROK': 4,
+  '3,5ROK': 5,
+  '8RK': 8,
 }
 
 export function isAllowedNumResidents(
