@@ -9,7 +9,6 @@ import {
   GetActiveOfferByListingIdErrorCodes,
   ListingStatus,
   UpdateListingStatusErrorCodes,
-  leasing,
 } from 'onecore-types'
 
 import { routes } from '../index'
@@ -577,6 +576,20 @@ describe('lease-service', () => {
     })
 
     it('responds with 200 and application profile', async () => {
+      jest
+        .spyOn(tenantLeaseAdapter, 'getApplicationProfileByContactCode')
+        .mockResolvedValueOnce({
+          ok: true,
+          data: {
+            contactCode: '1234',
+            createdAt: new Date(),
+            expiresAt: null,
+            id: 1,
+            numAdults: 0,
+            numChildren: 0,
+          },
+        })
+
       jest
         .spyOn(
           tenantLeaseAdapter,

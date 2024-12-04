@@ -34,8 +34,6 @@ export const UpdateApplicationProfileResponseData =
           name: true,
           phone: true,
           expiresAt: true,
-          applicationProfileId: true,
-          createdAt: true,
         })
         .optional(),
   })
@@ -60,8 +58,6 @@ export const GetApplicationProfileResponseDataSchema =
           name: true,
           phone: true,
           expiresAt: true,
-          applicationProfileId: true,
-          createdAt: true,
         })
         .optional(),
   })

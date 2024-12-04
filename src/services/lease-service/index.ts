@@ -1574,6 +1574,7 @@ export const routes = (router: KoaRouter) => {
         await leasingAdapter.getApplicationProfileByContactCode(
           ctx.params.contactCode
         )
+
       if (
         !getApplicationProfile.ok &&
         getApplicationProfile.err !== 'not-found'
