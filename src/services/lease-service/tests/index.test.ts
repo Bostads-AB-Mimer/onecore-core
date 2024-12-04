@@ -559,7 +559,7 @@ describe('lease-service', () => {
 
       expect(res.status).toBe(200)
       expect(() =>
-        schemas.client.applicationProfile.GetApplicationProfileResponseDataSchema.parse(
+        schemas.client.applicationProfile.GetApplicationProfileResponseData.parse(
           res.body.content
         )
       ).not.toThrow()
