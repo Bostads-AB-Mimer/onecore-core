@@ -1566,6 +1566,8 @@ export const routes = (router: KoaRouter) => {
     ),
     async (ctx) => {
       const metadata = generateRouteMetadata(ctx)
+      // TODO: Something wrong with parseRequestBody types.
+      // Body should be inferred from middleware
       const body = ctx.request.body as z.infer<
         typeof schemas.client.applicationProfile.UpdateApplicationProfileRequestParams
       >
@@ -1584,38 +1586,40 @@ export const routes = (router: KoaRouter) => {
         return
       }
 
+      const expiresAt = dayjs(new Date()).add(6, 'months').toDate()
+      const housingReferenceParams: leasingAdapter.CreateOrUpdateApplicationProfileRequestParams['housingReference'] =
+        body.housingReference
+          ? {
+              email: body.housingReference.email,
+              expiresAt,
+              name: body.housingReference.name,
+              phone: body.housingReference.phone,
+              ...(getApplicationProfile.ok &&
+              getApplicationProfile.data.housingReference
+                ? {
+                    reviewStatus:
+                      getApplicationProfile.data.housingReference.reviewStatus,
+                    reviewStatusReason:
+                      getApplicationProfile.data.housingReference
+                        .reviewStatusReason,
+                    reviewedAt:
+                      getApplicationProfile.data.housingReference.reviewedAt,
+                  }
+                : {
+                    reviewStatus: 'pending',
+                    reviewStatusReason: null,
+                    reviewedAt: null,
+                  }),
+            }
+          : undefined
+
       const createOrUpdate =
         await leasingAdapter.createOrUpdateApplicationProfileByContactCode(
           ctx.params.contactCode,
           {
             ...body,
-            expiresAt: dayjs(new Date()).add(6, 'months').toDate(),
-            housingReference: body.housingReference
-              ? {
-                  email: body.housingReference.email,
-                  expiresAt: dayjs(new Date()).add(6, 'months').toDate(),
-                  name: body.housingReference.name,
-                  phone: body.housingReference.phone,
-                  ...(getApplicationProfile.ok &&
-                  getApplicationProfile.data.housingReference
-                    ? {
-                        reviewStatus:
-                          getApplicationProfile.data.housingReference
-                            .reviewStatus,
-                        reviewStatusReason:
-                          getApplicationProfile.data.housingReference
-                            .reviewStatusReason,
-                        reviewedAt:
-                          getApplicationProfile.data.housingReference
-                            .reviewedAt,
-                      }
-                    : {
-                        reviewStatus: 'pending',
-                        reviewStatusReason: null,
-                        reviewedAt: null,
-                      }),
-                }
-              : undefined,
+            expiresAt,
+            housingReference: housingReferenceParams,
           }
         )
 
