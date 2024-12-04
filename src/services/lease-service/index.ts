@@ -7,15 +7,15 @@
  */
 import KoaRouter from '@koa/router'
 import dayjs from 'dayjs'
-import { GetActiveOfferByListingIdErrorCodes, leasing } from 'onecore-types'
+import { GetActiveOfferByListingIdErrorCodes } from 'onecore-types'
 import { logger, generateRouteMetadata } from 'onecore-utilities'
-import { z } from 'zod'
 
 import * as leasingAdapter from '../../adapters/leasing-adapter'
 import * as propertyManagementAdapter from '../../adapters/property-management-adapter'
 import { ProcessStatus } from '../../common/types'
 import { parseRequestBody } from '../../middlewares/parse-request-body'
 import * as internalParkingSpaceProcesses from '../../processes/parkingspaces/internal'
+import { schemas } from './schemas'
 import { isAllowedNumResidents } from './services/is-allowed-num-residents'
 
 const getLeaseWithRelatedEntities = async (rentalId: string) => {
@@ -1478,10 +1478,6 @@ export const routes = (router: KoaRouter) => {
    *         description: Internal server error. Failed to retrieve application profile information.
    */
 
-  type GetApplicationProfileResponseData = z.infer<
-    typeof leasing.GetApplicationProfileResponseDataSchema
-  >
-
   router.get('(.*)/contacts/:contactCode/application-profile', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
     const profile = await leasingAdapter.getApplicationProfileByContactCode(
@@ -1502,7 +1498,10 @@ export const routes = (router: KoaRouter) => {
 
     ctx.status = 200
     ctx.body = {
-      content: profile.data satisfies GetApplicationProfileResponseData,
+      content:
+        schemas.client.applicationProfile.GetApplicationProfileResponseDataSchema.parse(
+          profile.data
+        ),
       ...metadata,
     }
   })
@@ -1559,19 +1558,11 @@ export const routes = (router: KoaRouter) => {
    *         description: Internal server error. Failed to update application profile information.
    */
 
-  type CreateOrUpdateApplicationProfileResponseData = z.infer<
-    typeof leasing.CreateOrUpdateApplicationProfileResponseDataSchema
-  >
-
-  const UpdateApplicationProfileRequestParams =
-    leasing.CreateOrUpdateApplicationProfileRequestParamsSchema.pick({
-      numAdults: true,
-      numChildren: true,
-    })
-
   router.post(
     '(.*)/contacts/:contactCode/application-profile',
-    parseRequestBody(UpdateApplicationProfileRequestParams),
+    parseRequestBody(
+      schemas.client.applicationProfile.UpdateApplicationProfileRequestParams
+    ),
     async (ctx) => {
       const metadata = generateRouteMetadata(ctx)
       const createOrUpdate =
@@ -1592,7 +1583,9 @@ export const routes = (router: KoaRouter) => {
       ctx.status = createOrUpdate.statusCode ?? 200
       ctx.body = {
         content:
-          createOrUpdate.data satisfies CreateOrUpdateApplicationProfileResponseData,
+          schemas.client.applicationProfile.UpdateApplicationProfileResponseData.parse(
+            createOrUpdate.data
+          ),
         ...metadata,
       }
     }

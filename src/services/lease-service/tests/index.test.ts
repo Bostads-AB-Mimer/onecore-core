@@ -19,6 +19,7 @@ import * as replyToOffer from '../../../processes/parkingspaces/internal/reply-t
 
 import * as factory from '../../../../test/factories'
 import { ProcessStatus } from '../../../common/types'
+import { schemas } from '../schemas'
 
 const app = new Koa()
 const router = new KoaRouter()
@@ -559,7 +560,9 @@ describe('lease-service', () => {
 
       expect(res.status).toBe(200)
       expect(() =>
-        leasing.GetApplicationProfileResponseDataSchema.parse(res.body.content)
+        schemas.client.applicationProfile.GetApplicationProfileResponseDataSchema.parse(
+          res.body.content
+        )
       ).not.toThrow()
     })
   })
@@ -593,11 +596,16 @@ describe('lease-service', () => {
 
       const res = await request(app.callback())
         .post('/contacts/1234/application-profile')
-        .send({ numAdults: 0, numChildren: 0 })
+        .send({
+          numAdults: 0,
+          numChildren: 0,
+          housingType: 'foo',
+          housingTypeDescription: 'bar',
+        })
 
       expect(res.status).toBe(200)
       expect(() =>
-        leasing.CreateOrUpdateApplicationProfileResponseDataSchema.parse(
+        schemas.client.applicationProfile.UpdateApplicationProfileResponseData.parse(
           res.body.content
         )
       ).not.toThrow()
