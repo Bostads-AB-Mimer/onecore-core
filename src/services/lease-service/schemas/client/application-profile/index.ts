@@ -38,7 +38,7 @@ export const UpdateApplicationProfileResponseData =
         .optional(),
   })
 
-export const GetApplicationProfileResponseDataSchema =
+export const GetApplicationProfileResponseData =
   leasing.GetApplicationProfileResponseDataSchema.pick({
     contactCode: true,
     createdAt: true,
