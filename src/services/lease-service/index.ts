@@ -9,6 +9,7 @@ import KoaRouter from '@koa/router'
 import dayjs from 'dayjs'
 import { GetActiveOfferByListingIdErrorCodes } from 'onecore-types'
 import { logger, generateRouteMetadata } from 'onecore-utilities'
+import { z } from 'zod'
 
 import * as leasingAdapter from '../../adapters/leasing-adapter'
 import * as propertyManagementAdapter from '../../adapters/property-management-adapter'
@@ -1565,12 +1566,55 @@ export const routes = (router: KoaRouter) => {
     ),
     async (ctx) => {
       const metadata = generateRouteMetadata(ctx)
+      const body = ctx.request.body as z.infer<
+        typeof schemas.client.applicationProfile.UpdateApplicationProfileRequestParams
+      >
+
+      const getApplicationProfile =
+        await leasingAdapter.getApplicationProfileByContactCode(
+          ctx.params.contactCode
+        )
+      if (
+        !getApplicationProfile.ok &&
+        getApplicationProfile.err !== 'not-found'
+      ) {
+        ctx.status = 500
+        ctx.body = { error: 'unknown', ...metadata }
+        return
+      }
+
       const createOrUpdate =
         await leasingAdapter.createOrUpdateApplicationProfileByContactCode(
           ctx.params.contactCode,
           {
-            ...ctx.request.body,
+            ...body,
             expiresAt: dayjs(new Date()).add(6, 'months').toDate(),
+            housingReference: body.housingReference
+              ? {
+                  email: body.housingReference.email,
+                  expiresAt: dayjs(new Date()).add(6, 'months').toDate(),
+                  name: body.housingReference.name,
+                  phone: body.housingReference.phone,
+                  ...(getApplicationProfile.ok &&
+                  getApplicationProfile.data.housingReference
+                    ? {
+                        reviewStatus:
+                          getApplicationProfile.data.housingReference
+                            .reviewStatus,
+                        reviewStatusReason:
+                          getApplicationProfile.data.housingReference
+                            .reviewStatusReason,
+                        reviewedAt:
+                          getApplicationProfile.data.housingReference
+                            .reviewedAt,
+                      }
+                    : {
+                        reviewStatus: 'pending',
+                        reviewStatusReason: null,
+                        reviewedAt: null,
+                      }),
+                }
+              : undefined,
           }
         )
 
