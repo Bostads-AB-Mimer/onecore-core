@@ -11,7 +11,7 @@ export const UpdateApplicationProfileRequestParams =
     housingReference:
       leasing.CreateOrUpdateApplicationProfileRequestParamsSchema.shape.housingReference
         .unwrap()
-        .pick({ email: true, name: true, phone: true })
+        .pick({ email: true, phone: true })
         .optional(),
   })
 
@@ -31,7 +31,6 @@ export const UpdateApplicationProfileResponseData =
         .unwrap()
         .pick({
           email: true,
-          name: true,
           phone: true,
           expiresAt: true,
         })
@@ -55,7 +54,6 @@ export const GetApplicationProfileResponseData =
         .unwrap()
         .pick({
           email: true,
-          name: true,
           phone: true,
           expiresAt: true,
         })
