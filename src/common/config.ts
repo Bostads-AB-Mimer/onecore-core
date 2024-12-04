@@ -79,7 +79,7 @@ const config = configPackage({
       url: 'http://localhost:5040',
     },
     minaSidor: {
-      url: 'https://mina-sidor-test.mimer.nu',
+      url: 'https://test.mimer.nu/',
     },
     auth: {
       secret: 'very secret. replace this',
