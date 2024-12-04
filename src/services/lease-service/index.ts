@@ -1592,7 +1592,6 @@ export const routes = (router: KoaRouter) => {
           ? {
               email: body.housingReference.email,
               expiresAt,
-              name: body.housingReference.name,
               phone: body.housingReference.phone,
               ...(getApplicationProfile.ok &&
               getApplicationProfile.data.housingReference
