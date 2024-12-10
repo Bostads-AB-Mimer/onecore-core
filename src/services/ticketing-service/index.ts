@@ -575,8 +575,14 @@ export const routes = (router: KoaRouter) => {
         }
         return
       }
-      const { RentalObjectCode, AccessOptions, Pet, Rows, Images } =
-        ctx.request.body
+      const {
+        RentalObjectCode,
+        AccessOptions,
+        Pet,
+        HearingImpaired,
+        Rows,
+        Images,
+      } = ctx.request.body
 
       if (Rows.length === 0) {
         ctx.status = 404
@@ -644,8 +650,7 @@ export const routes = (router: KoaRouter) => {
           lease_id: newLeaseRecord.toString(),
           tenant_id: newTenantRecord.toString(),
           maintenance_unit_id: newMaintenanceUnitRecord.toString(),
-          // In the web ui, email can only be set if the user claims to be hearing impaired
-          hearing_impaired: !!AccessOptions.Email,
+          hearing_impaired: HearingImpaired,
           call_between: AccessOptions.CallBetween,
           pet: Pet,
           space_code: ticket.LocationCode,
