@@ -1605,7 +1605,7 @@ export const routes = (router: KoaRouter) => {
                       getApplicationProfile.data.housingReference.reviewedAt,
                   }
                 : {
-                    reviewStatus: 'pending',
+                    reviewStatus: 'PENDING',
                     reviewStatusReason: null,
                     reviewedAt: null,
                   }),
