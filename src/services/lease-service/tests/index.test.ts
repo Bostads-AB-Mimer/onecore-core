@@ -543,14 +543,7 @@ describe('lease-service', () => {
         .spyOn(tenantLeaseAdapter, 'getApplicationProfileByContactCode')
         .mockResolvedValueOnce({
           ok: true,
-          data: {
-            contactCode: '1234',
-            createdAt: new Date(),
-            expiresAt: null,
-            id: 1,
-            numAdults: 0,
-            numChildren: 0,
-          },
+          data: factory.applicationProfile.build(),
         })
 
       const res = await request(app.callback()).get(
@@ -580,14 +573,7 @@ describe('lease-service', () => {
         .spyOn(tenantLeaseAdapter, 'getApplicationProfileByContactCode')
         .mockResolvedValueOnce({
           ok: true,
-          data: {
-            contactCode: '1234',
-            createdAt: new Date(),
-            expiresAt: null,
-            id: 1,
-            numAdults: 0,
-            numChildren: 0,
-          },
+          data: factory.applicationProfile.build(),
         })
 
       jest
@@ -597,14 +583,7 @@ describe('lease-service', () => {
         )
         .mockResolvedValueOnce({
           ok: true,
-          data: {
-            contactCode: '1234',
-            createdAt: new Date(),
-            expiresAt: null,
-            id: 1,
-            numAdults: 0,
-            numChildren: 0,
-          },
+          data: factory.applicationProfile.build(),
         })
 
       const res = await request(app.callback())
@@ -612,8 +591,9 @@ describe('lease-service', () => {
         .send({
           numAdults: 0,
           numChildren: 0,
-          housingType: 'foo',
+          housingType: 'RENTAL',
           housingTypeDescription: 'bar',
+          landlord: null,
         })
 
       expect(res.status).toBe(200)
@@ -647,14 +627,7 @@ describe('GET /contacts/:contactCode/:rentalObjectCode/verify-application', () =
       .spyOn(tenantLeaseAdapter, 'getApplicationProfileByContactCode')
       .mockResolvedValueOnce({
         ok: true,
-        data: {
-          contactCode: 'foo',
-          createdAt: new Date(),
-          expiresAt: new Date(),
-          id: 1,
-          numAdults: 0,
-          numChildren: 0,
-        },
+        data: factory.applicationProfile.build(),
       })
 
     jest
@@ -676,14 +649,10 @@ describe('GET /contacts/:contactCode/:rentalObjectCode/verify-application', () =
       .spyOn(tenantLeaseAdapter, 'getApplicationProfileByContactCode')
       .mockResolvedValueOnce({
         ok: true,
-        data: {
-          contactCode: '1234',
-          createdAt: new Date(),
-          expiresAt: null,
-          id: 1,
-          numAdults: 2,
-          numChildren: 2,
-        },
+        data: factory.applicationProfile.build({
+          numAdults: 3,
+          numChildren: 3,
+        }),
       })
 
     jest
@@ -708,14 +677,7 @@ describe('GET /contacts/:contactCode/:rentalObjectCode/verify-application', () =
       .spyOn(tenantLeaseAdapter, 'getApplicationProfileByContactCode')
       .mockResolvedValueOnce({
         ok: true,
-        data: {
-          contactCode: '1234',
-          createdAt: new Date(),
-          expiresAt: null,
-          id: 1,
-          numAdults: 2,
-          numChildren: 2,
-        },
+        data: factory.applicationProfile.build(),
       })
 
     jest

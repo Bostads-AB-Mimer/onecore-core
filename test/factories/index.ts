@@ -8,3 +8,7 @@ export { ContactFactory as contact } from './contact'
 export { LeaseFactory as lease } from './lease'
 export { WaitingListFactory as waitingList } from './waiting-list'
 export { ApartmentInfoFactory as apartmentInfo } from './apartment-info'
+export {
+  ApplicationProfileFactory as applicationProfile,
+  ApplicationProfileHousingReferenceFactory as applicationProfileHousingReference,
+} from './application-profile'
