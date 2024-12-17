@@ -594,6 +594,16 @@ describe('lease-service', () => {
           housingType: 'RENTAL',
           housingTypeDescription: 'bar',
           landlord: null,
+          housingReference: {
+            email: null,
+            phone: null,
+            reviewStatus: 'PENDING',
+            comment: null,
+            lastApplicantUpdatedAt: null,
+            lastAdminUpdatedAt: null,
+            expiresAt: new Date(),
+            reasonRejected: null,
+          },
         })
 
       expect(res.status).toBe(200)
