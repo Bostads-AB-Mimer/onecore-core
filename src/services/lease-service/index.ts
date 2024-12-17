@@ -1598,15 +1598,26 @@ export const routes = (router: KoaRouter) => {
                 ? {
                     reviewStatus:
                       getApplicationProfile.data.housingReference.reviewStatus,
-                    reviewStatusReason:
+                    comment:
+                      getApplicationProfile.data.housingReference.comment,
+                    lastAdminUpdatedAt:
                       getApplicationProfile.data.housingReference
-                        .reviewStatusReason,
-                    reviewedAt:
-                      getApplicationProfile.data.housingReference.reviewedAt,
+                        .lastAdminUpdatedAt,
+                    lastApplicantUpdatedAt:
+                      getApplicationProfile.data.housingReference
+                        .lastApplicantUpdatedAt,
+                    lastAdminUpdatedBy: 'foo',
+                    reasonRejected:
+                      getApplicationProfile.data.housingReference
+                        .reasonRejected,
                   }
                 : {
                     reviewStatus: 'PENDING',
-                    reviewStatusReason: null,
+                    comment: null,
+                    lastAdminUpdatedAt: null,
+                    lastAdminUpdatedBy: null,
+                    lastApplicantUpdatedAt: null,
+                    reasonRejected: null,
                     reviewedAt: null,
                   }),
             }

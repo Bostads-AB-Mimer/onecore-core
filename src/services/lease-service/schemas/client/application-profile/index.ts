@@ -34,7 +34,7 @@ export const UpdateApplicationProfileResponseData =
           phone: true,
           expiresAt: true,
         })
-        .optional(),
+        .nullable(),
   })
 
 export const GetApplicationProfileResponseData =
@@ -57,5 +57,5 @@ export const GetApplicationProfileResponseData =
           phone: true,
           expiresAt: true,
         })
-        .optional(),
+        .nullable(),
   })
