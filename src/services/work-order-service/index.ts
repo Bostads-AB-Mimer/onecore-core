@@ -139,8 +139,8 @@ export const routes = (router: KoaRouter) => {
       pnr: async () => {
         const leases = await leasingAdapter.getLeasesForPnr(
           ctx.params.identifier,
-          undefined,
-          'true'
+          false,
+          true
         )
         if (leases) {
           await getRentalPropertyInfoWithLeases(leases)
@@ -153,8 +153,8 @@ export const routes = (router: KoaRouter) => {
         if (contact) {
           const leases = await leasingAdapter.getLeasesForPnr(
             contact.nationalRegistrationNumber,
-            undefined,
-            'true'
+            false,
+            true
           )
           if (leases) {
             await getRentalPropertyInfoWithLeases(leases)
@@ -168,8 +168,8 @@ export const routes = (router: KoaRouter) => {
         if (contactResult.ok) {
           const leases = await leasingAdapter.getLeasesForPnr(
             contactResult.data.nationalRegistrationNumber,
-            undefined,
-            'true'
+            false,
+            true
           )
           if (leases) {
             await getRentalPropertyInfoWithLeases(leases)
