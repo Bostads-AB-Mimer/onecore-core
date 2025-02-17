@@ -122,6 +122,22 @@ const getContactByContactCode = async (
   }
 }
 
+const getContactsByContactCodes = async (
+  contactCodes: string[]
+): Promise<AdapterResult<Contact[], 'unknown'>> => {
+  try {
+    const res = await axios.post<{ content: Contact[] }>(
+      `${tenantsLeasesServiceUrl}/contacts/by-contact-codes`,
+      { contactCodes }
+    )
+
+    return { ok: true, data: res.data.content }
+  } catch (err: any) {
+    logger.error({ err }, 'leasing-adapter.getContactByContactCode')
+    return { ok: false, err: 'unknown' }
+  }
+}
+
 const getTenantByContactCode = async (
   contactCode: string
 ): Promise<AdapterResult<Tenant, 'unknown'>> => {
@@ -576,6 +592,7 @@ export {
   getApplicantsByContactCode,
   getApplicationProfileByContactCode,
   getContactByContactCode,
+  getContactsByContactCodes,
   getContactByPhoneNumber,
   getContactForPnr,
   getContactsDataBySearchQuery,
