@@ -252,7 +252,7 @@ describe('work-order-service index', () => {
       expect(res.body.reason).toBe('RentalObjectCode is missing')
     })
 
-    it('should return 400 if no work orders on laundry rooms found in laundry room request', async () => {
+    it('should return 400 if no supported work orders found in request', async () => {
       createWorkOrderDetailsMock.Rows = []
       const res = await request(app.callback())
         .post('/api/workOrders')
