@@ -1598,13 +1598,13 @@ export const routes = (router: KoaRouter) => {
             housingType: body.housingType,
             landlord: body.landlord,
             housingTypeDescription: body.housingTypeDescription,
+            lastUpdatedAt: body.lastUpdatedAt,
             housingReference: {
               comment: body.housingReference.comment,
               email: body.housingReference.email,
               phone: body.housingReference.phone,
-              lastAdminUpdatedAt: body.housingReference.lastAdminUpdatedAt,
-              lastApplicantUpdatedAt:
-                body.housingReference.lastApplicantUpdatedAt,
+              reviewedAt: body.housingReference.reviewedAt,
+              reviewedBy: body.housingReference.reviewedBy,
               reasonRejected: body.housingReference.reasonRejected,
               reviewStatus: body.housingReference.reviewStatus,
               expiresAt: body.housingReference.expiresAt,

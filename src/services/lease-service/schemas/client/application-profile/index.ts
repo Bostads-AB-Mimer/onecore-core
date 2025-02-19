@@ -7,6 +7,7 @@ export const UpdateApplicationProfileRequestParams =
     landlord: true,
     housingType: true,
     housingTypeDescription: true,
+    lastUpdatedAt: true,
   }).extend({
     housingReference:
       leasing.v1.CreateOrUpdateApplicationProfileRequestParamsSchema.shape.housingReference.pick(
@@ -15,8 +16,8 @@ export const UpdateApplicationProfileRequestParams =
           phone: true,
           reviewStatus: true,
           comment: true,
-          lastAdminUpdatedAt: true,
-          lastApplicantUpdatedAt: true,
+          reviewedAt: true,
+          reviewedBy: true,
           reasonRejected: true,
           expiresAt: true,
         }
