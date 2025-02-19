@@ -1510,7 +1510,7 @@ export const routes = (router: KoaRouter) => {
 
   /**
    * @swagger
-   * /contacts/{contactCode}/application-profile:
+   * /contacts/{contactCode}/application-profile/admin:
    *   post:
    *     summary: Creates or updates an application profile by contact code
    *     description: Create or update application profile information by contact code.
@@ -1646,6 +1646,57 @@ export const routes = (router: KoaRouter) => {
     }
   }
 
+  /**
+   * @swagger
+   * /contacts/{contactCode}/application-profile/client:
+   *   post:
+   *     summary: Creates or updates an application profile by contact code
+   *     description: Create or update application profile information by contact code.
+   *     tags: [Contacts]
+   *     parameters:
+   *       - in: path
+   *         name: contactCode
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: The contact code associated with the application profile.
+   *     requestBody:
+   *       required: true
+   *       content:
+   *          application/json:
+   *             schema:
+   *               type: object
+   *       properties:
+   *         numAdults:
+   *           type: number
+   *           description: Number of adults in the current housing.
+   *         numChildren:
+   *           type: number
+   *           description: Number of children in the current housing.
+   *     responses:
+   *       200:
+   *         description: Successfully updated application profile.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 data:
+   *                   type: object
+   *                   description: The application profile data.
+   *       201:
+   *         description: Successfully created application profile.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 data:
+   *                   type: object
+   *                   description: The application profile data.
+   *       500:
+   *         description: Internal server error. Failed to update application profile information.
+   */
   router.post(
     '(.*)/contacts/:contactCode/application-profile/client',
     parseRequestBody(
