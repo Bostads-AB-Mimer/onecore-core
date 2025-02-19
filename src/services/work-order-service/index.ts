@@ -452,32 +452,25 @@ export const routes = (router: KoaRouter) => {
         return
       }
 
-      const results = await Promise.all(
-        onecoreWorkOrderRequests.map((workOrderRequest: any) =>
-          workOrderAdapter.createWorkOrder({
-            rentalPropertyInfo: rentalPropertyInfo,
-            tenant: tenant.data,
-            lease: lease,
-            details: {
-              ContactCode,
-              RentalObjectCode,
-              AccessOptions,
-              HearingImpaired,
-              Pet,
-              Images,
-              Rows: [workOrderRequest],
-            },
-          })
-        )
-      )
+      const result = await workOrderAdapter.createWorkOrder({
+        rentalPropertyInfo: rentalPropertyInfo,
+        tenant: tenant.data,
+        lease: lease,
+        details: {
+          ContactCode,
+          RentalObjectCode,
+          AccessOptions,
+          HearingImpaired,
+          Pet,
+          Images,
+          Rows: onecoreWorkOrderRequests,
+        },
+      })
 
       ctx.status = 200
       ctx.body = {
         message: `Work orders created`,
         // TODO better handling/response when there is an error with creating one or more work orders in the batch
-        errors: results
-          .filter((result) => !result.ok)
-          .map((result) => result.err),
         ...metadata,
       }
     } catch (error) {
