@@ -71,3 +71,19 @@ export const updateContactsFromDb = async (batchId: string) => {
 
   return result.data.result
 }
+
+export const updateInvoicesFromDb = async (batchId: string) => {
+  const axiosOptions = {
+    method: 'POST',
+    data: {
+      batchId,
+    },
+  }
+
+  const result = await axios(
+    config.economyService.url + '/invoice-data/update-invoices',
+    axiosOptions
+  )
+
+  return result.data.result
+}

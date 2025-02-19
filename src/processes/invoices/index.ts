@@ -3,9 +3,9 @@ import {
   enrichInvoiceDataRows,
   saveInvoiceContactsToDb,
   updateContactsFromDb,
+  updateInvoicesFromDb,
 } from './adapters/economy-adapter'
 import { excelFileToInvoiceDataRows } from './adapters/excel-adapter'
-import { InvoiceDataRow } from '../../processes/invoices/types'
 import { getContactsByContactCodes } from '../../adapters/leasing-adapter'
 import { ProcessResult, ProcessStatus } from '../../common/types'
 import { logger } from 'onecore-utilities'
@@ -56,7 +56,8 @@ export const processInvoiceDataFile = async (
       chunkNum++
     }
 
-    const result = updateContactsFromDb(batchId)
+    await updateContactsFromDb(batchId)
+    await updateInvoicesFromDb(batchId)
 
     return {
       processStatus: ProcessStatus.successful,

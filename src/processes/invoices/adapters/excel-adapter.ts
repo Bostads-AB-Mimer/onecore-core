@@ -2,11 +2,13 @@ import { Workbook, ValueType, Cell } from 'exceljs'
 import { createReadStream } from 'fs'
 import { columnNames, InvoiceDataRow } from '../types'
 
-const getCellValue = (cell: Cell): string => {
+const getCellValue = (cell: Cell): string | number => {
   if (cell.type === ValueType.Date) {
     const dateval = cell.value as Date
     const cellValue = dateval.toISOString().split('T')[0]
     return cellValue
+  } else if (cell.type === ValueType.Number) {
+    return cell.value as number
   } else {
     return cell.value ? cell.value.toString() : ' '
   }
@@ -26,7 +28,7 @@ export const excelFileToInvoiceDataRows = async (
     for (const row of rows) {
       const currentRow: InvoiceDataRow = {}
 
-      const cellContractMatch = getCellValue(row.getCell(1)).match(
+      const cellContractMatch = (getCellValue(row.getCell(1)) as string).match(
         RegExp(/[0-9-].*?\/[0-9]{2}/g)
       )
 
