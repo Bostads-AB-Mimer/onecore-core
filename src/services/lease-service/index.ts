@@ -7,7 +7,7 @@
  */
 import KoaRouter from '@koa/router'
 import dayjs from 'dayjs'
-import { GetActiveOfferByListingIdErrorCodes } from 'onecore-types'
+import { GetActiveOfferByListingIdErrorCodes, leasing } from 'onecore-types'
 import { logger, generateRouteMetadata } from 'onecore-utilities'
 import { z } from 'zod'
 
@@ -1559,8 +1559,191 @@ export const routes = (router: KoaRouter) => {
    *         description: Internal server error. Failed to update application profile information.
    */
 
+  type UpdateAdminApplicationProfileRequestParams = z.infer<
+    typeof schemas.admin.applicationProfile.UpdateApplicationProfileRequestParams
+  >
+
+  function getDiffType(
+    params: UpdateAdminApplicationProfileRequestParams,
+    existing: leasingAdapter.GetApplicationProfileResponseData
+  ): 'profile' | 'review' | 'both' | 'neither' {
+    const { housingReference: incomingHousingReference, ...incomingProfile } =
+      params
+    const { housingReference: existingHousingReference, ...existingProfile } =
+      schemas.admin.applicationProfile.UpdateApplicationProfileRequestParams.parse(
+        existing
+      )
+
+    const reviewed =
+      incomingHousingReference.reviewStatus !==
+      existingHousingReference.reviewStatus
+
+    const profileUpdate =
+      JSON.stringify(incomingProfile) !== JSON.stringify(existingProfile)
+
+    if (reviewed && profileUpdate) {
+      return 'both'
+    } else if (reviewed) {
+      return 'review'
+    } else if (profileUpdate) {
+      return 'profile'
+    } else {
+      return 'neither'
+    }
+  }
+
+  function makeAdminApplicationProfileRequestParams(
+    body: UpdateAdminApplicationProfileRequestParams,
+    existingProfile?: leasingAdapter.GetApplicationProfileResponseData
+  ): leasingAdapter.CreateOrUpdateApplicationProfileRequestParams {
+    const now = new Date()
+    const expiresAt = dayjs(now).add(6, 'months').toDate()
+
+    if (!existingProfile) {
+      return {
+        ...body,
+        lastUpdatedAt: null,
+        expiresAt: null,
+        housingReference: {
+          ...body.housingReference,
+          expiresAt: null,
+          reviewedAt:
+            body.housingReference.reviewStatus === 'PENDING' ? null : now,
+        },
+      }
+    }
+
+    const diffType = getDiffType(body, existingProfile)
+    if (diffType === 'neither') {
+      return {
+        ...body,
+        lastUpdatedAt: existingProfile.lastUpdatedAt,
+        expiresAt: existingProfile.expiresAt,
+        housingReference: {
+          ...body.housingReference,
+          reviewedAt: existingProfile.housingReference.reviewedAt,
+          expiresAt: existingProfile.housingReference.expiresAt,
+        },
+      }
+    } else if (diffType === 'profile') {
+      return {
+        ...body,
+        expiresAt,
+        lastUpdatedAt: now,
+        housingReference: {
+          ...body.housingReference,
+          reviewedAt: existingProfile.housingReference.reviewedAt,
+          expiresAt: existingProfile.housingReference.expiresAt,
+        },
+      }
+    } else if (diffType === 'review') {
+      return {
+        ...body,
+        lastUpdatedAt: existingProfile.lastUpdatedAt,
+        expiresAt: existingProfile.expiresAt,
+        housingReference: {
+          ...body.housingReference,
+          expiresAt,
+          reviewedAt: now,
+        },
+      }
+    } else {
+      return {
+        ...body,
+        expiresAt,
+        lastUpdatedAt: now,
+        housingReference: {
+          ...body.housingReference,
+          expiresAt,
+          reviewedAt: now,
+        },
+      }
+    }
+  }
+
   router.post(
-    '(.*)/contacts/:contactCode/application-profile',
+    '(.*)/contacts/:contactCode/application-profile/admin',
+    parseRequestBody(
+      schemas.admin.applicationProfile.UpdateApplicationProfileRequestParams
+    ),
+    async (ctx) => {
+      const metadata = generateRouteMetadata(ctx)
+      // TODO: Something wrong with parseRequestBody types.
+      // Body should be inferred from middleware
+      const body = ctx.request
+        .body as UpdateAdminApplicationProfileRequestParams
+
+      const getApplicationProfile =
+        await leasingAdapter.getApplicationProfileByContactCode(
+          ctx.params.contactCode
+        )
+
+      if (
+        !getApplicationProfile.ok &&
+        getApplicationProfile.err !== 'not-found'
+      ) {
+        ctx.status = 500
+        ctx.body = { error: 'unknown', ...metadata }
+        return
+      }
+      const createOrUpdate =
+        await leasingAdapter.createOrUpdateApplicationProfileByContactCode(
+          ctx.params.contactCode,
+          makeAdminApplicationProfileRequestParams(
+            body,
+            getApplicationProfile.ok ? getApplicationProfile.data : undefined
+          )
+        )
+
+      if (!createOrUpdate.ok) {
+        ctx.status = 500
+        ctx.body = { error: 'unknown', ...metadata }
+        return
+      }
+
+      ctx.status = createOrUpdate.statusCode ?? 200
+      ctx.body = {
+        content: createOrUpdate.data satisfies z.infer<
+          typeof schemas.client.applicationProfile.UpdateApplicationProfileResponseData
+        >,
+        ...metadata,
+      }
+    }
+  )
+
+  type UpdateClientApplicationProfileRequestParams = z.infer<
+    typeof schemas.client.applicationProfile.UpdateApplicationProfileRequestParams
+  >
+
+  function makeClientApplicationProfileRequestParams(
+    body: UpdateClientApplicationProfileRequestParams,
+    existingProfile?: leasingAdapter.GetApplicationProfileResponseData
+  ): leasingAdapter.CreateOrUpdateApplicationProfileRequestParams {
+    return {
+      expiresAt: dayjs(new Date()).add(6, 'months').toDate(),
+      numChildren: body.numChildren,
+      numAdults: body.numAdults,
+      housingType: body.housingType,
+      landlord: body.landlord,
+      housingTypeDescription: body.housingTypeDescription,
+      lastUpdatedAt: new Date(),
+      housingReference: {
+        comment: body.housingReference.comment,
+        email: body.housingReference.email,
+        phone: body.housingReference.phone,
+        reviewedAt: existingProfile?.housingReference.reviewedAt ?? null,
+        reviewedBy: existingProfile?.housingReference.reviewedBy ?? null,
+        reasonRejected:
+          existingProfile?.housingReference.reasonRejected ?? null,
+        reviewStatus:
+          existingProfile?.housingReference.reviewStatus ?? 'PENDING',
+        expiresAt: existingProfile?.housingReference.expiresAt ?? null,
+      },
+    }
+  }
+
+  router.post(
+    '(.*)/contacts/:contactCode/application-profile/client',
     parseRequestBody(
       schemas.client.applicationProfile.UpdateApplicationProfileRequestParams
     ),
@@ -1584,46 +1767,30 @@ export const routes = (router: KoaRouter) => {
         ctx.status = 500
         ctx.body = { error: 'unknown', ...metadata }
         return
-      }
+      } else {
+        const createOrUpdate =
+          await leasingAdapter.createOrUpdateApplicationProfileByContactCode(
+            ctx.params.contactCode,
+            makeClientApplicationProfileRequestParams(
+              body,
+              getApplicationProfile.ok ? getApplicationProfile.data : undefined
+            )
+          )
 
-      const expiresAt = dayjs(new Date()).add(6, 'months').toDate()
+        if (!createOrUpdate.ok) {
+          ctx.status = 500
+          ctx.body = { error: 'unknown', ...metadata }
+          return
+        }
 
-      const createOrUpdate =
-        await leasingAdapter.createOrUpdateApplicationProfileByContactCode(
-          ctx.params.contactCode,
-          {
-            expiresAt,
-            numChildren: body.numChildren,
-            numAdults: body.numAdults,
-            housingType: body.housingType,
-            landlord: body.landlord,
-            housingTypeDescription: body.housingTypeDescription,
-            lastUpdatedAt: body.lastUpdatedAt,
-            housingReference: {
-              comment: body.housingReference.comment,
-              email: body.housingReference.email,
-              phone: body.housingReference.phone,
-              reviewedAt: body.housingReference.reviewedAt,
-              reviewedBy: body.housingReference.reviewedBy,
-              reasonRejected: body.housingReference.reasonRejected,
-              reviewStatus: body.housingReference.reviewStatus,
-              expiresAt: body.housingReference.expiresAt,
-            },
-          }
-        )
-
-      if (!createOrUpdate.ok) {
-        ctx.status = 500
-        ctx.body = { error: 'unknown', ...metadata }
-        return
-      }
-
-      ctx.status = createOrUpdate.statusCode ?? 200
-      ctx.body = {
-        content: createOrUpdate.data satisfies z.infer<
-          typeof schemas.client.applicationProfile.UpdateApplicationProfileResponseData
-        >,
-        ...metadata,
+        ctx.status = createOrUpdate.statusCode ?? 200
+        ctx.body = {
+          content:
+            schemas.client.applicationProfile.UpdateApplicationProfileRequestParams.parse(
+              createOrUpdate.data
+            ),
+          ...metadata,
+        }
       }
     }
   )
