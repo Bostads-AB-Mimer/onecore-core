@@ -394,17 +394,12 @@ export const routes = (router: KoaRouter) => {
         Images,
       } = ctx.request.body
 
-      // Filter out workOrders that are not handled by onecore
-      const onecoreWorkOrderRequests = Rows.filter((workOrder: any) =>
-        ['TV', 'BWC', 'KÖ'].includes(workOrder.LocationCode)
-      )
-
       const reason = !ContactCode
         ? 'ContactCode is missing'
         : !RentalObjectCode
           ? 'RentalObjectCode is missing'
-          : onecoreWorkOrderRequests.length === 0
-            ? 'No supported work orders found in request'
+          : Rows.length === 0
+            ? 'No work orders found in request'
             : null
 
       if (reason) {
@@ -463,7 +458,7 @@ export const routes = (router: KoaRouter) => {
           HearingImpaired,
           Pet,
           Images,
-          Rows: onecoreWorkOrderRequests,
+          Rows,
         },
       })
 
