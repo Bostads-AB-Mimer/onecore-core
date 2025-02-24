@@ -462,6 +462,10 @@ export const routes = (router: KoaRouter) => {
         },
       })
 
+      if (!result.ok) {
+        throw result.err
+      }
+
       ctx.status = 200
       ctx.body = {
         message: `Work orders created`,
