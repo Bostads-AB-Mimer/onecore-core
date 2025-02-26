@@ -42,8 +42,6 @@ export const CreateWorkOrderFactory = Factory.define<CreateWorkOrder>(() => ({
 
 export const CreateWorkOrderDetailsFactory =
   Factory.define<CreateWorkOrderDetails>(({ sequence }) => ({
-    // TODO: Check this with ärendehantering
-    HearingImpaired: false,
     ContactCode: `P${158769 + sequence}`,
     RentalObjectCode: `123-456-789`,
     Images: [],
