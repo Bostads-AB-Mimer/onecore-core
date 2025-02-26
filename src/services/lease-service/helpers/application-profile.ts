@@ -8,35 +8,6 @@ type UpdateAdminApplicationProfileRequestParams = z.infer<
   typeof schemas.admin.applicationProfile.UpdateApplicationProfileRequestParams
 >
 
-export function getDiffType(
-  params: UpdateAdminApplicationProfileRequestParams,
-  existing: leasingAdapter.GetApplicationProfileResponseData
-): 'profile' | 'review' | 'both' | 'neither' {
-  const { housingReference: incomingHousingReference, ...incomingProfile } =
-    params
-  const { housingReference: existingHousingReference, ...existingProfile } =
-    schemas.admin.applicationProfile.UpdateApplicationProfileRequestParams.parse(
-      existing
-    )
-
-  const reviewed =
-    incomingHousingReference.reviewStatus !==
-    existingHousingReference.reviewStatus
-
-  const profileUpdate =
-    JSON.stringify(incomingProfile) !== JSON.stringify(existingProfile)
-
-  if (reviewed && profileUpdate) {
-    return 'both'
-  } else if (reviewed) {
-    return 'review'
-  } else if (profileUpdate) {
-    return 'profile'
-  } else {
-    return 'neither'
-  }
-}
-
 export function makeAdminApplicationProfileRequestParams(
   body: UpdateAdminApplicationProfileRequestParams,
   existingProfile?: leasingAdapter.GetApplicationProfileResponseData
@@ -103,5 +74,34 @@ export function makeAdminApplicationProfileRequestParams(
         reviewedAt: now,
       },
     }
+  }
+}
+
+function getDiffType(
+  params: UpdateAdminApplicationProfileRequestParams,
+  existing: leasingAdapter.GetApplicationProfileResponseData
+): 'profile' | 'review' | 'both' | 'neither' {
+  const { housingReference: incomingHousingReference, ...incomingProfile } =
+    params
+  const { housingReference: existingHousingReference, ...existingProfile } =
+    schemas.admin.applicationProfile.UpdateApplicationProfileRequestParams.parse(
+      existing
+    )
+
+  const reviewed =
+    incomingHousingReference.reviewStatus !==
+    existingHousingReference.reviewStatus
+
+  const profileUpdate =
+    JSON.stringify(incomingProfile) !== JSON.stringify(existingProfile)
+
+  if (reviewed && profileUpdate) {
+    return 'both'
+  } else if (reviewed) {
+    return 'review'
+  } else if (profileUpdate) {
+    return 'profile'
+  } else {
+    return 'neither'
   }
 }

@@ -1607,9 +1607,10 @@ export const routes = (router: KoaRouter) => {
 
       ctx.status = createOrUpdate.statusCode ?? 200
       ctx.body = {
-        content: createOrUpdate.data satisfies z.infer<
-          typeof schemas.client.applicationProfile.UpdateApplicationProfileResponseData
-        >,
+        content:
+          schemas.admin.applicationProfile.UpdateApplicationProfileResponseData.parse(
+            createOrUpdate.data
+          ),
         ...metadata,
       }
     }
@@ -1741,7 +1742,7 @@ export const routes = (router: KoaRouter) => {
         ctx.status = createOrUpdate.statusCode ?? 200
         ctx.body = {
           content:
-            schemas.client.applicationProfile.UpdateApplicationProfileRequestParams.parse(
+            schemas.client.applicationProfile.UpdateApplicationProfileResponseData.parse(
               createOrUpdate.data
             ),
           ...metadata,
