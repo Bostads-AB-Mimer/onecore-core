@@ -1633,7 +1633,7 @@ export const routes = (router: KoaRouter) => {
       housingTypeDescription: body.housingTypeDescription,
       lastUpdatedAt: new Date(),
       housingReference: {
-        comment: body.housingReference.comment,
+        comment: existingProfile?.housingReference.comment ?? null,
         email: body.housingReference.email,
         phone: body.housingReference.phone,
         reviewedAt: existingProfile?.housingReference.reviewedAt ?? null,
