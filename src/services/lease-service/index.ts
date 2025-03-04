@@ -1751,6 +1751,86 @@ export const routes = (router: KoaRouter) => {
     }
   )
 
+  router.post(
+    '(.*)/contacts/:contactCode/application-profile',
+    parseRequestBody(
+      schemas.client.applicationProfile.UpdateApplicationProfileRequestParams
+    ),
+    async (ctx) => {
+      const metadata = generateRouteMetadata(ctx)
+      // TODO: Something wrong with parseRequestBody types.
+      // Body should be inferred from middleware
+      const body = ctx.request.body as z.infer<
+        typeof schemas.client.applicationProfile.UpdateApplicationProfileRequestParams
+      >
+
+      const getApplicationProfile =
+        await leasingAdapter.getApplicationProfileByContactCode(
+          ctx.params.contactCode
+        )
+
+      if (
+        !getApplicationProfile.ok &&
+        getApplicationProfile.err !== 'not-found'
+      ) {
+        ctx.status = 500
+        ctx.body = { error: 'unknown', ...metadata }
+        return
+      }
+
+      const expiresAt = dayjs(new Date()).add(6, 'months').toDate()
+      const housingReferenceParams: leasingAdapter.CreateOrUpdateApplicationProfileRequestParams['housingReference'] =
+        {
+          email: body.housingReference.email,
+          expiresAt,
+          phone: body.housingReference.phone,
+          ...(getApplicationProfile.ok &&
+          getApplicationProfile.data.housingReference
+            ? {
+                reviewStatus:
+                  getApplicationProfile.data.housingReference.reviewStatus,
+                reviewedAt:
+                  getApplicationProfile.data.housingReference.reviewedAt,
+              }
+            : {
+                reviewStatus: 'pending',
+                reviewStatusReason: null,
+                reviewedAt: null,
+              }),
+          comment: null,
+          reasonRejected: null,
+          reviewStatus: 'REFERENCE_NOT_REQUIRED',
+          reviewedAt: null,
+          reviewedBy: null,
+        }
+
+      const createOrUpdate =
+        await leasingAdapter.createOrUpdateApplicationProfileByContactCode(
+          ctx.params.contactCode,
+          {
+            ...body,
+            expiresAt,
+            housingReference: housingReferenceParams,
+            lastUpdatedAt: new Date(),
+          }
+        )
+
+      if (!createOrUpdate.ok) {
+        ctx.status = 500
+        ctx.body = { error: 'unknown', ...metadata }
+        return
+      }
+
+      ctx.status = createOrUpdate.statusCode ?? 200
+      ctx.body = {
+        content: createOrUpdate.data satisfies z.infer<
+          typeof schemas.client.applicationProfile.UpdateApplicationProfileResponseData
+        >,
+        ...metadata,
+      }
+    }
+  )
+
   /**
    * @swagger
    * /contacts/{contactCode}/{rentalObjectCode}/verify-application:
