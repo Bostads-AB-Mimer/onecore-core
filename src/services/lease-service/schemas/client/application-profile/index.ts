@@ -14,6 +14,8 @@ export const UpdateApplicationProfileRequestParams =
       ),
   })
 
+// TODO: Remove this once all routes are migrated to the new application
+// profile (with housing references)
 export const UpdateApplicationProfileRequestParamsOld =
   leasing.CreateOrUpdateApplicationProfileRequestParamsSchema.pick({
     numChildren: true,
