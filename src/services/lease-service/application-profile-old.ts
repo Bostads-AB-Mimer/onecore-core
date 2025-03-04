@@ -40,22 +40,9 @@ export const routes = (router: KoaRouter) => {
       const expiresAt = dayjs(new Date()).add(6, 'months').toDate()
       const housingReferenceParams: leasingAdapter.CreateOrUpdateApplicationProfileRequestParams['housingReference'] =
         {
-          email: body.housingReference?.email ?? null,
           expiresAt,
+          email: body.housingReference?.email ?? null,
           phone: body.housingReference?.phone ?? null,
-          ...(getApplicationProfile.ok &&
-          getApplicationProfile.data.housingReference
-            ? {
-                reviewStatus:
-                  getApplicationProfile.data.housingReference.reviewStatus,
-                reviewedAt:
-                  getApplicationProfile.data.housingReference.reviewedAt,
-              }
-            : {
-                reviewStatus: 'pending',
-                reviewStatusReason: null,
-                reviewedAt: null,
-              }),
           comment: null,
           reasonRejected: null,
           reviewStatus: 'PENDING',
