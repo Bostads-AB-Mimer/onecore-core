@@ -1754,14 +1754,14 @@ export const routes = (router: KoaRouter) => {
   router.post(
     '(.*)/contacts/:contactCode/application-profile',
     parseRequestBody(
-      schemas.client.applicationProfile.UpdateApplicationProfileRequestParams
+      schemas.client.applicationProfile.UpdateApplicationProfileRequestParamsOld
     ),
     async (ctx) => {
       const metadata = generateRouteMetadata(ctx)
       // TODO: Something wrong with parseRequestBody types.
       // Body should be inferred from middleware
       const body = ctx.request.body as z.infer<
-        typeof schemas.client.applicationProfile.UpdateApplicationProfileRequestParams
+        typeof schemas.client.applicationProfile.UpdateApplicationProfileRequestParamsOld
       >
 
       const getApplicationProfile =
@@ -1781,9 +1781,9 @@ export const routes = (router: KoaRouter) => {
       const expiresAt = dayjs(new Date()).add(6, 'months').toDate()
       const housingReferenceParams: leasingAdapter.CreateOrUpdateApplicationProfileRequestParams['housingReference'] =
         {
-          email: body.housingReference.email,
+          email: body.housingReference?.email ?? null,
           expiresAt,
-          phone: body.housingReference.phone,
+          phone: body.housingReference?.phone ?? null,
           ...(getApplicationProfile.ok &&
           getApplicationProfile.data.housingReference
             ? {
@@ -1799,7 +1799,7 @@ export const routes = (router: KoaRouter) => {
               }),
           comment: null,
           reasonRejected: null,
-          reviewStatus: 'REFERENCE_NOT_REQUIRED',
+          reviewStatus: 'PENDING',
           reviewedAt: null,
           reviewedBy: null,
         }
@@ -1808,10 +1808,14 @@ export const routes = (router: KoaRouter) => {
         await leasingAdapter.createOrUpdateApplicationProfileByContactCode(
           ctx.params.contactCode,
           {
-            ...body,
+            housingTypeDescription: body.housingTypeDescription ?? null,
             expiresAt,
             housingReference: housingReferenceParams,
             lastUpdatedAt: new Date(),
+            housingType: 'OTHER',
+            landlord: body.landlord ?? null,
+            numAdults: body.numAdults,
+            numChildren: body.numChildren,
           }
         )
 

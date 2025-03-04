@@ -14,6 +14,21 @@ export const UpdateApplicationProfileRequestParams =
       ),
   })
 
+export const UpdateApplicationProfileRequestParamsOld =
+  leasing.CreateOrUpdateApplicationProfileRequestParamsSchema.pick({
+    numChildren: true,
+    numAdults: true,
+    landlord: true,
+    housingType: true,
+    housingTypeDescription: true,
+  }).extend({
+    housingReference:
+      leasing.CreateOrUpdateApplicationProfileRequestParamsSchema.shape.housingReference
+        .unwrap()
+        .pick({ email: true, phone: true })
+        .optional(),
+  })
+
 export const UpdateApplicationProfileResponseData =
   leasing.v1.CreateOrUpdateApplicationProfileResponseDataSchema.pick({
     contactCode: true,
