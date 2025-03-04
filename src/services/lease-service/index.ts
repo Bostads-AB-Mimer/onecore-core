@@ -20,6 +20,8 @@ import { makeAdminApplicationProfileRequestParams } from './helpers/application-
 import { schemas } from './schemas'
 import { isAllowedNumResidents } from './services/is-allowed-num-residents'
 
+import { routes as applicationProfileRoutesOld } from './application-profile-old'
+
 const getLeaseWithRelatedEntities = async (rentalId: string) => {
   const lease = await leasingAdapter.getLease(rentalId, 'true')
 
@@ -54,6 +56,10 @@ const getLeasesWithRelatedEntitiesForPnr = async (
  *   - bearerAuth: []
  */
 export const routes = (router: KoaRouter) => {
+  // TODO: Remove this once all routes are migrated to the new application
+  // profile (with housing references)
+  applicationProfileRoutesOld(router)
+
   /**
    * @swagger
    * /leases/for/{pnr}:
@@ -1747,90 +1753,6 @@ export const routes = (router: KoaRouter) => {
             ),
           ...metadata,
         }
-      }
-    }
-  )
-
-  router.post(
-    '(.*)/contacts/:contactCode/application-profile',
-    parseRequestBody(
-      schemas.client.applicationProfile.UpdateApplicationProfileRequestParamsOld
-    ),
-    async (ctx) => {
-      const metadata = generateRouteMetadata(ctx)
-      // TODO: Something wrong with parseRequestBody types.
-      // Body should be inferred from middleware
-      const body = ctx.request.body as z.infer<
-        typeof schemas.client.applicationProfile.UpdateApplicationProfileRequestParamsOld
-      >
-
-      const getApplicationProfile =
-        await leasingAdapter.getApplicationProfileByContactCode(
-          ctx.params.contactCode
-        )
-
-      if (
-        !getApplicationProfile.ok &&
-        getApplicationProfile.err !== 'not-found'
-      ) {
-        ctx.status = 500
-        ctx.body = { error: 'unknown', ...metadata }
-        return
-      }
-
-      const expiresAt = dayjs(new Date()).add(6, 'months').toDate()
-      const housingReferenceParams: leasingAdapter.CreateOrUpdateApplicationProfileRequestParams['housingReference'] =
-        {
-          email: body.housingReference?.email ?? null,
-          expiresAt,
-          phone: body.housingReference?.phone ?? null,
-          ...(getApplicationProfile.ok &&
-          getApplicationProfile.data.housingReference
-            ? {
-                reviewStatus:
-                  getApplicationProfile.data.housingReference.reviewStatus,
-                reviewedAt:
-                  getApplicationProfile.data.housingReference.reviewedAt,
-              }
-            : {
-                reviewStatus: 'pending',
-                reviewStatusReason: null,
-                reviewedAt: null,
-              }),
-          comment: null,
-          reasonRejected: null,
-          reviewStatus: 'PENDING',
-          reviewedAt: null,
-          reviewedBy: null,
-        }
-
-      const createOrUpdate =
-        await leasingAdapter.createOrUpdateApplicationProfileByContactCode(
-          ctx.params.contactCode,
-          {
-            housingTypeDescription: body.housingTypeDescription ?? null,
-            expiresAt,
-            housingReference: housingReferenceParams,
-            lastUpdatedAt: new Date(),
-            housingType: 'OTHER',
-            landlord: body.landlord ?? null,
-            numAdults: body.numAdults,
-            numChildren: body.numChildren,
-          }
-        )
-
-      if (!createOrUpdate.ok) {
-        ctx.status = 500
-        ctx.body = { error: 'unknown', ...metadata }
-        return
-      }
-
-      ctx.status = createOrUpdate.statusCode ?? 200
-      ctx.body = {
-        content: createOrUpdate.data satisfies z.infer<
-          typeof schemas.client.applicationProfile.UpdateApplicationProfileResponseData
-        >,
-        ...metadata,
       }
     }
   )
