@@ -462,8 +462,28 @@ export const routes = (router: KoaRouter) => {
     )
 
     if (!res.ok) {
+      if (res.err === 'no-valid-housing-contract') {
+        ctx.status = 500
+        ctx.body = {
+          // reason: 'no-valid-housing-contract',
+          // error: 'No valid housing contract found',
+          type: 'no-valid-housing-contract',
+          title: 'No valid housing contract found',
+          status: 500,
+          detail:
+            'A housing contract needs to be current or upcoming to be a valid contract when applying for a parking space.',
+          ...metadata,
+        }
+        return
+      }
+
       ctx.status = 500
-      ctx.body = { error: 'Internal server error', ...metadata }
+      ctx.body = {
+        type: res.err,
+        title: 'Internal server error',
+        status: 500,
+        ...metadata,
+      }
       return
     }
 
