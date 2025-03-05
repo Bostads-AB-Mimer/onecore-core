@@ -681,6 +681,7 @@ export const routes = (router: KoaRouter) => {
   )
 
   router.get('(.*)/maintenanceUnits/contactCode/:contactCode', async (ctx) => {
+    console.log('incoming!')
     const metadata = generateRouteMetadata(ctx)
     try {
       const contactResult = await leasingAdapter.getContactByContactCode(

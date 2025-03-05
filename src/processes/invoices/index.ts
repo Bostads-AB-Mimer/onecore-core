@@ -21,6 +21,7 @@ export const processInvoiceDataFile = async (
   try {
     const invoiceDataRows =
       await excelFileToInvoiceDataRows(invoiceDataFileName)
+    log.push(`Läste in ${invoiceDataRows.length} excelrader`)
 
     const batchId = await createInvoiceBatch()
 
@@ -46,26 +47,49 @@ export const processInvoiceDataFile = async (
         batchId
       )
 
+      console.log('contactCodes', contactCodes)
+
       const contacts = await getContactsByContactCodes(contactCodes)
+
+      console.log('contacts', contacts)
 
       if (contacts.ok) {
         const result = await saveInvoiceContactsToDb(contacts.data, batchId)
-        success = success && result.ok
       }
 
       chunkNum++
     }
 
-    await updateContactsFromDb(batchId)
-    await updateInvoicesFromDb(batchId)
+    const updateContactResult = await updateContactsFromDb(batchId)
+    console.log('updateContactResult', updateContactResult)
+    const updateInvoicesResult = await updateInvoicesFromDb(batchId)
 
     return {
       processStatus: ProcessStatus.successful,
       httpStatus: 200,
       data: {
         processedRows: invoiceDataRows.length,
+        log,
+        updateInvoices: {
+          contacts: {
+            successfulContacts: updateContactResult.content.successfulContacts,
+            failedContacts: updateContactResult.content.failedContacts,
+            errors: updateContactResult.content.errors,
+          },
+          aggregatedRows: {
+            successfulRows:
+              updateInvoicesResult.content.aggregatedRows?.successfulRows,
+            failedRows: updateInvoicesResult.content.aggregatedRows?.failedRows,
+            errors: updateInvoicesResult.content.aggregatedRows?.errors,
+          },
+        },
       },
     }
+    /*return {
+      processStatus: ProcessStatus.successful,
+      httpStatus: 200,
+      data: {},
+    }*/
   } catch (error: any) {
     logger.error(
       error,

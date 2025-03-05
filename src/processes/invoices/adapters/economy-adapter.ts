@@ -2,6 +2,7 @@ import { loggedAxios as axios } from 'onecore-utilities'
 import config from '../../../common/config'
 import { InvoiceDataRow } from '../types'
 import { Contact } from 'onecore-types'
+import { AdapterResult } from '../../../adapters/types'
 
 export const createInvoiceBatch = async () => {
   const axiosOptions = {
@@ -53,7 +54,7 @@ export const saveInvoiceContactsToDb = async (
     axiosOptions
   )
 
-  return result.data.result
+  return result.data
 }
 
 export const updateContactsFromDb = async (batchId: string) => {
@@ -69,7 +70,7 @@ export const updateContactsFromDb = async (batchId: string) => {
     axiosOptions
   )
 
-  return result.data.result
+  return result.data
 }
 
 export const updateInvoicesFromDb = async (batchId: string) => {
@@ -85,5 +86,5 @@ export const updateInvoicesFromDb = async (batchId: string) => {
     axiosOptions
   )
 
-  return result.data.result
+  return result.data
 }

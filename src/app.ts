@@ -43,6 +43,17 @@ healthRoutes(publicRouter)
 swagggerRoutes(publicRouter)
 app.use(publicRouter.routes())
 
+console.log(
+  api.stack
+    .sort((a, b) => {
+      return a.path < b.path ? -1 : 1
+    })
+    .map(
+      (i) => i.methods.filter((method) => method !== 'HEAD')[0] + ' ' + i.path
+    )
+)
+console.log(publicRouter.stack.sort().map((i) => i.methods[0] + ' ' + i.path))
+
 app.use(jwt({ secret: config.auth.secret }))
 
 app.use(api.routes())

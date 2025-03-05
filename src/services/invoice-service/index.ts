@@ -7,7 +7,9 @@ export const routes = (router: KoaRouter) => {
       const invoiceRowsExcelFile = ctx.request.files?.['excelData']
 
       if (invoiceRowsExcelFile && !Array.isArray(invoiceRowsExcelFile)) {
-        const result = processInvoiceDataFile(invoiceRowsExcelFile.filepath)
+        const result = await processInvoiceDataFile(
+          invoiceRowsExcelFile.filepath
+        )
         ctx.status = 200
         ctx.body = result
       }
