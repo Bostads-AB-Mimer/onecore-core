@@ -144,7 +144,12 @@ const getContactByContactCode = async (
 
 const getTenantByContactCode = async (
   contactCode: string
-): Promise<AdapterResult<Tenant, 'unknown' | 'no-valid-housing-contract'>> => {
+): Promise<
+  AdapterResult<
+    Tenant,
+    'unknown' | 'no-valid-housing-contract' | 'contact-not-found'
+  >
+> => {
   try {
     const res = await axios.get(
       `${tenantsLeasesServiceUrl}/tenants/contactCode/${contactCode}`
@@ -158,7 +163,7 @@ const getTenantByContactCode = async (
   } catch (err) {
     logger.error({ err }, 'leasing-adapter.getTenantByContactCode')
 
-    if (err instanceof AxiosError && err.response?.data?.type)
+    if (err instanceof AxiosError)
       return { ok: false, err: err.response?.data?.type }
     return { ok: false, err: 'unknown' }
   }
