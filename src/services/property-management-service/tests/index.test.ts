@@ -131,8 +131,8 @@ describe('rental-property-service index', () => {
       const getContactSpy = jest
         .spyOn(leasingAdapter, 'getContactByContactCode')
         .mockResolvedValue({ ok: true, data: contactMock })
-      const getLeasesForPnrSpy = jest
-        .spyOn(leasingAdapter, 'getLeasesForPnr')
+      const getLeasesForContactCodeSpy = jest
+        .spyOn(leasingAdapter, 'getLeasesForContactCode')
         .mockResolvedValue([leaseMock])
       const getMaintenanceUnitsForRentalPropertySpy = jest
         .spyOn(
@@ -148,13 +148,13 @@ describe('rental-property-service index', () => {
       expect(res.status).toBe(200)
       expect(res.body.content).toEqual(maintenanceUnitInfoMock)
       expect(getContactSpy).toHaveBeenCalledWith('P965339')
-      expect(getLeasesForPnrSpy).toHaveBeenCalledWith(
-        '199404084924',
+      expect(getLeasesForContactCodeSpy).toHaveBeenCalledWith(
+        contactMock.contactCode,
         false,
         false
       )
       expect(getMaintenanceUnitsForRentalPropertySpy).toHaveBeenCalledWith(
-        '705-022-04-0201'
+        leaseMock.rentalPropertyId
       )
     })
   })

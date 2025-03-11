@@ -693,8 +693,8 @@ export const routes = (router: KoaRouter) => {
         return
       }
 
-      const leases = await leasingAdapter.getLeasesForPnr(
-        contactResult.data.nationalRegistrationNumber,
+      const leases = await leasingAdapter.getLeasesForContactCode(
+        contactResult.data.contactCode,
         false,
         false
       )
