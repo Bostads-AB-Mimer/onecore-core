@@ -33,7 +33,7 @@ export const processInvoiceDataFile = async (
     let chunkNum = 0
     let success = true
 
-    while (chunkNum * CHUNK_SIZE < 200 /*invoiceDataRows.length*/) {
+    while (chunkNum * CHUNK_SIZE < 2000 /*invoiceDataRows.length*/) {
       logger.info(
         'Processing rows',
         chunkNum * CHUNK_SIZE,
@@ -47,11 +47,7 @@ export const processInvoiceDataFile = async (
         batchId
       )
 
-      console.log('contactCodes', contactCodes)
-
       const contacts = await getContactsByContactCodes(contactCodes)
-
-      console.log('contacts', contacts)
 
       if (contacts.ok) {
         const result = await saveInvoiceContactsToDb(contacts.data, batchId)
@@ -61,7 +57,6 @@ export const processInvoiceDataFile = async (
     }
 
     const updateContactResult = await updateContactsFromDb(batchId)
-    console.log('updateContactResult', updateContactResult)
     const updateInvoicesResult = await updateInvoicesFromDb(batchId)
 
     return {
@@ -81,6 +76,13 @@ export const processInvoiceDataFile = async (
               updateInvoicesResult.content.aggregatedRows?.successfulRows,
             failedRows: updateInvoicesResult.content.aggregatedRows?.failedRows,
             errors: updateInvoicesResult.content.aggregatedRows?.errors,
+          },
+          customerLedgers: {
+            successfulLedgers:
+              updateInvoicesResult.content.customerLedgers?.successfulLedgers,
+            failedLedgers:
+              updateInvoicesResult.content.customerLedgers?.failedLedgers,
+            errors: updateInvoicesResult.content.customerLedgers?.errors,
           },
         },
       },
