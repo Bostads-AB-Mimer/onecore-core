@@ -85,8 +85,6 @@ export const routes = (router: KoaRouter) => {
       return
     }
 
-    logger.info(`GET /search?q=${queryParams.data.q}`, metadata)
-
     const getProperties = await propertyBaseAdapter.searchProperties(
       queryParams.data.q
     )
@@ -100,10 +98,24 @@ export const routes = (router: KoaRouter) => {
       return
     }
 
+    // TODO: These mappings only adheres to the swagger docs above.
+    // I feel like we should have a zod schema for this.
+    const mappedProperties = getProperties.data.map((property) => ({
+      id: property.id,
+      type: 'property',
+      name: property.designation,
+    }))
+
+    const mappedBuildings = getBuildings.data.map((building) => ({
+      id: building.id,
+      type: 'building',
+      name: building.designation,
+    }))
+
     ctx.status = 200
     ctx.body = {
       ...metadata,
-      content: [...getProperties.data, ...getBuildings.data],
+      content: [...mappedProperties, ...mappedBuildings],
     }
   })
 }
