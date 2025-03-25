@@ -2,7 +2,37 @@ import KoaRouter from '@koa/router'
 import { generateRouteMetadata } from 'onecore-utilities'
 import { z } from 'zod'
 
+import { registerSchema } from '../../utils/openapi'
 import * as propertyBaseAdapter from '../../adapters/property-base-adapter'
+import {
+  SearchQueryParamsSchema,
+  PropertySearchResult,
+  BuildingSearchResult,
+  PropertySearchResultSchema,
+  BuildingSearchResultSchema,
+  SearchResultSchema,
+} from './schemas'
+
+registerSchema(
+  'SearchQueryParams',
+  SearchQueryParamsSchema,
+  'Parameters for searching properties and buildings'
+)
+registerSchema(
+  'PropertySearchResult',
+  PropertySearchResultSchema,
+  'A property search result'
+)
+registerSchema(
+  'BuildingSearchResult',
+  BuildingSearchResultSchema,
+  'A building search result'
+)
+registerSchema(
+  'SearchResult',
+  SearchResultSchema,
+  'A search result (property or building)'
+)
 
 /**
  * @swagger
@@ -19,6 +49,7 @@ import * as propertyBaseAdapter from '../../adapters/property-base-adapter'
  * security:
  *   - bearerAuth: []
  */
+
 export const routes = (router: KoaRouter) => {
   /**
    * @swagger
@@ -33,8 +64,7 @@ export const routes = (router: KoaRouter) => {
    *         name: q
    *         required: true
    *         schema:
-   *           type: string
-   *           minLength: 3
+   *           $ref: '#/components/schemas/SearchQueryParams'
    *         description: The search query string
    *     responses:
    *       200:
@@ -42,39 +72,14 @@ export const routes = (router: KoaRouter) => {
    *         content:
    *           application/json:
    *             schema:
-   *               type: object
-   *               properties:
-   *                 content:
-   *                   type: array
-   *                   items:
-   *                     oneOf:
-   *                       - type: object
-   *                         properties:
-   *                           id:
-   *                             type: string
-   *                           type:
-   *                             type: string
-   *                             enum: ['building']
-   *                           name:
-   *                             type: string
-   *                         required: ['id', 'type']
-   *                       - type: object
-   *                         properties:
-   *                           id:
-   *                             type: string
-   *                           type:
-   *                             type: string
-   *                             enum: ['property']
-   *                           name:
-   *                             type: string
-   *                         required: ['id', 'type', 'name']
+   *               arrayOf:
+   *                 items:
+   *                   $ref: '#/components/schemas/SearchResult'
+   *       400:
+   *         description: Bad request - invalid query parameters
    *       500:
    *         description: Internal server error.
    */
-  const SearchQueryParamsSchema = z.object({
-    q: z.string().min(3),
-  })
-
   router.get('(.*)/search', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
     const queryParams = SearchQueryParamsSchema.safeParse(ctx.query)
@@ -97,25 +102,27 @@ export const routes = (router: KoaRouter) => {
       ctx.status = 500
       return
     }
+    const mappedProperties: PropertySearchResult[] = getProperties.data.map(
+      (property) => ({
+        id: property.id,
+        type: 'property',
+        name: property.designation,
+      })
+    )
 
-    // TODO: These mappings only adheres to the swagger docs above.
-    // I feel like we should have a zod schema for this.
-    const mappedProperties = getProperties.data.map((property) => ({
-      id: property.id,
-      type: 'property',
-      name: property.designation,
-    }))
+    const mappedBuildings: BuildingSearchResult[] = getBuildings.data.map(
+      (building) => ({
+        id: building.id,
+        type: 'building',
+        name: building.name,
+      })
+    )
 
-    const mappedBuildings = getBuildings.data.map((building) => ({
-      id: building.id,
-      type: 'building',
-      name: building.name,
-    }))
-
-    ctx.status = 200
     ctx.body = {
       ...metadata,
-      content: [...mappedProperties, ...mappedBuildings],
+      content: [...mappedProperties, ...mappedBuildings] satisfies z.infer<
+        typeof SearchResultSchema
+      >[],
     }
   })
 }
