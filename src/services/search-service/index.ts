@@ -89,7 +89,7 @@ export const routes = (router: KoaRouter) => {
       queryParams.data.q
     )
 
-    const getBuildings = await propertyBaseAdapter.searchProperties(
+    const getBuildings = await propertyBaseAdapter.searchBuildings(
       queryParams.data.q
     )
 
@@ -109,7 +109,7 @@ export const routes = (router: KoaRouter) => {
     const mappedBuildings = getBuildings.data.map((building) => ({
       id: building.id,
       type: 'building',
-      name: building.designation,
+      name: building.name,
     }))
 
     ctx.status = 200
