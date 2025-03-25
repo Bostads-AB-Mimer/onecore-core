@@ -6,26 +6,10 @@ import { registerSchema } from '../../utils/openapi'
 import * as propertyBaseAdapter from '../../adapters/property-base-adapter'
 import * as schemas from './schemas'
 
-registerSchema(
-  'SearchQueryParams',
-  schemas.SearchQueryParamsSchema,
-  'Parameters for searching properties and buildings'
-)
-registerSchema(
-  'PropertySearchResult',
-  schemas.PropertySearchResultSchema,
-  'A property search result'
-)
-registerSchema(
-  'BuildingSearchResult',
-  schemas.BuildingSearchResultSchema,
-  'A building search result'
-)
-registerSchema(
-  'SearchResult',
-  schemas.SearchResultSchema,
-  'A search result (property or building)'
-)
+registerSchema('SearchQueryParams', schemas.SearchQueryParamsSchema)
+registerSchema('PropertySearchResult', schemas.PropertySearchResultSchema)
+registerSchema('BuildingSearchResult', schemas.BuildingSearchResultSchema)
+registerSchema('SearchResult', schemas.SearchResultSchema)
 
 /**
  * @swagger
@@ -98,19 +82,21 @@ export const routes = (router: KoaRouter) => {
       ctx.status = 500
       return
     }
-    const mappedProperties: schemas.PropertySearchResult[] =
-      getProperties.data.map((property) => ({
+    const mappedProperties = getProperties.data.map(
+      (property): schemas.PropertySearchResult => ({
         id: property.id,
         type: 'property',
         name: property.designation,
-      }))
+      })
+    )
 
-    const mappedBuildings: schemas.BuildingSearchResult[] =
-      getBuildings.data.map((building) => ({
+    const mappedBuildings = getBuildings.data.map(
+      (building): schemas.BuildingSearchResult => ({
         id: building.id,
         type: 'building',
         name: building.name,
-      }))
+      })
+    )
 
     ctx.body = {
       ...metadata,

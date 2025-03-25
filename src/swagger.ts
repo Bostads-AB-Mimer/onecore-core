@@ -1,4 +1,4 @@
-import { getRegisteredSchemas } from './utils/openapi'
+import { schemaRegistry } from './utils/openapi'
 
 const basePath = __dirname
 
@@ -31,6 +31,6 @@ export const swaggerSpec = {
 export function updateSwaggerSchemas() {
   swaggerSpec.definition.components.schemas = {
     ...swaggerSpec.definition.components.schemas,
-    ...getRegisteredSchemas(),
+    ...schemaRegistry,
   }
 }
