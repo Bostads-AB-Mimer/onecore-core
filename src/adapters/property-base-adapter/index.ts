@@ -1,12 +1,13 @@
 import { logger } from 'onecore-utilities'
 import createClient from 'openapi-fetch'
+
 import { AdapterResult } from '../types'
 import { components, paths } from './generated/api-types'
 
-const API_BASE_URL = 'http://localhost:5050'
+import config from '../../common/config'
 
 const client = createClient<paths>({
-  baseUrl: API_BASE_URL,
+  baseUrl: config.propertyBaseService.url,
   headers: {
     'Content-Type': 'application/json',
   },
