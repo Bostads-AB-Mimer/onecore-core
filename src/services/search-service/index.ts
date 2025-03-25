@@ -4,33 +4,26 @@ import { z } from 'zod'
 
 import { registerSchema } from '../../utils/openapi'
 import * as propertyBaseAdapter from '../../adapters/property-base-adapter'
-import {
-  SearchQueryParamsSchema,
-  PropertySearchResult,
-  BuildingSearchResult,
-  PropertySearchResultSchema,
-  BuildingSearchResultSchema,
-  SearchResultSchema,
-} from './schemas'
+import * as schemas from './schemas'
 
 registerSchema(
   'SearchQueryParams',
-  SearchQueryParamsSchema,
+  schemas.SearchQueryParamsSchema,
   'Parameters for searching properties and buildings'
 )
 registerSchema(
   'PropertySearchResult',
-  PropertySearchResultSchema,
+  schemas.PropertySearchResultSchema,
   'A property search result'
 )
 registerSchema(
   'BuildingSearchResult',
-  BuildingSearchResultSchema,
+  schemas.BuildingSearchResultSchema,
   'A building search result'
 )
 registerSchema(
   'SearchResult',
-  SearchResultSchema,
+  schemas.SearchResultSchema,
   'A search result (property or building)'
 )
 
@@ -85,7 +78,7 @@ export const routes = (router: KoaRouter) => {
    */
   router.get('(.*)/search', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
-    const queryParams = SearchQueryParamsSchema.safeParse(ctx.query)
+    const queryParams = schemas.SearchQueryParamsSchema.safeParse(ctx.query)
 
     if (!queryParams.success) {
       ctx.status = 400
@@ -105,26 +98,24 @@ export const routes = (router: KoaRouter) => {
       ctx.status = 500
       return
     }
-    const mappedProperties: PropertySearchResult[] = getProperties.data.map(
-      (property) => ({
+    const mappedProperties: schemas.PropertySearchResult[] =
+      getProperties.data.map((property) => ({
         id: property.id,
         type: 'property',
         name: property.designation,
-      })
-    )
+      }))
 
-    const mappedBuildings: BuildingSearchResult[] = getBuildings.data.map(
-      (building) => ({
+    const mappedBuildings: schemas.BuildingSearchResult[] =
+      getBuildings.data.map((building) => ({
         id: building.id,
         type: 'building',
         name: building.name,
-      })
-    )
+      }))
 
     ctx.body = {
       ...metadata,
       content: [...mappedProperties, ...mappedBuildings] satisfies z.infer<
-        typeof SearchResultSchema
+        typeof schemas.SearchResultSchema
       >[],
     }
   })
