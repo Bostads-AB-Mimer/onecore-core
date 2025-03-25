@@ -72,9 +72,12 @@ export const routes = (router: KoaRouter) => {
    *         content:
    *           application/json:
    *             schema:
-   *               arrayOf:
-   *                 items:
-   *                   $ref: '#/components/schemas/SearchResult'
+   *               type: object
+   *               properties:
+   *                 content:
+   *                   type: array
+   *                   items:
+   *                     $ref: '#/components/schemas/SearchResult'
    *       400:
    *         description: Bad request - invalid query parameters
    *       500:
