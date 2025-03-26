@@ -60,6 +60,11 @@ export const routes = (router: KoaRouter) => {
    *       500:
    *         description: Internal server error.
    */
+
+  type SearchResultResponseContent = z.infer<
+    typeof schemas.SearchResultSchema
+  >[]
+
   router.get('(.*)/search', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
     const queryParams = schemas.SearchQueryParamsSchema.safeParse(ctx.query)
@@ -82,6 +87,7 @@ export const routes = (router: KoaRouter) => {
       ctx.status = 500
       return
     }
+
     const mappedProperties = getProperties.data.map(
       (property): schemas.PropertySearchResult => ({
         id: property.id,
@@ -100,9 +106,10 @@ export const routes = (router: KoaRouter) => {
 
     ctx.body = {
       ...metadata,
-      content: [...mappedProperties, ...mappedBuildings] satisfies z.infer<
-        typeof schemas.SearchResultSchema
-      >[],
+      content: [
+        ...mappedProperties,
+        ...mappedBuildings,
+      ] satisfies SearchResultResponseContent,
     }
   })
 }
