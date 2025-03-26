@@ -36,7 +36,7 @@ const getLease = async (
   const leaseResponse = await axios(
     tenantsLeasesServiceUrl +
       '/leases/' +
-      leaseId +
+      encodeURIComponent(leaseId) +
       (includeContacts ? '?includeContacts=true' : '')
   )
 
@@ -124,12 +124,13 @@ const getContactByContactCode = async (
 
 const getContactsByContactCodes = async (
   contactCodes: string[]
-): Promise<AdapterResult<Contact[], 'unknown'>> => {
+): Promise<
+  AdapterResult<{ contacts: Contact[]; errors: string[] }, 'unknown'>
+> => {
   try {
-    const res = await axios.post<{ content: Contact[] }>(
-      `${tenantsLeasesServiceUrl}/contacts/by-contact-codes`,
-      { contactCodes }
-    )
+    const res = await axios.post<{
+      content: { contacts: Contact[]; errors: string[] }
+    }>(`${tenantsLeasesServiceUrl}/contacts/by-contact-codes`, { contactCodes })
 
     return { ok: true, data: res.data.content }
   } catch (err: any) {
@@ -198,6 +199,27 @@ const getCreditInformation = async (
       nationalRegistrationNumber
   )
   return informationResponse.data.content
+}
+
+export const getInvoicesForContact = async (
+  contactCode: string
+): Promise<AdapterResult<Invoice[], 'error'>> => {
+  const axiosOptions = {
+    method: 'GET',
+  }
+
+  const result = await axios(
+    config.tenantsLeasesService.url +
+      `/contact/invoices/contactCode/${contactCode}`,
+    axiosOptions
+  )
+
+  if (result.status == 200) {
+    return { ok: true, data: result.data.content }
+  } else {
+    logger.error(result, 'Error getting invoices for contact')
+    return { ok: false, err: 'error' }
+  }
 }
 
 const getInternalCreditInformation = async (
