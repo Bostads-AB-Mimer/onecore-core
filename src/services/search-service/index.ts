@@ -6,11 +6,6 @@ import { registerSchema } from '../../utils/openapi'
 import * as propertyBaseAdapter from '../../adapters/property-base-adapter'
 import * as schemas from './schemas'
 
-registerSchema('SearchQueryParams', schemas.SearchQueryParamsSchema)
-registerSchema('PropertySearchResult', schemas.PropertySearchResultSchema)
-registerSchema('BuildingSearchResult', schemas.BuildingSearchResultSchema)
-registerSchema('SearchResult', schemas.SearchResultSchema)
-
 /**
  * @swagger
  * openapi: 3.0.0
@@ -28,6 +23,11 @@ registerSchema('SearchResult', schemas.SearchResultSchema)
  */
 
 export const routes = (router: KoaRouter) => {
+  registerSchema('SearchQueryParams', schemas.SearchQueryParamsSchema)
+  registerSchema('PropertySearchResult', schemas.PropertySearchResultSchema)
+  registerSchema('BuildingSearchResult', schemas.BuildingSearchResultSchema)
+  registerSchema('SearchResult', schemas.SearchResultSchema)
+
   /**
    * @swagger
    * /search:
