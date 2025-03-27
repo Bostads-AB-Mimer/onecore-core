@@ -1,6 +1,6 @@
 import KoaRouter from '@koa/router'
 
-import * as leasingAdapter from '../../adapters/leasing-adapter'
+import * as leasingAdapter from '../../adapters/leasing-adapter-v2'
 import * as propertyManagementAdapter from '../../adapters/property-management-adapter'
 import * as workOrderAdapter from '../../adapters/work-order-adapter'
 import * as communicationAdapter from '../../adapters/communication-adapter'
@@ -121,8 +121,8 @@ export const routes = (router: KoaRouter) => {
       rentalObjectId: async () => {
         const leases = await leasingAdapter.getLeasesForPropertyId(
           ctx.params.identifier,
-          ctx.query['includeTerminatedLeases'],
-          'true'
+          false,
+          true
         )
         if (leases && leases.length > 0) {
           await getRentalPropertyInfoWithLeases(leases)
