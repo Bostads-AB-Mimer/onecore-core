@@ -1,9 +1,8 @@
 import request from 'supertest'
 import KoaRouter from '@koa/router'
 import Koa from 'koa'
-import * as tenantLeaseAdapter from '../../../adapters/leasing-adapter'
+import * as tenantLeaseAdapter from '../../../adapters/leasing-adapter-v2'
 import * as propertyManagementAdapter from '../../../adapters/property-management-adapter'
-import * as leasingAdapter from '../../../adapters/leasing-adapter'
 import * as communicationAdapter from '../../../adapters/communication-adapter'
 import * as workOrderAdapter from '../../../adapters/work-order-adapter'
 import { routes } from '../index'
@@ -212,7 +211,7 @@ describe('work-order-service index', () => {
         .mockResolvedValue(rentalPropertyInfoMock)
 
       const getTenantByContactCodeSpy = jest
-        .spyOn(leasingAdapter, 'getTenantByContactCode')
+        .spyOn(tenantLeaseAdapter, 'getTenantByContactCode')
         .mockResolvedValue({ ok: true, data: tenantMock })
 
       const createWorkOrderSpy = jest
@@ -289,7 +288,7 @@ describe('work-order-service index', () => {
         .mockResolvedValue(rentalPropertyInfoMock)
 
       jest
-        .spyOn(leasingAdapter, 'getTenantByContactCode')
+        .spyOn(tenantLeaseAdapter, 'getTenantByContactCode')
         .mockResolvedValue({ ok: true, data: tenantMock })
 
       const res = await request(app.callback())
