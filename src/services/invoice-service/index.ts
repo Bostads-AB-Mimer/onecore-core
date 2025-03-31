@@ -5,7 +5,8 @@ import {
   enrichInvoiceDataRows,
   saveInvoiceContactsToDb,
   getBatchContacts,
-  getBatchTransactionRows,
+  getBatchAggregatedRows,
+  getBatchLedgerRows,
 } from './adapters/economy-adapter'
 import { logger } from 'onecore-utilities'
 import {
@@ -120,6 +121,9 @@ export const processInvoiceDataFile = async (
 }
 
 const transformDate = (value: string | number) => {
+  if (value == undefined || typeof value === 'number' || value === '') {
+    return ''
+  }
   return (value as string).replaceAll('-', '')
 }
 
@@ -193,9 +197,37 @@ export const routes = (router: KoaRouter) => {
     }
   })
 
-  router.get('(.*)/invoices/batches/:batchId/transaction-rows', async (ctx) => {
+  router.get('(.*)/invoices/batches/:batchId/aggregated-rows', async (ctx) => {
     ctx.request.socket.setTimeout(0)
-    const transactionRows = await getBatchTransactionRows(
+    const transactionRows = await getBatchAggregatedRows(
+      ctx.params.batchId as string
+    )
+
+    if (transactionRows.ok) {
+      const csvContent: string[] = []
+
+      csvContent.push(
+        'Voucher Type;Voucher No;Voucher Date;Account;Posting 1;Posting 2;Posting 3;Posting 4;Posting 5;Period Start;No of Periods;Subledger No;Invoice Date;Invoice No;OCR;Due Date;Text;TaxRule;Amount'
+      )
+
+      transactionRows.data.forEach((transactionRow) => {
+        csvContent.push(
+          `${transactionRow.voucherType};${transactionRow.voucherNo};${transformDate(transactionRow.voucherDate)};${transactionRow.account};${transactionRow.posting1};${transactionRow.posting2};${transactionRow.posting3};${transactionRow.posting4};${transactionRow.posting5};${transformDate(transactionRow.periodStart)};${transactionRow.noOfPeriods};${transactionRow.subledgerNo};${transformDate(transactionRow.invoiceDate)};${transactionRow.invoiceNo};${transactionRow.ocr};${transformDate(transactionRow.dueDate)};${transactionRow.text};${transactionRow.taxRule};${transactionRow.amount}`
+        )
+      })
+
+      ctx.status = 200
+      ctx.response.type = 'text/plain'
+      ctx.body = csvContent.join('\n')
+    } else {
+      ctx.status = 500
+      ctx.body = ''
+    }
+  })
+
+  router.get('(.*)/invoices/batches/:batchId/ledger-rows', async (ctx) => {
+    ctx.request.socket.setTimeout(0)
+    const transactionRows = await getBatchLedgerRows(
       ctx.params.batchId as string
     )
 
@@ -222,7 +254,7 @@ export const routes = (router: KoaRouter) => {
   })
 
   router.get('(.*)/invoices/batches/:batchId/accounts', async (ctx) => {
-    const transactionRows = await getBatchTransactionRows(
+    const transactionRows = await getBatchAggregatedRows(
       ctx.params.batchId as string
     )
 
