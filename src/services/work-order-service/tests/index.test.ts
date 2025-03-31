@@ -84,8 +84,8 @@ describe('work-order-service index', () => {
       expect(getRentalPropertyInfoSpy).toHaveBeenCalledWith('123-456-789')
       expect(getLeasesForPropertyIdSpy).toHaveBeenCalledWith(
         '123-456-789',
-        undefined,
-        'true'
+        false,
+        true
       )
       expect(res.body.content).toBeDefined()
     })

@@ -79,15 +79,15 @@ const getLeasesForContactCode = async (
 
 const getLeasesForPropertyId = async (
   propertyId: string,
-  includeTerminatedLeases: string | string[] | undefined,
-  includeContacts: string | string[] | undefined
+  includeTerminatedLeases: boolean,
+  includeContacts: boolean
 ): Promise<Lease[]> => {
-  const query = querystring.stringify({
-    includeTerminatedLeases,
-    includeContacts,
+  const queryParams = new URLSearchParams({
+    includeTerminatedLeases: includeTerminatedLeases.toString(),
+    includeContacts: includeContacts.toString(),
   })
   const leasesResponse = await axios(
-    `${tenantsLeasesServiceUrl}/leases/for/propertyId/${propertyId}?${query}`
+    `${tenantsLeasesServiceUrl}/leases/for/propertyId/${propertyId}?${queryParams.toString()}`
   )
   return leasesResponse.data.content
 }
