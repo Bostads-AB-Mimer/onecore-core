@@ -8,7 +8,7 @@ Core orchestration for ONECore.
 2. Install nvm
 3. Install required version of node: `nvm install`
 4. Use required version of node `nvm use`
-5. Install packages: `npm run install`
+5. Install packages: `npm install`
 
 ## Development
 
