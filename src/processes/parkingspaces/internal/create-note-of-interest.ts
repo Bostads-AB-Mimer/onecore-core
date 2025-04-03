@@ -87,10 +87,14 @@ export const createNoteOfInterestForInternalParkingSpace = async (
     }
 
     const applicantContact = getApplicantContact.data
-    
+
     //step 3a. Check if applicant is tenant
-    const leases = await getLeasesForContactCode(contactCode, true, false)
-    
+    const leases = await getLeasesForContactCode(contactCode, {
+      includeUpcomingLeases: false,
+      includeTerminatedLeases: true,
+      includeContacts: false,
+    })
+
     if (leases.length < 1) {
       return endFailingProcess(
         log,
