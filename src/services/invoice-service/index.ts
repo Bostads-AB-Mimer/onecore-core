@@ -157,8 +157,6 @@ export const routes = (router: KoaRouter) => {
 
     const invoices = await getInvoicesForContact(contactCode)
 
-    console.log('invoices', invoices)
-
     if (invoices.ok && invoices.data.length > 0) {
       ctx.status = 200
       ctx.body = {
@@ -179,8 +177,6 @@ export const routes = (router: KoaRouter) => {
       csvContent.push(
         'Code;Description;Company No;Email;Street Address;Zip Code;City;Invoice Delivery Method'
       )
-
-      console.log(csvContent)
 
       contacts.data.forEach((contact) => {
         csvContent.push(
