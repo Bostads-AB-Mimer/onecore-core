@@ -40,8 +40,7 @@ export const routes = (router: KoaRouter) => {
    *       - in: query
    *         name: q
    *         required: true
-   *         schema:
-   *           $ref: '#/components/schemas/SearchQueryParams'
+   *         type: string
    *         description: The search query string
    *     responses:
    *       200:
