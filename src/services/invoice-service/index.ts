@@ -175,12 +175,12 @@ export const routes = (router: KoaRouter) => {
       const csvContent: string[] = []
 
       csvContent.push(
-        'Code;Description;Company No;Email;Street Address;Zip Code;City;Invoice Delivery Method'
+        'Code;Description;Company No;Email;Street Address;Zip Code;City;Invoice Delivery Method;GL Object Value 5;Group'
       )
 
       contacts.data.forEach((contact) => {
         csvContent.push(
-          `${contact.code};${contact.description};${contact.companyNo};${contact.email};${contact.streetAddress};${contact.zipCode};${contact.city};${contact.invoiceDeliveryMethod}`
+          `${contact.code};${contact.description};${contact.companyNo};${contact.email};${contact.streetAddress};${contact.zipCode};${contact.city};${contact.invoiceDeliveryMethod};${contact.counterPart};`
         )
       })
 
