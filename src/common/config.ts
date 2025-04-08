@@ -13,6 +13,9 @@ export interface Config {
   tenantsLeasesService: {
     url: string
   }
+  propertyBaseService: {
+    url: string
+  }
   propertyInfoService: {
     url: string
   }
@@ -44,6 +47,10 @@ export interface Config {
       systemName: string
       minimumMinutesBetweenRequests: number
     }
+    propertyBase: {
+      systemName: string
+      minimumMinutesBetweenRequests: number
+    }
     propertyManagement: {
       systemName: string
       minimumMinutesBetweenRequests: number
@@ -68,6 +75,9 @@ const config = configPackage({
     },
     propertyInfoService: {
       url: 'http://localhost:5030',
+    },
+    propertyBaseService: {
+      url: 'http://localhost:5050',
     },
     documentsService: {
       url: 'https://mim-shared-apim-apim01-t.azure-api.net/document',
@@ -95,6 +105,10 @@ const config = configPackage({
         systemName: 'leasing',
         minimumMinutesBetweenRequests: 1,
       },
+      propertyBase: {
+        systemName: 'property-base',
+        minimumMinutesBetweenRequests: 1,
+      },
       propertyManagement: {
         systemName: 'property-management',
         minimumMinutesBetweenRequests: 1,
@@ -114,6 +128,7 @@ const config = configPackage({
 export default {
   port: config.get('port'),
   tenantsLeasesService: config.get('tenantsLeasesService'),
+  propertyBaseService: config.get('propertyBaseService'),
   propertyInfoService: config.get('propertyInfoService'),
   documentsService: config.get('documentsService'),
   communicationService: config.get('communicationService'),
