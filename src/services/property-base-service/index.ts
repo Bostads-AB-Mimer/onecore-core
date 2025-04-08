@@ -3,6 +3,8 @@ import KoaRouter from '@koa/router'
 import * as propertyBaseAdapter from '../../adapters/property-base-adapter'
 
 import { logger, generateRouteMetadata } from 'onecore-utilities'
+import { registerSchema } from '../../utils/openapi'
+import * as schemas from './schemas'
 
 /**
  * @swagger
@@ -20,6 +22,8 @@ import { logger, generateRouteMetadata } from 'onecore-utilities'
  *   - bearerAuth: []
  */
 export const routes = (router: KoaRouter) => {
+  registerSchema('ResidenceDetails', schemas.ResidenceDetailsSchema)
+
   /**
    * @swagger
    * /propertyBase/residence/{residenceId}:
@@ -44,12 +48,7 @@ export const routes = (router: KoaRouter) => {
    *               type: object
    *               properties:
    *                 content:
-   *                     type: object
-   *                     properties:
-   *                       rentalPropertyId:
-   *                         type: string
-   *                             # Add other lease properties here
-   *                 # Add other metadata properties here
+   *                   $ref: '#/components/schemas/ResidenceDetails'
    *       '404':
    *         description: Residence not found
    *         content:
