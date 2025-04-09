@@ -1,13 +1,24 @@
 import { z } from 'zod'
 
+export const ResidenceSchema = z.object({
+  id: z.string(),
+  code: z.string(),
+  name: z.string(),
+  deleted: z.boolean(),
+  validityPeriod: z.object({
+    fromDate: z.string().datetime(),
+    toDate: z.string().datetime(),
+  }),
+})
+
 export const ResidenceDetailsSchema = z.object({
   id: z.string(),
   code: z.string(),
   name: z.string(),
   deleted: z.boolean(),
   validityPeriod: z.object({
-    fromDate: z.string(),
-    toDate: z.string(),
+    fromDate: z.string().datetime(),
+    toDate: z.string().datetime(),
   }),
   location: z.string(),
   accessibility: z.object({
@@ -55,11 +66,17 @@ export const ResidenceDetailsSchema = z.object({
   propertyObject: z.object({
     energy: z.object({
       energyClass: z.number(),
-      energyRegistered: z.string(),
-      energyReceived: z.string(),
+      energyRegistered: z.string().datetime(),
+      energyReceived: z.string().datetime(),
       energyIndex: z.number(),
     }),
   }),
 })
 
+export const GetResidencesQueryParamsSchema = z.object({
+  buildingCode: z.string(),
+  staircaseCode: z.string().optional(),
+})
+
+export type Residence = z.infer<typeof ResidenceSchema>
 export type ResidenceDetails = z.infer<typeof ResidenceDetailsSchema>
