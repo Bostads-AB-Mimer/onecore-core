@@ -5,6 +5,7 @@ export { OfferWithRentalObjectCodeFactory as offerWithRentalObjectCode } from '.
 export { DetailedOfferFactory as detailedOffer } from './offer'
 export { ApplicantFactory as applicant } from './applicant'
 export { ContactFactory as contact } from './contact'
+export { CompanyFactory as company } from './company'
 export { LeaseFactory as lease } from './lease'
 export { WaitingListFactory as waitingList } from './waiting-list'
 export { ApartmentInfoFactory as apartmentInfo } from './apartment-info'
