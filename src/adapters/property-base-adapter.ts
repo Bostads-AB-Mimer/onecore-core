@@ -24,13 +24,6 @@ const getCompanies = async (): Promise<{
     return { ok: false, err: 'unknown' }
   } catch (err) {
     logger.error(err, 'Error getting companies from property base')
-    if (err instanceof AxiosError && err.status === 404) {
-      return {
-        ok: false,
-        err: 'not-found',
-      }
-    }
-
     return { ok: false, err: 'unknown' }
   }
 }
