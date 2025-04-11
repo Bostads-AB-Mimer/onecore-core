@@ -19,6 +19,25 @@ export const getWorkOrdersByContactCode = async (
   }
 }
 
+export const getWorkOrdersByRentalPropertyId = async (
+  rentalPropertyId: string
+): Promise<AdapterResult<WorkOrder[], string>> => {
+  try {
+    const res = await axios.get<{ content: { workOrders: WorkOrder[] } }>(
+      `${config.workOrderService.url}/workOrders/residenceId/${rentalPropertyId}`
+    )
+
+    return { ok: true, data: res.data.content.workOrders }
+  } catch (error) {
+    logger.error(
+      { error },
+      'work-order-adapter.getWorkOrdersByRentalPropertyId'
+    )
+    const errorMessage = error instanceof Error ? error.message : 'unknown'
+    return { ok: false, err: errorMessage }
+  }
+}
+
 export const createWorkOrder = async (
   CreateWorkOrder: CreateWorkOrder
 ): Promise<AdapterResult<{ newWorkOrderId: number }, string>> => {
