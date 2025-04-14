@@ -116,9 +116,9 @@ export const ResidenceDetailsSchema = z.object({
 export const StaircaseSchema = z.object({
   id: z.string(),
   code: z.string(),
-  name: z.string(),
+  name: z.string().nullable(),
   features: z.object({
-    floorPlan: z.string(),
+    floorPlan: z.string().nullable(),
     accessibleByElevator: z.boolean(),
   }),
   dates: z.object({

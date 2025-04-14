@@ -352,7 +352,7 @@ export const routes = (router: KoaRouter) => {
       }
 
       ctx.body = {
-        content: result.data,
+        content: result.data satisfies schemas.Staircase[],
         ...metadata,
       }
     } catch (error) {

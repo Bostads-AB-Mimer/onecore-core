@@ -9,12 +9,12 @@ export const StaircaseFactory = Factory.define<
   name: 'Adressgatan 123',
   deleted: false,
   dates: {
-    from: '2024-10-01',
-    to: '2025-10-01',
+    from: '2024-10-01T00:00:00Z',
+    to: '2025-10-01T00:00:00Z',
   },
   features: {
     floorPlan: '1',
     accessibleByElevator: true,
   },
-  timestamp: '2024-10-01',
+  timestamp: '2024-10-01T00:00:00Z',
 }))

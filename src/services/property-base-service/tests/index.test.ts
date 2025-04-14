@@ -8,7 +8,7 @@ import { routes } from '../index'
 import * as propertyBaseAdapter from '../../../adapters/property-base-adapter'
 
 import * as factory from '../../../../test/factories'
-import { PropertySchema, ResidenceSchema } from '../schemas'
+import { PropertySchema, ResidenceSchema, StaircaseSchema } from '../schemas'
 
 const app = new Koa()
 const router = new KoaRouter()
@@ -123,6 +123,9 @@ describe('property-base-service', () => {
       expect(JSON.stringify(res.body.content)).toEqual(
         JSON.stringify(staircasesMock)
       )
+      expect(() =>
+        z.array(StaircaseSchema).parse(res.body.content)
+      ).not.toThrow()
     })
 
     it('returns 400 if buildingCode query parameter is missing', async () => {
