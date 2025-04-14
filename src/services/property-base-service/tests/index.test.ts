@@ -2,11 +2,13 @@ import request from 'supertest'
 import Koa from 'koa'
 import KoaRouter from '@koa/router'
 import bodyParser from 'koa-bodyparser'
+import { z } from 'zod'
 
 import { routes } from '../index'
 import * as propertyBaseAdapter from '../../../adapters/property-base-adapter'
 
 import * as factory from '../../../../test/factories'
+import { ResidenceSchema } from '../schemas'
 
 const app = new Koa()
 const router = new KoaRouter()
@@ -32,6 +34,9 @@ describe('property-base-service', () => {
       expect(JSON.stringify(res.body.content)).toEqual(
         JSON.stringify(residences)
       )
+      expect(() =>
+        z.array(ResidenceSchema).parse(res.body.content)
+      ).not.toThrow()
     })
 
     it('returns 400 if building code is missing', async () => {
@@ -57,6 +62,7 @@ describe('property-base-service', () => {
       expect(JSON.stringify(res.body.content)).toEqual(
         JSON.stringify(residenceDetails)
       )
+      expect(() => ResidenceSchema.parse(res.body.content)).not.toThrow()
     })
 
     it('returns 404 if no residence is found', async () => {

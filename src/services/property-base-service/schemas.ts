@@ -6,8 +6,8 @@ export const ResidenceSchema = z.object({
   name: z.string(),
   deleted: z.boolean(),
   validityPeriod: z.object({
-    fromDate: z.string().datetime(),
-    toDate: z.string().datetime(),
+    fromDate: z.coerce.date(),
+    toDate: z.coerce.date(),
   }),
 })
 
@@ -17,8 +17,8 @@ export const ResidenceDetailsSchema = z.object({
   name: z.string(),
   deleted: z.boolean(),
   validityPeriod: z.object({
-    fromDate: z.string().datetime(),
-    toDate: z.string().datetime(),
+    fromDate: z.coerce.date(),
+    toDate: z.coerce.date(),
   }),
   location: z.string(),
   accessibility: z.object({
@@ -66,8 +66,8 @@ export const ResidenceDetailsSchema = z.object({
   propertyObject: z.object({
     energy: z.object({
       energyClass: z.number(),
-      energyRegistered: z.string().datetime(),
-      energyReceived: z.string().datetime(),
+      energyRegistered: z.coerce.date(),
+      energyReceived: z.coerce.date(),
       energyIndex: z.number(),
     }),
   }),
