@@ -9,8 +9,8 @@ export const ResidenceDetailsFactory = Factory.define<
   name: 'Adressgatan 123',
   deleted: false,
   validityPeriod: {
-    fromDate: '2024-10-01',
-    toDate: '2025-10-01',
+    fromDate: '2024-10-01T00:00:00Z',
+    toDate: '2025-10-01T00:00:00Z',
   },
   accessibility: {
     wheelchairAccessible: false,

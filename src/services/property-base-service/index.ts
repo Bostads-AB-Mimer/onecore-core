@@ -103,7 +103,7 @@ export const routes = (router: KoaRouter) => {
       }
 
       ctx.body = {
-        content: result.data,
+        content: result.data satisfies schemas.Residence[],
         ...metadata,
       }
     } catch (error) {
@@ -181,7 +181,7 @@ export const routes = (router: KoaRouter) => {
       }
 
       ctx.body = {
-        content: result.data,
+        content: result.data satisfies schemas.ResidenceDetails,
         ...metadata,
       }
     } catch (error) {
