@@ -122,11 +122,11 @@ export const StaircaseSchema = z.object({
     accessibleByElevator: z.boolean(),
   }),
   dates: z.object({
-    from: z.string(),
-    to: z.string(),
+    from: z.string().datetime(),
+    to: z.string().datetime(),
   }),
   deleted: z.boolean(),
-  timestamp: z.string(),
+  timestamp: z.string().datetime(),
 })
 
 export const GetResidencesQueryParamsSchema = z.object({
