@@ -8,7 +8,7 @@ import { routes } from '../index'
 import * as propertyBaseAdapter from '../../../adapters/property-base-adapter'
 
 import * as factory from '../../../../test/factories'
-import { ResidenceSchema } from '../schemas'
+import { PropertySchema, ResidenceSchema } from '../schemas'
 
 const app = new Koa()
 const router = new KoaRouter()
@@ -34,6 +34,9 @@ describe('property-base-service', () => {
       expect(JSON.stringify(res.body.content)).toEqual(
         JSON.stringify(propertiesMock)
       )
+      expect(() =>
+        z.array(PropertySchema).parse(res.body.content)
+      ).not.toThrow()
     })
 
     it('returns 400 if company code is missing', async () => {
