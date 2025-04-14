@@ -300,11 +300,11 @@ export const routes = (router: KoaRouter) => {
    *         content:
    *           application/json:
    *             schema:
-   *              type: array
-   *              items:
-   *                type: object
-   *                properties:
-   *                  content:
+   *              type: object
+   *              properties:
+   *                content:
+   *                  type: array
+   *                  items:
    *                    $ref: '#/components/schemas/Staircase'
    *       '400':
    *         description: Missing buildingCode
