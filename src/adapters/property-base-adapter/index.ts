@@ -120,7 +120,9 @@ export async function getResidenceDetails(
       return { ok: false, err: 'not-found' }
     }
 
-    return { ok: false, err: 'unknown' }
+    throw new Error(
+      `Unexpected response status: ${fetchResponse.response.status}`
+    )
   } catch (err) {
     logger.error({ err }, 'property-base-adapter.getResidenceDetails')
     return { ok: false, err: 'unknown' }
