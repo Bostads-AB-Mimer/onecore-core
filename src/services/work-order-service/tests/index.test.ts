@@ -165,12 +165,15 @@ describe('work-order-service index', () => {
   })
 
   describe('GET /workOrders/contactCode/:contactCode', () => {
-    const workOrderMock: WorkOrder = factory.workOrder.build()
+    const workOrderMock = factory.workOrder.build()
 
     it('should return work orders by contact code', async () => {
       const getWorkOrdersByContactCodeSpy = jest
         .spyOn(workOrderAdapter, 'getWorkOrdersByContactCode')
-        .mockResolvedValue({ ok: true, data: [workOrderMock] })
+        .mockResolvedValue({
+          ok: true,
+          data: [workOrderMock],
+        })
 
       const res = await request(app.callback()).get(
         '/api/workOrders/contactCode/P174958'
@@ -200,12 +203,15 @@ describe('work-order-service index', () => {
   })
 
   describe('GET /workOrders/rentalPropertyId/:rentalPropertyId', () => {
-    const workOrderMock: WorkOrder = factory.workOrder.build()
+    const workOrderMock = factory.workOrder.build()
 
     it('should return work orders by rental property id', async () => {
       const getWorkOrdersByRentalPropertyIdSpy = jest
         .spyOn(workOrderAdapter, 'getWorkOrdersByRentalPropertyId')
-        .mockResolvedValue({ ok: true, data: [workOrderMock] })
+        .mockResolvedValue({
+          ok: true,
+          data: [workOrderMock],
+        })
 
       const res = await request(app.callback()).get(
         '/api/workOrders/rentalPropertyId/406-028-02-0101'

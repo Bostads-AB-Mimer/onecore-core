@@ -4,6 +4,8 @@ import * as leasingAdapter from '../../adapters/leasing-adapter'
 import * as propertyManagementAdapter from '../../adapters/property-management-adapter'
 import * as workOrderAdapter from '../../adapters/work-order-adapter'
 import * as communicationAdapter from '../../adapters/communication-adapter'
+import * as schemas from './schemas'
+import { registerSchema } from '../../utils/openapi'
 
 import { Lease, RentalPropertyInfo } from 'onecore-types'
 import { logger, generateRouteMetadata } from 'onecore-utilities'
@@ -28,6 +30,8 @@ interface RentalPropertyInfoWithLeases extends RentalPropertyInfo {
  *   - bearerAuth: []
  */
 export const routes = (router: KoaRouter) => {
+  registerSchema('WorkOrder', schemas.CoreWorkOrderSchema)
+
   /**
    * @swagger
    * /workOrderData/{identifier}:
@@ -254,9 +258,7 @@ export const routes = (router: KoaRouter) => {
    *                     workOrders:
    *                       type: array
    *                       items:
-   *                         type: object
-   *                         properties:
-   *                           # Add work order properties here
+   *                         $ref: '#/components/schemas/WorkOrder'
    *       '500':
    *         description: Internal server error. Failed to retrieve work orders.
    *         content:
@@ -281,7 +283,7 @@ export const routes = (router: KoaRouter) => {
         ctx.body = {
           content: {
             totalCount: result.data.length,
-            workOrders: result.data,
+            workOrders: result.data satisfies schemas.CoreWorkOrder[],
           },
           ...metadata,
         }
@@ -333,9 +335,7 @@ export const routes = (router: KoaRouter) => {
    *                     workOrders:
    *                       type: array
    *                       items:
-   *                         type: object
-   *                         properties:
-   *                           # Add work order properties here
+   *                         $ref: '#/components/schemas/WorkOrder'
    *       '500':
    *         description: Internal server error. Failed to retrieve work orders.
    *         content:
@@ -362,7 +362,7 @@ export const routes = (router: KoaRouter) => {
           ctx.body = {
             content: {
               totalCount: result.data.length,
-              workOrders: result.data,
+              workOrders: result.data satisfies schemas.CoreWorkOrder[],
             },
             ...metadata,
           }
