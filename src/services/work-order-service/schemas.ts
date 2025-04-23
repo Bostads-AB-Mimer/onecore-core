@@ -31,6 +31,7 @@ export const CoreWorkOrderSchema = z.object({
     })
   ),
   Messages: z.array(CoreWorkOrderMessageSchema).optional(),
+  Url: z.string().optional(),
 })
 
 export const CoreWorkOrderSchemaArray = z.array(CoreWorkOrderSchema)
