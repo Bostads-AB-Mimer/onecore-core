@@ -25,9 +25,9 @@ export const CoreWorkOrderSchema = z.object({
   UseMasterKey: z.boolean(),
   WorkOrderRows: z.array(
     z.object({
-      Description: z.string(),
-      LocationCode: z.string(),
-      EquipmentCode: z.string(),
+      Description: z.string().nullable(),
+      LocationCode: z.string().nullable(),
+      EquipmentCode: z.string().nullable(),
     })
   ),
   Messages: z.array(CoreWorkOrderMessageSchema).optional(),
