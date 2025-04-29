@@ -70,7 +70,7 @@ export async function searchResidences(
       return { ok: true, data: response.data.content ?? [] }
     }
 
-    return { ok: false, err: 'unknown' }
+    throw { ok: false, err: 'missing response data invariant' }
   } catch (err) {
     logger.error({ err }, 'property-base-adapter.searchResidences')
     return { ok: false, err: 'unknown' }
