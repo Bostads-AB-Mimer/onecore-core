@@ -10,7 +10,7 @@ export const createInvoiceBatch = async () => {
   }
 
   const result = await axios(
-    config.economyService.url + '/invoice-data/batches',
+    config.economyService.url + '/invoices/import/batches',
     axiosOptions
   )
 
@@ -34,7 +34,7 @@ export const enrichInvoiceDataRows = async (
   }
 
   const result = await axios(
-    config.economyService.url + '/invoice-data/enrich-invoice-data-rows',
+    config.economyService.url + '/invoices/import/enrich-invoice-data-rows',
     axiosOptions
   )
 
@@ -70,7 +70,7 @@ export const updateContactsFromDb = async (batchId: string) => {
   }
 
   const result = await axios(
-    config.economyService.url + '/invoice-data/update-contacts',
+    config.economyService.url + '/invoices/import/update-contacts',
     axiosOptions
   )
 
@@ -86,7 +86,7 @@ export const updateInvoicesFromDb = async (batchId: string) => {
   }
 
   const result = await axios(
-    config.economyService.url + '/invoice-data/update-invoices',
+    config.economyService.url + '/invoices/import/update-invoices',
     axiosOptions
   )
 
@@ -101,7 +101,7 @@ export const getBatchContacts = async (
   }
 
   const result = await axios(
-    config.economyService.url + `/invoice-data/batches/${batchId}/contacts`,
+    config.economyService.url + `/invoices/import/batches/${batchId}/contacts`,
     axiosOptions
   )
 
@@ -116,7 +116,8 @@ export const getBatchLedgerRows = async (
   }
 
   const result = await axios(
-    config.economyService.url + `/invoice-data/batches/${batchId}/ledger-rows`,
+    config.economyService.url +
+      `/invoices/import/batches/${batchId}/ledger-rows`,
     axiosOptions
   )
 
@@ -132,7 +133,7 @@ export const getBatchAggregatedRows = async (
 
   const result = await axios(
     config.economyService.url +
-      `/invoice-data/batches/${batchId}/aggregated-rows`,
+      `/invoices/import/batches/${batchId}/aggregated-rows`,
     axiosOptions
   )
 
