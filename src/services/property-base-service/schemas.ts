@@ -110,13 +110,8 @@ export const ResidenceSchema = z.object({
 export const ResidenceDetailsSchema = z.object({
   id: z.string(),
   code: z.string(),
-  name: z.string(),
-  deleted: z.boolean(),
-  validityPeriod: z.object({
-    fromDate: z.string().datetime(),
-    toDate: z.string().datetime(),
-  }),
-  location: z.string().optional(),
+  name: z.string().nullable(),
+  location: z.string().nullable(),
   accessibility: z.object({
     wheelchairAccessible: z.boolean(),
     residenceAdapted: z.boolean(),
@@ -135,19 +130,26 @@ export const ResidenceDetailsSchema = z.object({
         type: z.string(),
       })
       .optional(),
-    patioLocation: z.string().optional(),
-    hygieneFacility: z.string(),
+    patioLocation: z.string().nullable(),
+    hygieneFacility: z.string().nullable(),
     sauna: z.boolean(),
     extraToilet: z.boolean(),
     sharedKitchen: z.boolean(),
     petAllergyFree: z.boolean(),
-    electricAllergyIntolerance: z.boolean(),
+    electricAllergyIntolerance: z
+      .boolean()
+      .describe('Is the apartment checked for electric allergy intolerance?'),
     smokeFree: z.boolean(),
     asbestos: z.boolean(),
   }),
-  entrance: z.string(),
+  entrance: z.string().nullable(),
   partNo: z.number().optional().nullable(),
   part: z.string().optional().nullable(),
+  deleted: z.boolean(),
+  validityPeriod: z.object({
+    fromDate: z.coerce.date(),
+    toDate: z.coerce.date(),
+  }),
   residenceType: z.object({
     residenceTypeId: z.string(),
     code: z.string(),
@@ -166,11 +168,19 @@ export const ResidenceDetailsSchema = z.object({
   propertyObject: z.object({
     energy: z.object({
       energyClass: z.number(),
-      energyRegistered: z.string().datetime().optional(),
-      energyReceived: z.string().datetime().optional(),
+      energyRegistered: z.coerce.date().optional(),
+      energyReceived: z.date().optional(),
       energyIndex: z.number().optional(),
     }),
     rentalId: z.string().nullable(),
+  }),
+  property: z.object({
+    name: z.string().nullable(),
+    code: z.string().nullable(),
+  }),
+  building: z.object({
+    name: z.string().nullable(),
+    code: z.string().nullable(),
   }),
 })
 

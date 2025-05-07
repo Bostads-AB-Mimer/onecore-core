@@ -102,7 +102,7 @@ describe('property-base-service', () => {
 
   describe('GET /propertyBase/residences', () => {
     it('returns 200 and a list of residences', async () => {
-      const residences = factory.residenceDetails.buildList(3)
+      const residences = factory.residence.buildList(3)
       const getResidencesSpy = jest
         .spyOn(propertyBaseAdapter, 'getResidences')
         .mockResolvedValueOnce({ ok: true, data: residences })

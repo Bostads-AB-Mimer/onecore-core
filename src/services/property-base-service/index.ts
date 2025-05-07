@@ -406,7 +406,7 @@ export const routes = (router: KoaRouter) => {
       }
 
       ctx.body = {
-        content: result.data satisfies schemas.ResidenceDetails,
+        content: schemas.ResidenceDetailsSchema.parse(result.data),
         ...metadata,
       }
     } catch (error) {
