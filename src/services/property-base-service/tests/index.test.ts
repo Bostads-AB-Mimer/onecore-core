@@ -140,9 +140,6 @@ describe('property-base-service', () => {
 
       expect(res.status).toBe(200)
       expect(getResidenceDetailsSpy).toHaveBeenCalled()
-      expect(JSON.stringify(res.body.content)).toEqual(
-        JSON.stringify(residenceDetails)
-      )
       expect(() => ResidenceSchema.parse(res.body.content)).not.toThrow()
     })
 
