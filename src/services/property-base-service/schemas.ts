@@ -200,6 +200,49 @@ export const StaircaseSchema = z.object({
   timestamp: z.string().datetime(),
 })
 
+export const RoomTypeSchema = z.object({
+  id: z.string(),
+  code: z.string(),
+  name: z.string().nullable(),
+  use: z.number(),
+  optionAllowed: z.number(),
+  isSystemStandard: z.number(),
+  allowSmallRoomsInValuation: z.number(),
+  timestamp: z.string(),
+})
+
+export const RoomSchema = z.object({
+  id: z.string(),
+  code: z.string(),
+  name: z.string().nullable(),
+  usage: z.object({
+    shared: z.boolean(),
+    allowPeriodicWorks: z.boolean(),
+    spaceType: z.number(),
+  }),
+  features: z.object({
+    hasToilet: z.boolean(),
+    isHeated: z.boolean(),
+    hasThermostatValve: z.boolean(),
+    orientation: z.number(),
+  }),
+  dates: z.object({
+    installation: z.string().datetime().nullable(),
+    from: z.string().datetime(),
+    to: z.string().date(),
+    availableFrom: z.string().datetime().nullable(),
+    availableTo: z.string().datetime().nullable(),
+  }),
+  sortingOrder: z.number(),
+  deleted: z.boolean(),
+  timestamp: z.string(),
+  roomType: RoomTypeSchema.nullable(),
+})
+
+export const GetRoomsQueryParamsSchema = z.object({
+  residenceId: z.string().min(1, { message: 'residenceId is required.' }),
+})
+
 export const GetResidencesQueryParamsSchema = z.object({
   buildingCode: z.string(),
   staircaseCode: z.string().optional(),
@@ -222,3 +265,5 @@ export type PropertyDetails = z.infer<typeof PropertyDetailsSchema>
 export type Residence = z.infer<typeof ResidenceSchema>
 export type ResidenceDetails = z.infer<typeof ResidenceDetailsSchema>
 export type Staircase = z.infer<typeof StaircaseSchema>
+export type RoomType = z.infer<typeof RoomTypeSchema>
+export type Room = z.infer<typeof RoomSchema>

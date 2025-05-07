@@ -996,13 +996,6 @@ export interface components {
             id: string;
             code: string;
             name: string | null;
-            deleted: boolean;
-            validityPeriod: {
-                /** Format: date-time */
-                fromDate: string;
-                /** Format: date-time */
-                toDate: string;
-            };
             location: string | null;
             accessibility: {
                 wheelchairAccessible: boolean;
@@ -1032,6 +1025,13 @@ export interface components {
             entrance: string | null;
             partNo?: number | null;
             part?: string | null;
+            deleted: boolean;
+            validityPeriod: {
+                /** Format: date-time */
+                fromDate: string;
+                /** Format: date-time */
+                toDate: string;
+            };
             residenceType: {
                 residenceTypeId: string;
                 code: string;
