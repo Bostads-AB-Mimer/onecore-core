@@ -229,7 +229,7 @@ export const RoomSchema = z.object({
   dates: z.object({
     installation: z.string().datetime().nullable(),
     from: z.string().datetime(),
-    to: z.string().date(),
+    to: z.string().datetime(),
     availableFrom: z.string().datetime().nullable(),
     availableTo: z.string().datetime().nullable(),
   }),

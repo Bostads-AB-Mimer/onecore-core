@@ -12,6 +12,7 @@ import {
   CompanySchema,
   PropertySchema,
   ResidenceSchema,
+  RoomSchema,
   StaircaseSchema,
 } from '../schemas'
 
@@ -183,6 +184,29 @@ describe('property-base-service', () => {
       const res = await request(app.callback()).get('/propertyBase/staircases')
 
       expect(res.status).toBe(400)
+    })
+  })
+
+  describe('GET /propertyBase/rooms', () => {
+    it('returns 400 if residenceId query parameter is missing', async () => {
+      const res = await request(app.callback()).get('/propertyBase/rooms')
+
+      expect(res.status).toBe(400)
+    })
+
+    it('returns 200 and a list of rooms', async () => {
+      const roomsMock = factory.room.buildList(3)
+      const getRoomsSpy = jest
+        .spyOn(propertyBaseAdapter, 'getRooms')
+        .mockResolvedValueOnce({ ok: true, data: roomsMock })
+
+      const res = await request(app.callback()).get(
+        '/propertyBase/rooms?residenceId=foo'
+      )
+
+      expect(res.status).toBe(200)
+      expect(getRoomsSpy).toHaveBeenCalled()
+      expect(() => z.array(RoomSchema).parse(res.body.content)).not.toThrow()
     })
   })
 })
