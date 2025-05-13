@@ -65,10 +65,6 @@ const getLeasesWithRelatedEntitiesForPnr = async (
  */
 export const routes = (router: KoaRouter) => {
   registerSchema('Lease', Lease)
-  registerSchema(
-    'GetLeaseForPropertyIdQueryParams',
-    GetLeaseForPropertyIdQueryParams
-  )
 
   // TODO: Remove this once all routes are migrated to the new application
   // profile (with housing references)
@@ -131,15 +127,21 @@ export const routes = (router: KoaRouter) => {
    *       - in: query
    *         name: includeUpcomingLeases
    *         schema:
-   *           $ref: '#/components/schemas/GetLeaseForPropertyIdQueryParams/properties/includeUpcomingLeases'
+   *           type: boolean
+   *           default: false
+   *         description: Whether to include upcoming leases in the response
    *       - in: query
    *         name: includeTerminatedLeases
    *         schema:
-   *           $ref: '#/components/schemas/GetLeaseForPropertyIdQueryParams/properties/includeTerminatedLeases'
+   *           type: boolean
+   *           default: false
+   *         description: Whether to include terminated leases in the response
    *       - in: query
    *         name: includeContacts
    *         schema:
-   *           $ref: '#/components/schemas/GetLeaseForPropertyIdQueryParams/properties/includeContacts'
+   *           type: boolean
+   *           default: false
+   *         description: Whether to include contact information in the response
    *     responses:
    *       '200':
    *         description: Successful response with leases and related entities
