@@ -72,46 +72,7 @@ export const routes = (router: KoaRouter) => {
 
   /**
    * @swagger
-   * /leases/for/{pnr}:
-   *   get:
-   *     summary: Get leases with related entities for a specific Personal Number (PNR)
-   *     tags:
-   *       - Lease service
-   *     description: Retrieves lease information along with related entities (such as tenants, properties, etc.) for the specified Personal Number (PNR).
-   *     parameters:
-   *       - in: path
-   *         name: pnr
-   *         required: true
-   *         schema:
-   *           type: string
-   *         description: Personal Number (PNR) of the individual to fetch leases for.
-   *     responses:
-   *       '200':
-   *         description: Successful response with leases and related entities
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: array
-   *               items:
-   *                 type: object
-   *     security:
-   *       - bearerAuth: []
-   */
-  router.get('(.*)/leases/for/:pnr', async (ctx) => {
-    const metadata = generateRouteMetadata(ctx)
-    const responseData = await getLeasesWithRelatedEntitiesForPnr(
-      ctx.params.pnr
-    )
-
-    ctx.body = {
-      content: responseData,
-      ...metadata,
-    }
-  })
-
-  /**
-   * @swagger
-   * /leases/for/{propertyId}:
+   * /leases/for/propertyId/{propertyId}:
    *   get:
    *     summary: Get leases with related entities for a specific property id
    *     tags:
@@ -183,6 +144,7 @@ export const routes = (router: KoaRouter) => {
         queryParams.data
       )
 
+      console.log(leases)
       ctx.status = 200
       ctx.body = {
         content: leases,
@@ -191,6 +153,45 @@ export const routes = (router: KoaRouter) => {
     } catch (err) {
       logger.error({ err, metadata }, 'Error fetching leases from leasing')
       ctx.status = 500
+    }
+  })
+
+  /**
+   * @swagger
+   * /leases/for/{pnr}:
+   *   get:
+   *     summary: Get leases with related entities for a specific Personal Number (PNR)
+   *     tags:
+   *       - Lease service
+   *     description: Retrieves lease information along with related entities (such as tenants, properties, etc.) for the specified Personal Number (PNR).
+   *     parameters:
+   *       - in: path
+   *         name: pnr
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: Personal Number (PNR) of the individual to fetch leases for.
+   *     responses:
+   *       '200':
+   *         description: Successful response with leases and related entities
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 type: object
+   *     security:
+   *       - bearerAuth: []
+   */
+  router.get('(.*)/leases/for/:pnr', async (ctx) => {
+    const metadata = generateRouteMetadata(ctx)
+    const responseData = await getLeasesWithRelatedEntitiesForPnr(
+      ctx.params.pnr
+    )
+
+    ctx.body = {
+      content: responseData,
+      ...metadata,
     }
   })
 
