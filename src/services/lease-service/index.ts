@@ -25,7 +25,7 @@ import { isAllowedNumResidents } from './services/is-allowed-num-residents'
 
 import { routes as applicationProfileRoutesOld } from './application-profile-old'
 import { registerSchema } from '../../utils/openapi'
-import { Lease } from './schemas/lease'
+import { GetLeaseForPropertyIdQueryParams, Lease } from './schemas/lease'
 
 const getLeaseWithRelatedEntities = async (rentalId: string) => {
   const lease = await leasingAdapter.getLease(rentalId, 'true')
@@ -65,6 +65,10 @@ const getLeasesWithRelatedEntitiesForPnr = async (
  */
 export const routes = (router: KoaRouter) => {
   registerSchema('Lease', Lease)
+  registerSchema(
+    'GetLeaseForPropertyIdQueryParams',
+    GetLeaseForPropertyIdQueryParams
+  )
 
   // TODO: Remove this once all routes are migrated to the new application
   // profile (with housing references)
@@ -124,6 +128,18 @@ export const routes = (router: KoaRouter) => {
    *         schema:
    *           type: string
    *         description: Property id of the building/residence to fetch leases for.
+   *       - in: query
+   *         name: includeUpcomingLeases
+   *         schema:
+   *           $ref: '#/components/schemas/GetLeaseForPropertyIdQueryParams/properties/includeUpcomingLeases'
+   *       - in: query
+   *         name: includeTerminatedLeases
+   *         schema:
+   *           $ref: '#/components/schemas/GetLeaseForPropertyIdQueryParams/properties/includeTerminatedLeases'
+   *       - in: query
+   *         name: includeContacts
+   *         schema:
+   *           $ref: '#/components/schemas/GetLeaseForPropertyIdQueryParams/properties/includeContacts'
    *     responses:
    *       '200':
    *         description: Successful response with leases and related entities
@@ -133,20 +149,33 @@ export const routes = (router: KoaRouter) => {
    *               type: array
    *               items:
    *                 $ref: '#/components/schemas/Lease'
+   *       '400':
+   *         description: Invalid query parameters
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
    *     security:
    *       - bearerAuth: []
    */
   router.get('(.*)/leases/for/propertyId/:propertyId', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
+    const queryParams = GetLeaseForPropertyIdQueryParams.safeParse(ctx.query)
+
+    if (!queryParams.success) {
+      ctx.status = 400
+      ctx.body = {
+        reason: 'Invalid query parameters',
+        error: queryParams.error,
+        ...metadata,
+      }
+      return
+    }
 
     try {
       const leases = await leasingAdapter.getLeasesForPropertyId(
         ctx.params.propertyId,
-        {
-          includeContacts: true,
-          includeUpcomingLeases: true,
-          includeTerminatedLeases: false,
-        }
+        queryParams.data
       )
 
       ctx.status = 200

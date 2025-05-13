@@ -124,3 +124,9 @@ export const Lease = z.object({
     )
     .optional(),
 })
+
+export const GetLeaseForPropertyIdQueryParams = z.object({
+  includeUpcomingLeases: z.coerce.boolean().optional().default(false),
+  includeTerminatedLeases: z.coerce.boolean().optional().default(false),
+  includeContacts: z.coerce.boolean().optional().default(false),
+})
