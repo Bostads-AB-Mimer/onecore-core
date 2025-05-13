@@ -24,6 +24,8 @@ import { schemas } from './schemas'
 import { isAllowedNumResidents } from './services/is-allowed-num-residents'
 
 import { routes as applicationProfileRoutesOld } from './application-profile-old'
+import { registerSchema } from '../../utils/openapi'
+import { Lease } from './schemas/lease'
 
 const getLeaseWithRelatedEntities = async (rentalId: string) => {
   const lease = await leasingAdapter.getLease(rentalId, 'true')
@@ -62,6 +64,8 @@ const getLeasesWithRelatedEntitiesForPnr = async (
  *   - bearerAuth: []
  */
 export const routes = (router: KoaRouter) => {
+  registerSchema('Lease', Lease)
+
   // TODO: Remove this once all routes are migrated to the new application
   // profile (with housing references)
   applicationProfileRoutesOld(router)
@@ -102,6 +106,57 @@ export const routes = (router: KoaRouter) => {
     ctx.body = {
       content: responseData,
       ...metadata,
+    }
+  })
+
+  /**
+   * @swagger
+   * /leases/for/{propertyId}:
+   *   get:
+   *     summary: Get leases with related entities for a specific property id
+   *     tags:
+   *       - Lease service
+   *     description: Retrieves lease information along with related entities (such as tenants, properties, etc.) for the specified property id.
+   *     parameters:
+   *       - in: path
+   *         name: propertyId
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: Property id of the building/residence to fetch leases for.
+   *     responses:
+   *       '200':
+   *         description: Successful response with leases and related entities
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: '#/components/schemas/Lease'
+   *     security:
+   *       - bearerAuth: []
+   */
+  router.get('(.*)/leases/for/propertyId/:propertyId', async (ctx) => {
+    const metadata = generateRouteMetadata(ctx)
+
+    try {
+      const leases = await leasingAdapter.getLeasesForPropertyId(
+        ctx.params.propertyId,
+        {
+          includeContacts: true,
+          includeUpcomingLeases: true,
+          includeTerminatedLeases: false,
+        }
+      )
+
+      ctx.status = 200
+      ctx.body = {
+        content: leases,
+        ...metadata,
+      }
+    } catch (err) {
+      logger.error({ err, metadata }, 'Error fetching leases from leasing')
+      ctx.status = 500
     }
   })
 
