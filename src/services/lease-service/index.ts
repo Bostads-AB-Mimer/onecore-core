@@ -25,7 +25,11 @@ import { isAllowedNumResidents } from './services/is-allowed-num-residents'
 
 import { routes as applicationProfileRoutesOld } from './application-profile-old'
 import { registerSchema } from '../../utils/openapi'
-import { GetLeaseForPropertyIdQueryParams, Lease } from './schemas/lease'
+import {
+  GetLeaseForPropertyIdQueryParams,
+  Lease,
+  mapLease,
+} from './schemas/lease'
 
 const getLeaseWithRelatedEntities = async (rentalId: string) => {
   const lease = await leasingAdapter.getLease(rentalId, 'true')
@@ -144,10 +148,9 @@ export const routes = (router: KoaRouter) => {
         queryParams.data
       )
 
-      console.log(leases)
       ctx.status = 200
       ctx.body = {
-        content: leases,
+        content: leases.map(mapLease),
         ...metadata,
       }
     } catch (err) {

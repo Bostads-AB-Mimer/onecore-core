@@ -1,3 +1,4 @@
+import { Lease as OnecoreTypesLease } from 'onecore-types'
 import { z } from 'zod'
 
 /**
@@ -130,3 +131,36 @@ export const GetLeaseForPropertyIdQueryParams = z.object({
   includeTerminatedLeases: z.coerce.boolean().optional().default(false),
   includeContacts: z.coerce.boolean().optional().default(false),
 })
+
+export function mapLease(lease: OnecoreTypesLease): z.infer<typeof Lease> {
+  return {
+    leaseId: lease.leaseId,
+    leaseNumber: lease.leaseNumber,
+    leaseStartDate: lease.leaseStartDate,
+    leaseEndDate: lease.leaseEndDate,
+    status:
+      lease.status === 0
+        ? 'Current'
+        : lease.status === 1
+          ? 'Upcoming'
+          : lease.status === 2
+            ? 'AboutToEnd'
+            : 'Ended',
+    tenantContactIds: lease.tenantContactIds,
+    rentalPropertyId: lease.rentalPropertyId,
+    rentalProperty: lease.rentalProperty,
+    type: lease.type,
+    rentInfo: lease.rentInfo,
+    address: lease.address,
+    noticeGivenBy: lease.noticeGivenBy,
+    noticeDate: lease.noticeDate,
+    noticeTimeTenant: lease.noticeTimeTenant,
+    preferredMoveOutDate: lease.preferredMoveOutDate,
+    terminationDate: lease.terminationDate,
+    contractDate: lease.contractDate,
+    lastDebitDate: lease.lastDebitDate,
+    approvalDate: lease.approvalDate,
+    residentialArea: lease.residentialArea,
+    tenants: lease.tenants,
+  }
+}
