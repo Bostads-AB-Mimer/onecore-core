@@ -69,6 +69,10 @@ export const routes = (router: KoaRouter) => {
 
     //todo: append parking space by retrieving rental object from property management adapter
 
+    //todo: if validToRentForContactCode is provided:
+    // - get contact by contact code
+    // - filter "listingsWithParkingSpaces" on the residential area code of the contract so that the list only contains listings that are valid to rent for the contact
+
     if (!result.ok) {
       ctx.status = 500
       ctx.body = { error: 'Unknown error', ...metadata }
