@@ -48,10 +48,10 @@ describe('lease-service', () => {
     city: 'Västerås',
   }
 
-  describe('GET /leases/for/propertyId/:propertyId', () => {
+  describe('GET /leases/by-rental-property-id/:rentalPropertyId', () => {
     it('responds with 400 for invalid query parameters', async () => {
       const res = await request(app.callback()).get(
-        '/leases/for/propertyId/123?includeUpcomingLeases=invalid'
+        '/leases/by-rental-property-id/123?includeUpcomingLeases=invalid'
       )
 
       expect(res.status).toBe(400)
@@ -67,7 +67,7 @@ describe('lease-service', () => {
         .mockRejectedValue(new Error('Adapter error'))
 
       const res = await request(app.callback()).get(
-        '/leases/for/propertyId/123'
+        '/leases/by-rental-property-id/123'
       )
 
       expect(res.status).toBe(500)
@@ -79,7 +79,7 @@ describe('lease-service', () => {
         .mockResolvedValue(factory.lease.buildList(1))
 
       const res = await request(app.callback()).get(
-        '/leases/for/propertyId/123?includeUpcomingLeases=true&includeTerminatedLeases=false&includeContacts=true'
+        '/leases/by-rental-property-id/123?includeUpcomingLeases=true&includeTerminatedLeases=false&includeContacts=true'
       )
 
       expect(res.status).toBe(200)

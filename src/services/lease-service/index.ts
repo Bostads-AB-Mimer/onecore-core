@@ -26,7 +26,7 @@ import { isAllowedNumResidents } from './services/is-allowed-num-residents'
 import { routes as applicationProfileRoutesOld } from './application-profile-old'
 import { registerSchema } from '../../utils/openapi'
 import {
-  GetLeaseForPropertyIdQueryParams,
+  GetLeasesByRentalPropertyIdQueryParams,
   Lease,
   mapLease,
 } from './schemas/lease'
@@ -76,19 +76,19 @@ export const routes = (router: KoaRouter) => {
 
   /**
    * @swagger
-   * /leases/for/propertyId/{propertyId}:
+   * /leases/by-rental-property-id/{rentalPropertyId}:
    *   get:
-   *     summary: Get leases with related entities for a specific property id
+   *     summary: Get leases with related entities for a specific rental property id
    *     tags:
    *       - Lease service
-   *     description: Retrieves lease information along with related entities (such as tenants, properties, etc.) for the specified property id.
+   *     description: Retrieves lease information along with related entities (such as tenants, properties, etc.) for the specified rental property id.
    *     parameters:
    *       - in: path
-   *         name: propertyId
+   *         name: rentalPropertyId
    *         required: true
    *         schema:
    *           type: string
-   *         description: Property id of the building/residence to fetch leases for.
+   *         description: Rental roperty id of the building/residence to fetch leases for.
    *       - in: query
    *         name: includeUpcomingLeases
    *         schema:
@@ -128,36 +128,41 @@ export const routes = (router: KoaRouter) => {
    *     security:
    *       - bearerAuth: []
    */
-  router.get('(.*)/leases/for/propertyId/:propertyId', async (ctx) => {
-    const metadata = generateRouteMetadata(ctx)
-    const queryParams = GetLeaseForPropertyIdQueryParams.safeParse(ctx.query)
-
-    if (!queryParams.success) {
-      ctx.status = 400
-      ctx.body = {
-        reason: 'Invalid query parameters',
-        error: queryParams.error,
-        ...metadata,
-      }
-      return
-    }
-
-    try {
-      const leases = await leasingAdapter.getLeasesForPropertyId(
-        ctx.params.propertyId,
-        queryParams.data
+  router.get(
+    '(.*)/leases/by-rental-property-id/:rentalPropertyId',
+    async (ctx) => {
+      const metadata = generateRouteMetadata(ctx)
+      const queryParams = GetLeasesByRentalPropertyIdQueryParams.safeParse(
+        ctx.query
       )
 
-      ctx.status = 200
-      ctx.body = {
-        content: leases.map(mapLease),
-        ...metadata,
+      if (!queryParams.success) {
+        ctx.status = 400
+        ctx.body = {
+          reason: 'Invalid query parameters',
+          error: queryParams.error,
+          ...metadata,
+        }
+        return
       }
-    } catch (err) {
-      logger.error({ err, metadata }, 'Error fetching leases from leasing')
-      ctx.status = 500
+
+      try {
+        const leases = await leasingAdapter.getLeasesForPropertyId(
+          ctx.params.rentalPropertyId,
+          queryParams.data
+        )
+
+        ctx.status = 200
+        ctx.body = {
+          content: leases.map(mapLease),
+          ...metadata,
+        }
+      } catch (err) {
+        logger.error({ err, metadata }, 'Error fetching leases from leasing')
+        ctx.status = 500
+      }
     }
-  })
+  )
 
   /**
    * @swagger

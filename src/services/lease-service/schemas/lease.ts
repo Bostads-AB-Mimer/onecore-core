@@ -126,7 +126,7 @@ export const Lease = z.object({
     .optional(),
 })
 
-export const GetLeaseForPropertyIdQueryParams = z.object({
+export const GetLeasesByRentalPropertyIdQueryParams = z.object({
   includeUpcomingLeases: z
     .enum(['true', 'false'])
     .optional()
