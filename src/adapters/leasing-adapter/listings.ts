@@ -6,6 +6,7 @@ import {
   Listing,
   ListingStatus,
   UpdateListingStatusErrorCodes,
+  WaitingListType,
 } from 'onecore-types'
 
 import { AdapterResult } from '../types'
@@ -217,7 +218,26 @@ const getExpiredListingsWithNoOffers = async (): Promise<
     )
     return { ok: true, data: response.data.content }
   } catch (error) {
-    logger.error(error, 'Error fetching exired listings without offers:')
+    logger.error(error, 'Error fetching expired listings without offers:')
+    return { ok: false, err: 'unknown' }
+  }
+}
+
+const getListings = async (
+  published?: boolean,
+  rentalRule?: 'Scored' | 'NonScored'
+): Promise<AdapterResult<Listing[], 'unknown'>> => {
+  const queryParams = new URLSearchParams()
+  if (published) queryParams.append('published', published.toString())
+  if (rentalRule) queryParams.append('rentalRule', rentalRule)
+
+  try {
+    const response = await axios.get(
+      `${tenantsLeasesServiceUrl}/listings?${queryParams}`
+    )
+    return { ok: true, data: response.data.content }
+  } catch (error) {
+    logger.error(error, 'Error fetching listings:')
     return { ok: false, err: 'unknown' }
   }
 }
@@ -232,4 +252,5 @@ export {
   deleteListing,
   updateListingStatus,
   getExpiredListingsWithNoOffers,
+  getListings,
 }
