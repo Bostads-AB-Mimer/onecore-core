@@ -127,9 +127,18 @@ export const Lease = z.object({
 })
 
 export const GetLeaseForPropertyIdQueryParams = z.object({
-  includeUpcomingLeases: z.coerce.boolean().optional().default(false),
-  includeTerminatedLeases: z.coerce.boolean().optional().default(false),
-  includeContacts: z.coerce.boolean().optional().default(false),
+  includeUpcomingLeases: z
+    .enum(['true', 'false'])
+    .optional()
+    .transform((value) => value === 'true'),
+  includeTerminatedLeases: z
+    .enum(['true', 'false'])
+    .optional()
+    .transform((value) => value === 'true'),
+  includeContacts: z
+    .enum(['true', 'false'])
+    .optional()
+    .transform((value) => value === 'true'),
 })
 
 export function mapLease(lease: OnecoreTypesLease): z.infer<typeof Lease> {
