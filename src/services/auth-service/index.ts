@@ -4,7 +4,7 @@ import { logger } from 'onecore-utilities'
 
 import hash from './hash'
 import { createToken } from './jwt'
-import * as keycloak from './keycloak'
+import auth from './keycloak'
 
 /**
  * @swagger
@@ -136,9 +136,10 @@ export const routes = (router: KoaRouter) => {
    *         description: Redirect to Keycloak login
    */
   router.get('(.*)/auth/login', async (ctx) => {
-    const redirectUri = `${ctx.protocol}://${ctx.host}/auth/callback`
-    const loginUrl = keycloak.getLoginUrl(redirectUri)
-    ctx.redirect(loginUrl)
+    const redirectUri = `${ctx.protocol}://${ctx.host}/auth/callback`;
+    const keycloakLoginUrl = `${auth.keycloakUrl}/protocol/openid-connect/auth?client_id=${auth.clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=openid`;
+    
+    ctx.redirect(keycloakLoginUrl);
   })
 
   /**
@@ -167,10 +168,9 @@ export const routes = (router: KoaRouter) => {
       }
 
       const redirectUri = `${ctx.protocol}://${ctx.host}/auth/callback`
-      const tokens = await keycloak.handleTokenExchange(code, redirectUri)
       
-      // Set cookies with tokens
-      keycloak.setAuthCookies(ctx, tokens)
+      // Exchange code for tokens and set cookies
+      const { user } = await auth.handleTokenExchange(code, redirectUri, ctx.response)
       
       // Redirect to dashboard or home page
       ctx.redirect('/dashboard')
@@ -194,12 +194,13 @@ export const routes = (router: KoaRouter) => {
    */
   router.get('(.*)/auth/logout', async (ctx) => {
     // Clear cookies
-    keycloak.clearAuthCookies(ctx)
+    auth.logout(ctx.response)
     
     // Redirect to Keycloak logout
     const redirectUri = `${ctx.protocol}://${ctx.host}/auth/login`
-    const logoutUrl = keycloak.getLogoutUrl(redirectUri)
-    ctx.redirect(logoutUrl)
+    const keycloakLogoutUrl = `${auth.keycloakUrl}/protocol/openid-connect/logout?redirect_uri=${encodeURIComponent(redirectUri)}`
+    
+    ctx.redirect(keycloakLogoutUrl)
   })
 
   /**
@@ -218,7 +219,7 @@ export const routes = (router: KoaRouter) => {
    *       '401':
    *         description: Unauthorized
    */
-  router.get('(.*)/auth/profile', keycloak.extractJwtToken, async (ctx) => {
+  router.get('(.*)/auth/profile', auth.middleware.extractJwtToken, async (ctx) => {
     ctx.body = {
       profile: ctx.state.user,
       message: 'This route is protected'
@@ -228,5 +229,5 @@ export const routes = (router: KoaRouter) => {
 
 // Export middleware for use in other routes
 export const middleware = {
-  extractJwtToken: keycloak.extractJwtToken
+  extractJwtToken: auth.middleware.extractJwtToken
 }
