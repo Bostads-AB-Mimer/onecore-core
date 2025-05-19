@@ -1,8 +1,10 @@
 import KoaRouter from '@koa/router'
+import createHttpError from 'http-errors'
+import { logger } from 'onecore-utilities'
 
 import hash from './hash'
 import { createToken } from './jwt'
-import createHttpError from 'http-errors'
+import * as keycloak from './keycloak'
 
 /**
  * @swagger
@@ -120,4 +122,111 @@ export const routes = (router: KoaRouter) => {
       }
     }
   })
+
+  /**
+   * @swagger
+   * /auth/login:
+   *   get:
+   *     summary: Redirects to Keycloak login
+   *     description: Redirects the user to the Keycloak login page
+   *     tags:
+   *       - Auth
+   *     responses:
+   *       '302':
+   *         description: Redirect to Keycloak login
+   */
+  router.get('(.*)/auth/login', async (ctx) => {
+    const redirectUri = `${ctx.protocol}://${ctx.host}/auth/callback`
+    const loginUrl = keycloak.getLoginUrl(redirectUri)
+    ctx.redirect(loginUrl)
+  })
+
+  /**
+   * @swagger
+   * /auth/callback:
+   *   get:
+   *     summary: OAuth callback endpoint
+   *     description: Handles the OAuth callback from Keycloak
+   *     tags:
+   *       - Auth
+   *     parameters:
+   *       - in: query
+   *         name: code
+   *         required: true
+   *         type: string
+   *         description: Authorization code from Keycloak
+   *     responses:
+   *       '302':
+   *         description: Redirect to dashboard on success
+   */
+  router.get('(.*)/auth/callback', async (ctx) => {
+    try {
+      const { code } = ctx.query
+      if (!code || typeof code !== 'string') {
+        throw new Error('Missing authorization code')
+      }
+
+      const redirectUri = `${ctx.protocol}://${ctx.host}/auth/callback`
+      const tokens = await keycloak.handleTokenExchange(code, redirectUri)
+      
+      // Set cookies with tokens
+      keycloak.setAuthCookies(ctx, tokens)
+      
+      // Redirect to dashboard or home page
+      ctx.redirect('/dashboard')
+    } catch (error) {
+      logger.error('Authentication error:', error)
+      ctx.redirect('/auth/login?error=auth_failed')
+    }
+  })
+
+  /**
+   * @swagger
+   * /auth/logout:
+   *   get:
+   *     summary: Logout endpoint
+   *     description: Clears authentication cookies and redirects to Keycloak logout
+   *     tags:
+   *       - Auth
+   *     responses:
+   *       '302':
+   *         description: Redirect to login page
+   */
+  router.get('(.*)/auth/logout', async (ctx) => {
+    // Clear cookies
+    keycloak.clearAuthCookies(ctx)
+    
+    // Redirect to Keycloak logout
+    const redirectUri = `${ctx.protocol}://${ctx.host}/auth/login`
+    const logoutUrl = keycloak.getLogoutUrl(redirectUri)
+    ctx.redirect(logoutUrl)
+  })
+
+  /**
+   * @swagger
+   * /auth/profile:
+   *   get:
+   *     summary: Get user profile
+   *     description: Returns the authenticated user's profile information
+   *     tags:
+   *       - Auth
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       '200':
+   *         description: User profile information
+   *       '401':
+   *         description: Unauthorized
+   */
+  router.get('(.*)/auth/profile', keycloak.extractJwtToken, async (ctx) => {
+    ctx.body = {
+      profile: ctx.state.user,
+      message: 'This route is protected'
+    }
+  })
+}
+
+// Export middleware for use in other routes
+export const middleware = {
+  extractJwtToken: keycloak.extractJwtToken
 }
