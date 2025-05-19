@@ -60,10 +60,6 @@ app.use(jwt({
   secret: config.auth.secret,
   cookie: 'access_token',
   passthrough: true, // Allow requests to pass through (for public routes)
-  isRevoked: async (ctx, token) => {
-    // Optional: Check if token is revoked
-    return false
-  }
 }))
 
 app.use(api.routes())
