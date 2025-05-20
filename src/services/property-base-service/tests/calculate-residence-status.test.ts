@@ -24,7 +24,7 @@ describe(calculateResidenceStatus, () => {
     ).toBe('LEASED')
   })
 
-  it('returns "VACANT" when lease status is "Terminated"', () => {
+  it('returns "VACANT" when lease status is "Ended"', () => {
     const leases = [factory.lease.build({ status: LeaseStatus.Ended })]
     const status = calculateResidenceStatus(leases)
     expect(status).toBe('VACANT')
