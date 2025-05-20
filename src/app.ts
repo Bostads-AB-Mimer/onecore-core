@@ -42,7 +42,7 @@ app.on('error', (err) => {
   logger.error(err)
 })
 
-app.use(bodyParser())
+app.use(bodyParser({ multipart: true }))
 
 // Log the start and completion of all incoming requests
 app.use(loggerMiddlewares.pre)

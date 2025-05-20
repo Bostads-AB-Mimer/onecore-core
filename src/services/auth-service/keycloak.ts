@@ -1,4 +1,4 @@
-import keycloakKoa from 'keycloak-koa'
+import * as keycloakKoa from 'keycloak-koa'
 import config from '../../common/config'
 import { logger } from 'onecore-utilities'
 
