@@ -608,6 +608,7 @@ export interface components {
             Priority: string;
             /** Format: date-time */
             Registered: string;
+            DueDate: string | null;
             RentalObjectCode: string;
             Status: string;
             UseMasterKey: boolean;

@@ -329,6 +329,7 @@ describe('work-order-service index', () => {
               ],
               UseMasterKey: false,
               Messages: [],
+              DueDate: null,
             },
           ],
         })

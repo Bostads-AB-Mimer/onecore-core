@@ -305,6 +305,7 @@ export const routes = (router: KoaRouter) => {
                 registered: new Date(v.Registered),
                 rentalObjectCode: v.RentalObjectCode,
                 status: v.Status,
+                dueDate: v.DueDate ? new Date(v.DueDate) : null,
                 workOrderRows: v.WorkOrderRows.map((row) => ({
                   description: row.Description,
                   locationCode: row.LocationCode,
@@ -396,6 +397,7 @@ export const routes = (router: KoaRouter) => {
                   accessCaption: v.AccessCaption,
                   caption: v.Caption,
                   code: v.Code,
+                  dueDate: v.DueDate ? new Date(v.DueDate) : null,
                   contactCode: v.ContactCode,
                   description: v.Description,
                   detailsCaption: v.DetailsCaption,
@@ -406,6 +408,7 @@ export const routes = (router: KoaRouter) => {
                   registered: new Date(v.Registered),
                   rentalObjectCode: v.RentalObjectCode,
                   status: v.Status,
+
                   workOrderRows: v.WorkOrderRows.map((row) => ({
                     description: row.Description,
                     locationCode: row.LocationCode,

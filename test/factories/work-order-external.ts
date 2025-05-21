@@ -17,6 +17,7 @@ export const OdooWorkOrderFactory = Factory.define<
   Priority: 'Priority',
   Registered: new Date().toISOString(),
   RentalObjectCode: 'RentalObjectCode',
+  DueDate: null,
   Status: 'Status',
   WorkOrderRows: [
     {
