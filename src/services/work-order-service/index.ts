@@ -460,12 +460,26 @@ export const routes = (router: KoaRouter) => {
             ctx.params.rentalPropertyId,
             { skip, limit, sortAscending }
           )
+
         if (result.ok) {
           ctx.status = 200
           ctx.body = {
             content: {
               totalCount: result.data.length,
-              workOrders: result.data satisfies schemas.CoreXpandWorkOrder[],
+              workOrders: result.data.map(
+                (v): schemas.CoreXpandWorkOrder => ({
+                  accessCaption: v.AccessCaption,
+                  caption: v.Caption,
+                  code: v.Code,
+                  contactCode: v.ContactCode,
+                  id: v.Id,
+                  lastChanged: new Date(v.LastChanged),
+                  priority: v.Priority,
+                  registered: new Date(v.Registered),
+                  rentalObjectCode: v.RentalObjectCode,
+                  status: v.Status,
+                })
+              ),
             },
             ...metadata,
           }
@@ -547,7 +561,18 @@ export const routes = (router: KoaRouter) => {
       if (result.ok) {
         ctx.status = 200
         ctx.body = {
-          content: result.data satisfies schemas.CoreXpandWorkOrder,
+          content: {
+            id: result.data.Id,
+            accessCaption: result.data.AccessCaption,
+            caption: result.data.Caption,
+            code: result.data.Code,
+            contactCode: result.data.ContactCode,
+            lastChanged: new Date(result.data.LastChanged),
+            priority: result.data.Priority,
+            registered: new Date(result.data.Registered),
+            rentalObjectCode: result.data.RentalObjectCode,
+            status: result.data.Status,
+          } satisfies schemas.CoreXpandWorkOrder,
           ...metadata,
         }
       } else {

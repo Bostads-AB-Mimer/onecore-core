@@ -195,14 +195,26 @@ describe('work-order-service index', () => {
 
   describe('GET /workOrders/xpand/rentalPropertyId/:rentalPropertyId', () => {
     const rentalPropertyId = '406-028-02-0101'
-    const xpandWorkOrderMock = factory.workOrder.buildList(3)
 
     it('should return work orders by rentalPropertyId', async () => {
       const getXpandWorkOrdersByRentalPropertyId = jest
         .spyOn(workOrderAdapter, 'getXpandWorkOrdersByRentalPropertyId')
         .mockResolvedValue({
           ok: true,
-          data: xpandWorkOrderMock,
+          data: [
+            {
+              AccessCaption: 'test',
+              Caption: 'test',
+              Code: 'test',
+              ContactCode: 'test',
+              Id: '1',
+              LastChanged: new Date().toISOString(),
+              Priority: 'test',
+              Registered: new Date().toISOString(),
+              RentalObjectCode: 'test',
+              Status: 'test',
+            },
+          ],
         })
 
       const res = await request(app.callback()).get(
@@ -249,9 +261,10 @@ describe('work-order-service index', () => {
 
   describe('GET /workOrders/xpand/:code', () => {
     const workOrderCode = '25-000050'
-    const xpandWorkOrderDetailsMock = factory.xpandWorkOrderDetails.build({
-      Code: workOrderCode,
-    })
+    const xpandWorkOrderDetailsMock =
+      factory.externalXpandWorkOrderDetails.build({
+        Code: workOrderCode,
+      })
 
     it('should return work order details', async () => {
       const getXpandWorkOrderDetailsSpy = jest

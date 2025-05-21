@@ -6,8 +6,6 @@ import {
   CoreWorkOrder,
   CoreWorkOrderSchema,
   CoreXpandWorkOrder,
-  CoreXpandWorkOrderDetails,
-  CoreXpandWorkOrderDetailsSchema,
   CoreXpandWorkOrderSchema,
   CreateWorkOrderResponse,
   CreateWorkOrderResponseSchema,
@@ -94,7 +92,12 @@ export const getXpandWorkOrdersByRentalPropertyId = async (
     limit = 100,
     sortAscending,
   }: { skip?: number; limit?: number; sortAscending?: boolean } = {}
-): Promise<AdapterResult<CoreXpandWorkOrder[], 'schema-error' | 'unknown'>> => {
+): Promise<
+  AdapterResult<
+    components['schemas']['XpandWorkOrder'][],
+    'schema-error' | 'unknown'
+  >
+> => {
   try {
     const fetchResponse = await client().GET(
       '/workOrders/xpand/residenceId/{residenceId}',
@@ -105,27 +108,25 @@ export const getXpandWorkOrdersByRentalPropertyId = async (
         },
       }
     )
-    if (fetchResponse.data?.content?.workOrders) {
-      const parsed = CoreXpandWorkOrderSchema.array().safeParse(
-        fetchResponse.data.content.workOrders
-      )
-      if (!parsed.success) {
-        logger.error({ error: parsed.error.format() })
-        return { ok: false, err: 'schema-error' }
-      }
 
-      return {
-        ok: true,
-        data: parsed.data,
-      }
+    if (fetchResponse.error) {
+      throw fetchResponse.error
     }
 
-    return { ok: false, err: 'unknown' }
+    if (!fetchResponse.data.content?.workOrders) {
+      throw 'missing-content'
+    }
+
+    return {
+      ok: true,
+      data: fetchResponse.data?.content.workOrders,
+    }
   } catch (error) {
     logger.error(
       { error },
       'work-order-adapter.getXpandWorkOrdersByRentalPropertyId'
     )
+
     return { ok: false, err: 'unknown' }
   }
 }
@@ -134,8 +135,8 @@ export const getXpandWorkOrderDetails = async (
   workOrderCode: string
 ): Promise<
   AdapterResult<
-    CoreXpandWorkOrderDetails,
-    'not-found' | 'schema-error' | 'unknown'
+    components['schemas']['XpandWorkOrderDetails'],
+    'not-found' | 'unknown'
   >
 > => {
   try {
@@ -148,17 +149,9 @@ export const getXpandWorkOrderDetails = async (
     }
 
     if (fetchResponse.data?.content) {
-      const parsed = CoreXpandWorkOrderDetailsSchema.safeParse(
-        fetchResponse.data.content
-      )
-      if (!parsed.success) {
-        logger.error({ error: parsed.error.format() })
-        return { ok: false, err: 'schema-error' }
-      }
-
       return {
         ok: true,
-        data: parsed.data,
+        data: fetchResponse.data.content,
       }
     }
 
