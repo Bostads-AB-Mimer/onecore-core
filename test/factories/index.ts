@@ -21,6 +21,7 @@ export {
 export {
   XpandWorkOrderFactory as externalXpandWorkOrder,
   XpandWorkOrderDetailsFactory as externalXpandWorkOrderDetails,
+  OdooWorkOrderFactory as externalOdooWorkOrder,
 } from './work-order-external'
 export { MaintenanceUnitInfoFactory as maintenanceUnitInfo } from './maintenance-unit-info'
 export {

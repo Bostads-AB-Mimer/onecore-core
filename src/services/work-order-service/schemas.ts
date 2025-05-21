@@ -50,7 +50,7 @@ export const CoreXpandWorkOrderDetailsSchema = z.object({
   accessCaption: z.string(),
   caption: z.string().nullable(),
   code: z.string(),
-  contactCode: z.string(),
+  contactCode: z.string().nullable(),
   description: z.string(),
   id: z.string(),
   lastChanged: z.coerce.date(),

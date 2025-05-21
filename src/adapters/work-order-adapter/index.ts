@@ -3,14 +3,15 @@ import { logger } from 'onecore-utilities'
 import config from '../../common/config'
 import { AdapterResult } from '../types'
 import {
-  CoreWorkOrder,
-  CoreWorkOrderSchema,
-  CoreXpandWorkOrder,
-  CoreXpandWorkOrderSchema,
   CreateWorkOrderResponse,
   CreateWorkOrderResponseSchema,
 } from '../../services/work-order-service/schemas'
 import { components, paths } from './generated/api-types'
+
+export type OdooWorkOrder = components['schemas']['WorkOrder']
+export type XpandWorkOrder = components['schemas']['XpandWorkOrder']
+export type XpandWorkOrderDetails =
+  components['schemas']['XpandWorkOrderDetails']
 
 const client = () =>
   createClient<paths>({
@@ -22,7 +23,7 @@ const client = () =>
 
 export const getWorkOrdersByContactCode = async (
   contactCode: string
-): Promise<AdapterResult<CoreWorkOrder[], 'schema-error' | 'unknown'>> => {
+): Promise<AdapterResult<OdooWorkOrder[], 'unknown'>> => {
   try {
     const fetchResponse = await client().GET(
       '/workOrders/contactCode/{contactCode}',
@@ -30,21 +31,19 @@ export const getWorkOrdersByContactCode = async (
         params: { path: { contactCode } },
       }
     )
-    if (fetchResponse.data?.content?.workOrders) {
-      const parsed = CoreWorkOrderSchema.array().safeParse(
-        fetchResponse.data.content.workOrders
-      )
-      if (!parsed.success) {
-        return { ok: false, err: 'schema-error' }
-      }
 
-      return {
-        ok: true,
-        data: parsed.data,
-      }
+    if (fetchResponse.error) {
+      throw fetchResponse.error
     }
 
-    return { ok: false, err: 'unknown' }
+    if (!fetchResponse.data.content?.workOrders) {
+      throw 'missing-content'
+    }
+
+    return {
+      ok: true,
+      data: fetchResponse.data.content.workOrders,
+    }
   } catch (error) {
     logger.error({ error }, 'work-order-adapter.getWorkOrdersByContactCode')
     return { ok: false, err: 'unknown' }
@@ -53,7 +52,7 @@ export const getWorkOrdersByContactCode = async (
 
 export const getWorkOrdersByRentalPropertyId = async (
   rentalPropertyId: string
-): Promise<AdapterResult<CoreWorkOrder[], 'schema-error' | 'unknown'>> => {
+): Promise<AdapterResult<OdooWorkOrder[], 'unknown'>> => {
   try {
     const fetchResponse = await client().GET(
       '/workOrders/residenceId/{residenceId}',
@@ -61,21 +60,19 @@ export const getWorkOrdersByRentalPropertyId = async (
         params: { path: { residenceId: rentalPropertyId } },
       }
     )
-    if (fetchResponse.data?.content?.workOrders) {
-      const parsed = CoreWorkOrderSchema.array().safeParse(
-        fetchResponse.data.content.workOrders
-      )
-      if (!parsed.success) {
-        return { ok: false, err: 'schema-error' }
-      }
 
-      return {
-        ok: true,
-        data: parsed.data,
-      }
+    if (fetchResponse.error) {
+      throw fetchResponse.error
     }
 
-    return { ok: false, err: 'unknown' }
+    if (!fetchResponse.data.content?.workOrders) {
+      throw 'missing-content'
+    }
+
+    return {
+      ok: true,
+      data: fetchResponse.data.content.workOrders,
+    }
   } catch (error) {
     logger.error(
       { error },
@@ -92,12 +89,7 @@ export const getXpandWorkOrdersByRentalPropertyId = async (
     limit = 100,
     sortAscending,
   }: { skip?: number; limit?: number; sortAscending?: boolean } = {}
-): Promise<
-  AdapterResult<
-    components['schemas']['XpandWorkOrder'][],
-    'schema-error' | 'unknown'
-  >
-> => {
+): Promise<AdapterResult<XpandWorkOrder[], 'unknown'>> => {
   try {
     const fetchResponse = await client().GET(
       '/workOrders/xpand/residenceId/{residenceId}',
@@ -133,12 +125,7 @@ export const getXpandWorkOrdersByRentalPropertyId = async (
 
 export const getXpandWorkOrderDetails = async (
   workOrderCode: string
-): Promise<
-  AdapterResult<
-    components['schemas']['XpandWorkOrderDetails'],
-    'not-found' | 'unknown'
-  >
-> => {
+): Promise<AdapterResult<XpandWorkOrderDetails, 'not-found' | 'unknown'>> => {
   try {
     const fetchResponse = await client().GET('/workOrders/xpand/{code}', {
       params: { path: { code: workOrderCode } },
@@ -173,6 +160,7 @@ export const createWorkOrder = async (
       const parsed = CreateWorkOrderResponseSchema.safeParse(
         fetchResponse.data.content
       )
+
       if (!parsed.success) {
         return { ok: false, err: 'schema-error' }
       }

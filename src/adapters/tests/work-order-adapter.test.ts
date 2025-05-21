@@ -21,7 +21,8 @@ describe('work-order-adapter', () => {
   })
 
   describe(workOrderAdapter.getWorkOrdersByContactCode, () => {
-    const workOrderMock = factory.workOrder.buildList(2)
+    const workOrderMock = factory.externalXpandWorkOrder.build()
+
     it('returns err if request fails', async () => {
       mockServer.use(
         http.get(
@@ -43,7 +44,7 @@ describe('work-order-adapter', () => {
           () =>
             HttpResponse.json(
               {
-                content: { workOrders: workOrderMock },
+                content: { workOrders: [workOrderMock] },
               },
               { status: 200 }
             )
@@ -54,7 +55,7 @@ describe('work-order-adapter', () => {
 
       expect(result).toMatchObject({
         ok: true,
-        data: workOrderMock,
+        data: [workOrderMock],
       })
     })
   })
