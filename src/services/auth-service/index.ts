@@ -145,13 +145,13 @@ export const routes = (router: KoaRouter) => {
   /**
    * @swagger
    * /auth/callback:
-   *   get:
+   *   post:
    *     summary: OAuth callback endpoint
    *     description: Handles the OAuth callback from Keycloak
    *     tags:
    *       - Auth
    *     parameters:
-   *       - in: query
+   *       - in: body
    *         name: code
    *         required: true
    *         type: string
@@ -160,14 +160,12 @@ export const routes = (router: KoaRouter) => {
    *       '302':
    *         description: Redirect to dashboard on success
    */
-  router.get('(.*)/auth/callback', async (ctx) => {
+  router.post('(.*)/auth/callback', async (ctx) => {
     try {
-      const { code } = ctx.query
+      const { code, redirectUri } = ctx.request.body
       if (!code || typeof code !== 'string') {
         throw new Error('Missing authorization code')
       }
-
-      const redirectUri = `${ctx.protocol}://${ctx.host}/auth/callback`
 
       // Exchange code for tokens and set cookies
       const { user } = await auth.handleTokenExchange(
@@ -200,8 +198,7 @@ export const routes = (router: KoaRouter) => {
     auth.logout(ctx.response)
 
     // Redirect to Keycloak logout
-    const redirectUri = `${ctx.protocol}://${ctx.host}/auth/login`
-    const keycloakLogoutUrl = `${auth.keycloakUrl}/protocol/openid-connect/logout?redirect_uri=${encodeURIComponent(redirectUri)}`
+    const keycloakLogoutUrl = `${auth.keycloakUrl}/protocol/openid-connect/logout`
 
     ctx.redirect(keycloakLogoutUrl)
   })
