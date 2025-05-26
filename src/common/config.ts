@@ -107,7 +107,8 @@ const config = configPackage({
         url: process.env.KEYCLOAK_URL || 'http://localhost:8080/auth',
         realm: process.env.KEYCLOAK_REALM || 'onecore',
         clientId: process.env.KEYCLOAK_CLIENT_ID || 'onecore-api',
-        clientSecret: process.env.KEYCLOAK_CLIENT_SECRET || 'your-client-secret',
+        clientSecret:
+          process.env.KEYCLOAK_CLIENT_SECRET || 'your-client-secret',
       },
     },
     emailAddresses: {
