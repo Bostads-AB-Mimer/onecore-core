@@ -408,7 +408,7 @@ export const routes = (router: KoaRouter) => {
                   registered: new Date(v.Registered),
                   rentalObjectCode: v.RentalObjectCode,
                   status: v.Status,
-
+                  url: v.Url,
                   workOrderRows: v.WorkOrderRows.map((row) => ({
                     description: row.Description,
                     locationCode: row.LocationCode,
