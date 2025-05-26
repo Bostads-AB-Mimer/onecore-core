@@ -15,19 +15,24 @@ import { routes as swagggerRoutes } from './services/swagger'
 
 const app = new Koa()
 
-app.use(cors({
-  credentials: true,
-  origin: (ctx) => {
-    const allowedOrigins = ['http://localhost:3000', 'https://your-production-domain.com']
-    const origin = ctx.request.headers.origin
-    if (origin && allowedOrigins.includes(origin)) {
-      return origin
-    }
-    return allowedOrigins[0]
-  },
-  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization', 'Accept'],
-}))
+app.use(
+  cors({
+    credentials: true,
+    origin: (ctx) => {
+      const allowedOrigins = [
+        'http://localhost:3000',
+        'https://your-production-domain.com',
+      ]
+      const origin = ctx.request.headers.origin
+      if (origin && allowedOrigins.includes(origin)) {
+        return origin
+      }
+      return allowedOrigins[0]
+    },
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  })
+)
 
 app.use(
   koaSwagger({
@@ -56,11 +61,13 @@ swagggerRoutes(publicRouter)
 app.use(publicRouter.routes())
 
 // JWT middleware with multiple options
-app.use(jwt({
-  secret: config.auth.secret,
-  cookie: 'access_token',
-  passthrough: true, // Allow requests to pass through (for public routes)
-}))
+app.use(
+  jwt({
+    secret: config.auth.secret,
+    cookie: 'access_token',
+    passthrough: true, // Allow requests to pass through (for public routes)
+  })
+)
 
 app.use(api.routes())
 

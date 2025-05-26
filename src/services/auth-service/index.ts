@@ -136,10 +136,10 @@ export const routes = (router: KoaRouter) => {
    *         description: Redirect to Keycloak login
    */
   router.get('(.*)/auth/login', async (ctx) => {
-    const redirectUri = `${ctx.protocol}://${ctx.host}/auth/callback`;
-    const keycloakLoginUrl = `${auth.keycloakUrl}/protocol/openid-connect/auth?client_id=${auth.clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=openid`;
-    
-    ctx.redirect(keycloakLoginUrl);
+    const redirectUri = `${ctx.protocol}://${ctx.host}/auth/callback`
+    const keycloakLoginUrl = `${auth.keycloakUrl}/protocol/openid-connect/auth?client_id=${auth.clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=openid`
+
+    ctx.redirect(keycloakLoginUrl)
   })
 
   /**
@@ -168,12 +168,15 @@ export const routes = (router: KoaRouter) => {
       }
 
       const redirectUri = `${ctx.protocol}://${ctx.host}/auth/callback`
-      
+
       // Exchange code for tokens and set cookies
-      const { user } = await auth.handleTokenExchange(code, redirectUri, ctx.response)
-      
-      // Redirect to dashboard or home page
-      ctx.redirect('/dashboard')
+      const { user } = await auth.handleTokenExchange(
+        code,
+        redirectUri,
+        ctx.response
+      )
+
+      ctx.body = user
     } catch (error) {
       logger.error('Authentication error:', error)
       ctx.redirect('/auth/login?error=auth_failed')
@@ -195,11 +198,11 @@ export const routes = (router: KoaRouter) => {
   router.get('(.*)/auth/logout', async (ctx) => {
     // Clear cookies
     auth.logout(ctx.response)
-    
+
     // Redirect to Keycloak logout
     const redirectUri = `${ctx.protocol}://${ctx.host}/auth/login`
     const keycloakLogoutUrl = `${auth.keycloakUrl}/protocol/openid-connect/logout?redirect_uri=${encodeURIComponent(redirectUri)}`
-    
+
     ctx.redirect(keycloakLogoutUrl)
   })
 
@@ -219,15 +222,19 @@ export const routes = (router: KoaRouter) => {
    *       '401':
    *         description: Unauthorized
    */
-  router.get('(.*)/auth/profile', auth.middleware.extractJwtToken, async (ctx) => {
-    ctx.body = {
-      profile: ctx.state.user,
-      message: 'This route is protected'
+  router.get(
+    '(.*)/auth/profile',
+    auth.middleware.extractJwtToken,
+    async (ctx) => {
+      ctx.body = {
+        profile: ctx.state.user,
+        message: 'This route is protected',
+      }
     }
-  })
+  )
 }
 
 // Export middleware for use in other routes
 export const middleware = {
-  extractJwtToken: auth.middleware.extractJwtToken
+  extractJwtToken: auth.middleware.extractJwtToken,
 }
