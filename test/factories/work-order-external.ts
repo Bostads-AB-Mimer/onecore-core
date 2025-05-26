@@ -41,6 +41,7 @@ export const XpandWorkOrderFactory = Factory.define<
   LastChanged: new Date().toISOString(),
   Priority: 'Priority',
   Registered: new Date().toISOString(),
+  DueDate: null,
   RentalObjectCode: 'RentalObjectCode',
   Status: 'Väntar på handläggning',
 }))
@@ -57,6 +58,7 @@ export const XpandWorkOrderDetailsFactory = Factory.define<
   LastChanged: new Date().toISOString(),
   Priority: 'Priority',
   Registered: new Date().toISOString(),
+  DueDate: null,
   RentalObjectCode: 'RentalObjectCode',
   Status: 'Väntar på handläggning',
   WorkOrderRows: [

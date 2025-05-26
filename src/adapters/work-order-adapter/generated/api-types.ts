@@ -639,6 +639,7 @@ export interface components {
             Priority: string | null;
             /** Format: date-time */
             Registered: string;
+            DueDate: string | null;
             RentalObjectCode: string;
             Status: string;
         };
@@ -654,6 +655,7 @@ export interface components {
             Priority: string | null;
             /** Format: date-time */
             Registered: string;
+            DueDate: string | null;
             RentalObjectCode: string;
             Status: string;
             WorkOrderRows: {

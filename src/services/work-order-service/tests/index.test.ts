@@ -193,6 +193,7 @@ describe('work-order-service index', () => {
               LastChanged: new Date().toISOString(),
               Priority: 'test',
               Registered: new Date().toISOString(),
+              DueDate: null,
               RentalObjectCode: 'test',
               Status: 'test',
             },

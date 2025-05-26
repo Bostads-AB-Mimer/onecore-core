@@ -43,6 +43,7 @@ export const CoreXpandWorkOrderSchema = z.object({
   lastChanged: z.coerce.date(),
   priority: z.string().nullable(),
   registered: z.coerce.date(),
+  dueDate: z.union([z.null(), z.coerce.date()]),
   rentalObjectCode: z.string(),
   status: z.string(),
 })
@@ -57,6 +58,7 @@ export const CoreXpandWorkOrderDetailsSchema = z.object({
   lastChanged: z.coerce.date(),
   priority: z.string().nullable(),
   registered: z.coerce.date(),
+  dueDate: z.union([z.null(), z.coerce.date()]),
   rentalObjectCode: z.string(),
   status: z.string(),
   workOrderRows: z.array(

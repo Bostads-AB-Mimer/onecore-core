@@ -47,6 +47,7 @@ export const XpandWorkOrderFactory = Factory.define<CoreXpandWorkOrder>(
     lastChanged: new Date(),
     priority: 'Priority',
     registered: new Date(),
+    dueDate: null,
     rentalObjectCode: 'RentalObjectCode',
     status: 'Status',
   })
@@ -63,6 +64,7 @@ export const XpandWorkOrderDetailsFactory =
     lastChanged: new Date(),
     priority: 'Priority',
     registered: new Date(),
+    dueDate: null,
     rentalObjectCode: 'RentalObjectCode',
     status: 'Väntar på handläggning',
     workOrderRows: [

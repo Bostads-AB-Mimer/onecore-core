@@ -521,6 +521,7 @@ export const routes = (router: KoaRouter) => {
                   id: v.Id,
                   lastChanged: new Date(v.LastChanged),
                   priority: v.Priority,
+                  dueDate: v.DueDate ? new Date(v.DueDate) : null,
                   registered: new Date(v.Registered),
                   rentalObjectCode: v.RentalObjectCode,
                   status: v.Status,
@@ -616,6 +617,7 @@ export const routes = (router: KoaRouter) => {
             lastChanged: new Date(result.data.LastChanged),
             priority: result.data.Priority,
             registered: new Date(result.data.Registered),
+            dueDate: result.data.DueDate ? new Date(result.data.DueDate) : null,
             rentalObjectCode: result.data.RentalObjectCode,
             status: result.data.Status,
             workOrderRows: result.data.WorkOrderRows.map((row) => ({
