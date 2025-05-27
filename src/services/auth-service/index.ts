@@ -150,15 +150,20 @@ export const routes = (router: KoaRouter) => {
    *     description: Handles the OAuth callback from Keycloak
    *     tags:
    *       - Auth
-   *     parameters:
-   *       - in: body
-   *         name: code
-   *         required: true
-   *         type: string
-   *         description: Authorization code from Keycloak
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               code:
+   *                 type: string
+   *               redirectUri:
+   *                 type: string
    *     responses:
-   *       '302':
-   *         description: Redirect to dashboard on success
+   *       '200':
+   *         description: User profile information
    */
   router.post('(.*)/auth/callback', async (ctx) => {
     try {
