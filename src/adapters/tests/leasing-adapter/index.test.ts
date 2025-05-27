@@ -1,6 +1,7 @@
 import { HttpStatusCode } from 'axios'
 import assert from 'node:assert'
 import nock from 'nock'
+import { leasing, WaitingListType } from 'onecore-types'
 
 import config from '../../../common/config'
 import * as leasingAdapter from '../../leasing-adapter'
@@ -10,7 +11,6 @@ import {
   mockedProblematicInvoices,
 } from './mocks'
 import * as factory from '../../../../test/factories'
-import { leasing, WaitingListType } from 'onecore-types'
 
 describe('leasing-adapter', () => {
   describe(leasingAdapter.getInternalCreditInformation, () => {
@@ -67,11 +67,10 @@ describe('leasing-adapter', () => {
   describe(leasingAdapter.addApplicantToWaitingList, () => {
     it('should add applicant to waiting list', async () => {
       nock(config.tenantsLeasesService.url)
-        .post(/contacts\/196709226789\/waitingLists/)
+        .post(/contacts\/P123456\/waitingLists/)
         .reply(201)
 
       const result = await leasingAdapter.addApplicantToWaitingList(
-        '196709226789',
         'P123456',
         WaitingListType.ParkingSpace
       )
@@ -83,11 +82,10 @@ describe('leasing-adapter', () => {
   describe(leasingAdapter.resetWaitingList, () => {
     it('should reset waiting list for applicant', async () => {
       nock(config.tenantsLeasesService.url)
-        .post(/contacts\/196709226789\/waitingLists/)
+        .post(/contacts\/P123456\/waitingLists/)
         .reply(200)
 
       const result = await leasingAdapter.resetWaitingList(
-        '196709226789',
         'P123456',
         WaitingListType.ParkingSpace
       )
@@ -97,11 +95,10 @@ describe('leasing-adapter', () => {
 
     it('should return not-in-waiting-list when applicant not in waiting list', async () => {
       nock(config.tenantsLeasesService.url)
-        .post(/contacts\/196709226789\/waitingLists/)
+        .post(/contacts\/P123456\/waitingLists/)
         .reply(404)
 
       const result = await leasingAdapter.resetWaitingList(
-        '196709226789',
         'P123456',
         WaitingListType.ParkingSpace
       )
@@ -112,11 +109,10 @@ describe('leasing-adapter', () => {
 
     it('should return unknown on unknown error from leasing', async () => {
       nock(config.tenantsLeasesService.url)
-        .post(/contacts\/196709226789\/waitingLists/)
+        .post(/contacts\/P123456\/waitingLists/)
         .reply(500)
 
       const result = await leasingAdapter.resetWaitingList(
-        '196709226789',
         'P123456',
         WaitingListType.ParkingSpace
       )
@@ -231,7 +227,17 @@ describe('leasing-adapter', () => {
       const result =
         await leasingAdapter.createOrUpdateApplicationProfileByContactCode(
           '123',
-          { expiresAt: new Date(), numAdults: 0, numChildren: 0 }
+          {
+            expiresAt: new Date(),
+            numAdults: 0,
+            numChildren: 0,
+            housingType: 'RENTAL',
+            housingTypeDescription: null,
+            landlord: null,
+            lastUpdatedAt: new Date(),
+            housingReference:
+              factory.applicationProfileHousingReference.build(),
+          }
         )
 
       expect(result).toEqual({ ok: false, err: 'bad-params' })
@@ -245,7 +251,17 @@ describe('leasing-adapter', () => {
       const result =
         await leasingAdapter.createOrUpdateApplicationProfileByContactCode(
           '123',
-          { expiresAt: new Date(), numAdults: 0, numChildren: 0 }
+          {
+            expiresAt: new Date(),
+            numAdults: 0,
+            numChildren: 0,
+            housingType: 'RENTAL',
+            housingTypeDescription: null,
+            landlord: null,
+            lastUpdatedAt: new Date(),
+            housingReference:
+              factory.applicationProfileHousingReference.build(),
+          }
         )
 
       expect(result).toEqual({ ok: false, err: 'unknown' })
@@ -255,25 +271,28 @@ describe('leasing-adapter', () => {
       nock(config.tenantsLeasesService.url)
         .post('/contacts/123/application-profile')
         .reply(200, {
-          content: {
-            contactCode: '1234',
-            numChildren: 0,
-            numAdults: 0,
-            expiresAt: null,
-            id: 1,
-            createdAt: new Date(),
-          },
+          content: factory.applicationProfile.build(),
         })
 
       const result =
         await leasingAdapter.createOrUpdateApplicationProfileByContactCode(
           '123',
-          { expiresAt: new Date(), numAdults: 0, numChildren: 0 }
+          {
+            expiresAt: new Date(),
+            numAdults: 0,
+            numChildren: 0,
+            housingType: 'RENTAL',
+            housingTypeDescription: null,
+            landlord: null,
+            lastUpdatedAt: new Date(),
+            housingReference:
+              factory.applicationProfileHousingReference.build(),
+          }
         )
 
       assert(result.ok)
       expect(() =>
-        leasing.CreateOrUpdateApplicationProfileResponseDataSchema.parse(
+        leasing.v1.CreateOrUpdateApplicationProfileResponseDataSchema.parse(
           result.data
         )
       ).not.toThrow()

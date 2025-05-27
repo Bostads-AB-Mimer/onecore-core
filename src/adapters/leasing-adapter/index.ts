@@ -1,7 +1,6 @@
 import { loggedAxios as axios, logger } from 'onecore-utilities'
 import { AxiosError } from 'axios'
 import dayjs from 'dayjs'
-import querystring from 'querystring'
 import {
   ConsumerReport,
   Contact,
@@ -29,6 +28,12 @@ axios.defaults.validateStatus = function (status) {
 
 const tenantsLeasesServiceUrl = config.tenantsLeasesService.url
 
+interface GetLeasesOptions {
+  includeUpcomingLeases: boolean
+  includeTerminatedLeases: boolean
+  includeContacts: boolean
+}
+
 const getLease = async (
   leaseId: string,
   includeContacts: string | string[] | undefined
@@ -45,29 +50,49 @@ const getLease = async (
 
 const getLeasesForPnr = async (
   nationalRegistrationNumber: string,
-  includeTerminatedLeases: string | string[] | undefined,
-  includeContacts: string | string[] | undefined
+  options: GetLeasesOptions
 ): Promise<Lease[]> => {
-  const leasesResponse = await axios(
-    tenantsLeasesServiceUrl +
-      '/leases/for/nationalRegistrationNumber/' +
-      nationalRegistrationNumber +
-      (includeContacts ? '?includeContacts=true' : '')
+  const queryParams = new URLSearchParams({
+    includeUpcomingLeases: options.includeUpcomingLeases.toString(),
+    includeTerminatedLeases: options.includeTerminatedLeases.toString(),
+    includeContacts: options.includeContacts.toString(),
+  })
+
+  const leasesResponse = await axios.get(
+    `${tenantsLeasesServiceUrl}/leases/for/nationalRegistrationNumber/${nationalRegistrationNumber}?${queryParams.toString()}`
   )
+
+  return leasesResponse.data.content
+}
+
+const getLeasesForContactCode = async (
+  contactCode: string,
+  options: GetLeasesOptions
+): Promise<Lease[]> => {
+  const queryParams = new URLSearchParams({
+    includeUpcomingLeases: options.includeUpcomingLeases.toString(),
+    includeTerminatedLeases: options.includeTerminatedLeases.toString(),
+    includeContacts: options.includeContacts.toString(),
+  })
+
+  const leasesResponse = await axios.get(
+    `${tenantsLeasesServiceUrl}/leases/for/contactCode/${contactCode}?${queryParams.toString()}`
+  )
+
   return leasesResponse.data.content
 }
 
 const getLeasesForPropertyId = async (
   propertyId: string,
-  includeTerminatedLeases: string | string[] | undefined,
-  includeContacts: string | string[] | undefined
+  options: GetLeasesOptions
 ): Promise<Lease[]> => {
-  const query = querystring.stringify({
-    includeTerminatedLeases,
-    includeContacts,
+  const queryParams = new URLSearchParams({
+    includeUpcomingLeases: options.includeUpcomingLeases.toString(),
+    includeTerminatedLeases: options.includeTerminatedLeases.toString(),
+    includeContacts: options.includeContacts.toString(),
   })
   const leasesResponse = await axios(
-    `${tenantsLeasesServiceUrl}/leases/for/propertyId/${propertyId}?${query}`
+    `${tenantsLeasesServiceUrl}/leases/for/propertyId/${propertyId}?${queryParams.toString()}`
   )
   return leasesResponse.data.content
 }
@@ -141,17 +166,30 @@ const getContactsByContactCodes = async (
 
 const getTenantByContactCode = async (
   contactCode: string
-): Promise<AdapterResult<Tenant, 'unknown'>> => {
+): Promise<
+  AdapterResult<
+    Tenant,
+    | 'unknown'
+    | 'no-valid-housing-contract'
+    | 'contact-not-found'
+    | 'contact-not-tenant'
+  >
+> => {
   try {
     const res = await axios.get(
       `${tenantsLeasesServiceUrl}/tenants/contactCode/${contactCode}`
     )
 
-    if (!res.data.content) return { ok: false, err: 'unknown' }
+    if (!res.data.content) {
+      return { ok: false, err: 'unknown' }
+    }
 
     return { ok: true, data: res.data.content }
   } catch (err) {
     logger.error({ err }, 'leasing-adapter.getTenantByContactCode')
+
+    if (err instanceof AxiosError)
+      return { ok: false, err: err.response?.data?.type }
     return { ok: false, err: 'unknown' }
   }
 }
@@ -249,26 +287,22 @@ const getInternalCreditInformation = async (
 }
 
 const addApplicantToWaitingList = async (
-  nationalRegistrationNumber: string,
   contactCode: string,
   waitingListType: WaitingListType
 ) => {
   const axiosOptions = {
     method: 'POST',
     data: {
-      contactCode: contactCode,
       waitingListType: waitingListType,
     },
   }
   return await axios(
-    tenantsLeasesServiceUrl +
-      `/contacts/${nationalRegistrationNumber}/waitingLists`,
+    tenantsLeasesServiceUrl + `/contacts/${contactCode}/waitingLists`,
     axiosOptions
   )
 }
 
 const resetWaitingList = async (
-  nationalRegistrationNumber: string,
   contactCode: string,
   waitingListType: WaitingListType
 ): Promise<AdapterResult<undefined, 'not-in-waiting-list' | 'unknown'>> => {
@@ -276,13 +310,11 @@ const resetWaitingList = async (
     const axiosOptions = {
       method: 'POST',
       data: {
-        contactCode: contactCode,
         waitingListType: waitingListType,
       },
     }
     const res = await axios(
-      tenantsLeasesServiceUrl +
-        `/contacts/${nationalRegistrationNumber}/waitingLists/reset`,
+      tenantsLeasesServiceUrl + `/contacts/${contactCode}/waitingLists/reset`,
       axiosOptions
     )
 
@@ -381,12 +413,17 @@ const getDetailedApplicantsByListingId = async (
 
 const setApplicantStatusActive = async (
   applicantId: string,
-  contactCode: string
+  contactCode: string,
+  applicationType?: 'Replace' | 'Additional'
 ): Promise<any> => {
   try {
     const response = await axios.patch(
       `${tenantsLeasesServiceUrl}/applicants/${applicantId}/status`,
-      { status: ApplicantStatus.Active, contactCode: contactCode }
+      {
+        status: ApplicantStatus.Active,
+        contactCode: contactCode,
+        applicationType,
+      }
     )
     return response.data
   } catch (error) {
@@ -530,8 +567,8 @@ const validatePropertyRentalRules = async (
   }
 }
 
-type GetApplicationProfileResponseData = z.infer<
-  typeof leasing.GetApplicationProfileResponseDataSchema
+export type GetApplicationProfileResponseData = z.infer<
+  typeof leasing.v1.GetApplicationProfileResponseDataSchema
 >
 
 async function getApplicationProfileByContactCode(
@@ -560,11 +597,11 @@ async function getApplicationProfileByContactCode(
 }
 
 type CreateOrUpdateApplicationProfileResponseData = z.infer<
-  typeof leasing.CreateOrUpdateApplicationProfileResponseDataSchema
+  typeof leasing.v1.CreateOrUpdateApplicationProfileResponseDataSchema
 >
 
 export type CreateOrUpdateApplicationProfileRequestParams = z.infer<
-  typeof leasing.CreateOrUpdateApplicationProfileRequestParamsSchema
+  typeof leasing.v1.CreateOrUpdateApplicationProfileRequestParamsSchema
 >
 
 async function createOrUpdateApplicationProfileByContactCode(
@@ -622,6 +659,7 @@ export {
   getInternalCreditInformation,
   getLease,
   getLeasesForPnr,
+  getLeasesForContactCode,
   getLeasesForPropertyId,
   getDetailedApplicantsByListingId,
   getTenantByContactCode,

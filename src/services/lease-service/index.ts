@@ -7,7 +7,10 @@
  */
 import KoaRouter from '@koa/router'
 import dayjs from 'dayjs'
-import { GetActiveOfferByListingIdErrorCodes } from 'onecore-types'
+import {
+  GetActiveOfferByListingIdErrorCodes,
+  RouteErrorResponse,
+} from 'onecore-types'
 import { logger, generateRouteMetadata } from 'onecore-utilities'
 import { z } from 'zod'
 
@@ -16,8 +19,17 @@ import * as propertyManagementAdapter from '../../adapters/property-management-a
 import { ProcessStatus } from '../../common/types'
 import { parseRequestBody } from '../../middlewares/parse-request-body'
 import * as internalParkingSpaceProcesses from '../../processes/parkingspaces/internal'
+import { makeAdminApplicationProfileRequestParams } from './helpers/application-profile'
 import { schemas } from './schemas'
 import { isAllowedNumResidents } from './services/is-allowed-num-residents'
+
+import { routes as applicationProfileRoutesOld } from './application-profile-old'
+import { registerSchema } from '../../utils/openapi'
+import {
+  GetLeasesByRentalPropertyIdQueryParams,
+  Lease,
+  mapLease,
+} from './schemas/lease'
 
 const getLeaseWithRelatedEntities = async (rentalId: string) => {
   const lease = await leasingAdapter.getLease(rentalId, 'true')
@@ -30,8 +42,11 @@ const getLeasesWithRelatedEntitiesForPnr = async (
 ) => {
   const leases = await leasingAdapter.getLeasesForPnr(
     nationalRegistrationNumber,
-    undefined,
-    'true'
+    {
+      includeUpcomingLeases: false,
+      includeTerminatedLeases: false,
+      includeContacts: true,
+    }
   )
 
   return leases
@@ -53,6 +68,102 @@ const getLeasesWithRelatedEntitiesForPnr = async (
  *   - bearerAuth: []
  */
 export const routes = (router: KoaRouter) => {
+  registerSchema('Lease', Lease)
+
+  // TODO: Remove this once all routes are migrated to the new application
+  // profile (with housing references)
+  applicationProfileRoutesOld(router)
+
+  /**
+   * @swagger
+   * /leases/by-rental-property-id/{rentalPropertyId}:
+   *   get:
+   *     summary: Get leases with related entities for a specific rental property id
+   *     tags:
+   *       - Lease service
+   *     description: Retrieves lease information along with related entities (such as tenants, properties, etc.) for the specified rental property id.
+   *     parameters:
+   *       - in: path
+   *         name: rentalPropertyId
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: Rental roperty id of the building/residence to fetch leases for.
+   *       - in: query
+   *         name: includeUpcomingLeases
+   *         schema:
+   *           type: boolean
+   *           default: false
+   *         description: Whether to include upcoming leases in the response
+   *       - in: query
+   *         name: includeTerminatedLeases
+   *         schema:
+   *           type: boolean
+   *           default: false
+   *         description: Whether to include terminated leases in the response
+   *       - in: query
+   *         name: includeContacts
+   *         schema:
+   *           type: boolean
+   *           default: false
+   *         description: Whether to include contact information in the response
+   *     responses:
+   *       '200':
+   *         description: Successful response with leases and related entities
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 content:
+   *                   type: array
+   *                   items:
+   *                     $ref: '#/components/schemas/Lease'
+   *       '400':
+   *         description: Invalid query parameters
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *     security:
+   *       - bearerAuth: []
+   */
+  router.get(
+    '(.*)/leases/by-rental-property-id/:rentalPropertyId',
+    async (ctx) => {
+      const metadata = generateRouteMetadata(ctx)
+      const queryParams = GetLeasesByRentalPropertyIdQueryParams.safeParse(
+        ctx.query
+      )
+
+      if (!queryParams.success) {
+        ctx.status = 400
+        ctx.body = {
+          reason: 'Invalid query parameters',
+          error: queryParams.error,
+          ...metadata,
+        }
+        return
+      }
+
+      try {
+        const leases = await leasingAdapter.getLeasesForPropertyId(
+          ctx.params.rentalPropertyId,
+          queryParams.data
+        )
+
+        ctx.status = 200
+        ctx.body = {
+          content: leases.map(mapLease),
+          ...metadata,
+        }
+      } catch (err) {
+        logger.error({ err, metadata }, 'Error fetching leases from leasing')
+        ctx.status = 500
+      }
+    }
+  )
+
   /**
    * @swagger
    * /leases/for/{pnr}:
@@ -455,6 +566,39 @@ export const routes = (router: KoaRouter) => {
     }
   })
 
+  /**
+   * @swagger
+   * /tenants/contactCode/{contactCode}:
+   *   get:
+   *     summary: Get tenant by contact code
+   *     tags:
+   *       - Lease service
+   *     description: Retrieves a tenant based on the provided contact code.
+   *     parameters:
+   *       - in: path
+   *         name: contactCode
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: The contact code used to identify the contact.
+   *     responses:
+   *       200:
+   *         description: Successfully retrieved tenant information.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 data:
+   *                   type: object
+   *                   description: The tenant data.
+   *       404:
+   *         description: Not found.
+   *       500:
+   *         description: Internal server error. Failed to retrieve Tenant information.
+   *     security:
+   *       - bearerAuth: []
+   */
   router.get('(.*)/tenants/contactCode/:contactCode', async (ctx) => {
     const metadata = generateRouteMetadata(ctx)
     const res = await leasingAdapter.getTenantByContactCode(
@@ -462,8 +606,49 @@ export const routes = (router: KoaRouter) => {
     )
 
     if (!res.ok) {
+      if (res.err === 'contact-not-found') {
+        ctx.status = 404
+        ctx.body = {
+          type: res.err,
+          title: 'Contact not found',
+          status: 404,
+          ...metadata,
+        } satisfies RouteErrorResponse
+        return
+      }
+
+      if (res.err === 'no-valid-housing-contract') {
+        ctx.status = 500
+        ctx.body = {
+          type: res.err,
+          title: 'No valid housing contract found',
+          status: 500,
+          detail: 'No active or upcoming contract found.',
+          ...metadata,
+        } satisfies RouteErrorResponse
+
+        return
+      }
+
+      if (res.err === 'contact-not-tenant') {
+        ctx.status = 500
+        ctx.body = {
+          type: res.err,
+          title: 'Contact is not a tenant',
+          status: 500,
+          detail: 'No active or upcoming contract found.',
+          ...metadata,
+        } satisfies RouteErrorResponse
+        return
+      }
+
       ctx.status = 500
-      ctx.body = { error: 'Internal server error', ...metadata }
+      ctx.body = {
+        type: res.err,
+        title: 'Internal server error',
+        status: 500,
+        ...metadata,
+      } satisfies RouteErrorResponse
       return
     }
 
@@ -930,8 +1115,9 @@ export const routes = (router: KoaRouter) => {
    *             schema:
    *               type: object
    *               properties:
-   *                 applicationType: string
-   *                 example: Additional - applicant is eligible for applying for an additional parking space. Replace - applicant is eligible for replacing their current parking space in the same residential area or property.
+   *                 applicationType:
+   *                   type: string
+   *                   example: Additional - applicant is eligible for applying for an additional parking space. Replace - applicant is eligible for replacing their current parking space in the same residential area or property.
    *                 reason:
    *                   type: string
    *                   example: No property rental rules applies to this property.
@@ -1056,8 +1242,9 @@ export const routes = (router: KoaRouter) => {
    *             schema:
    *               type: object
    *               properties:
-   *                 applicationType: string
-   *                 example: Additional - applicant is eligible for applying for an additional parking space. Replace - applicant is eligible for replacing their current parking space in the same residential area or property.
+   *                 applicationType:
+   *                   type: string
+   *                   example: Additional - applicant is eligible for applying for an additional parking space. Replace - applicant is eligible for replacing their current parking space in the same residential area or property.
    *                 reason:
    *                   type: string
    *                   examples:
@@ -1509,7 +1696,7 @@ export const routes = (router: KoaRouter) => {
 
   /**
    * @swagger
-   * /contacts/{contactCode}/application-profile:
+   * /contacts/{contactCode}/application-profile/admin:
    *   post:
    *     summary: Creates or updates an application profile by contact code
    *     description: Create or update application profile information by contact code.
@@ -1559,8 +1746,146 @@ export const routes = (router: KoaRouter) => {
    *         description: Internal server error. Failed to update application profile information.
    */
 
+  type UpdateAdminApplicationProfileRequestParams = z.infer<
+    typeof schemas.admin.applicationProfile.UpdateApplicationProfileRequestParams
+  >
+
   router.post(
-    '(.*)/contacts/:contactCode/application-profile',
+    '(.*)/contacts/:contactCode/application-profile/admin',
+    parseRequestBody(
+      schemas.admin.applicationProfile.UpdateApplicationProfileRequestParams
+    ),
+    async (ctx) => {
+      const metadata = generateRouteMetadata(ctx)
+      // TODO: Something wrong with parseRequestBody types.
+      // Body should be inferred from middleware
+      const body = ctx.request
+        .body as UpdateAdminApplicationProfileRequestParams
+
+      const getApplicationProfile =
+        await leasingAdapter.getApplicationProfileByContactCode(
+          ctx.params.contactCode
+        )
+
+      if (
+        !getApplicationProfile.ok &&
+        getApplicationProfile.err !== 'not-found'
+      ) {
+        ctx.status = 500
+        ctx.body = { error: 'unknown', ...metadata }
+        return
+      }
+
+      const createOrUpdate =
+        await leasingAdapter.createOrUpdateApplicationProfileByContactCode(
+          ctx.params.contactCode,
+          makeAdminApplicationProfileRequestParams(
+            body,
+            getApplicationProfile.ok ? getApplicationProfile.data : undefined
+          )
+        )
+
+      if (!createOrUpdate.ok) {
+        ctx.status = 500
+        ctx.body = { error: 'unknown', ...metadata }
+        return
+      }
+
+      ctx.status = createOrUpdate.statusCode ?? 200
+      ctx.body = {
+        content:
+          schemas.admin.applicationProfile.UpdateApplicationProfileResponseData.parse(
+            createOrUpdate.data
+          ),
+        ...metadata,
+      }
+    }
+  )
+
+  type UpdateClientApplicationProfileRequestParams = z.infer<
+    typeof schemas.client.applicationProfile.UpdateApplicationProfileRequestParams
+  >
+
+  function makeClientApplicationProfileRequestParams(
+    body: UpdateClientApplicationProfileRequestParams,
+    existingProfile?: leasingAdapter.GetApplicationProfileResponseData
+  ): leasingAdapter.CreateOrUpdateApplicationProfileRequestParams {
+    return {
+      expiresAt: dayjs(new Date()).add(6, 'months').toDate(),
+      numChildren: body.numChildren,
+      numAdults: body.numAdults,
+      housingType: body.housingType,
+      landlord: body.landlord,
+      housingTypeDescription: body.housingTypeDescription,
+      lastUpdatedAt: new Date(),
+      housingReference: {
+        comment: existingProfile?.housingReference.comment ?? null,
+        email: body.housingReference.email,
+        phone: body.housingReference.phone,
+        reviewedAt: existingProfile?.housingReference.reviewedAt ?? null,
+        reviewedBy: existingProfile?.housingReference.reviewedBy ?? null,
+        reasonRejected:
+          existingProfile?.housingReference.reasonRejected ?? null,
+        reviewStatus:
+          existingProfile?.housingReference.reviewStatus ?? 'PENDING',
+        expiresAt: existingProfile?.housingReference.expiresAt ?? null,
+      },
+    }
+  }
+
+  /**
+   * @swagger
+   * /contacts/{contactCode}/application-profile/client:
+   *   post:
+   *     summary: Creates or updates an application profile by contact code
+   *     description: Create or update application profile information by contact code.
+   *     tags: [Contacts]
+   *     parameters:
+   *       - in: path
+   *         name: contactCode
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: The contact code associated with the application profile.
+   *     requestBody:
+   *       required: true
+   *       content:
+   *          application/json:
+   *             schema:
+   *               type: object
+   *       properties:
+   *         numAdults:
+   *           type: number
+   *           description: Number of adults in the current housing.
+   *         numChildren:
+   *           type: number
+   *           description: Number of children in the current housing.
+   *     responses:
+   *       200:
+   *         description: Successfully updated application profile.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 data:
+   *                   type: object
+   *                   description: The application profile data.
+   *       201:
+   *         description: Successfully created application profile.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 data:
+   *                   type: object
+   *                   description: The application profile data.
+   *       500:
+   *         description: Internal server error. Failed to update application profile information.
+   */
+  router.post(
+    '(.*)/contacts/:contactCode/application-profile/client',
     parseRequestBody(
       schemas.client.applicationProfile.UpdateApplicationProfileRequestParams
     ),
@@ -1584,56 +1909,30 @@ export const routes = (router: KoaRouter) => {
         ctx.status = 500
         ctx.body = { error: 'unknown', ...metadata }
         return
-      }
+      } else {
+        const createOrUpdate =
+          await leasingAdapter.createOrUpdateApplicationProfileByContactCode(
+            ctx.params.contactCode,
+            makeClientApplicationProfileRequestParams(
+              body,
+              getApplicationProfile.ok ? getApplicationProfile.data : undefined
+            )
+          )
 
-      const expiresAt = dayjs(new Date()).add(6, 'months').toDate()
-      const housingReferenceParams: leasingAdapter.CreateOrUpdateApplicationProfileRequestParams['housingReference'] =
-        body.housingReference
-          ? {
-              email: body.housingReference.email,
-              expiresAt,
-              phone: body.housingReference.phone,
-              ...(getApplicationProfile.ok &&
-              getApplicationProfile.data.housingReference
-                ? {
-                    reviewStatus:
-                      getApplicationProfile.data.housingReference.reviewStatus,
-                    reviewStatusReason:
-                      getApplicationProfile.data.housingReference
-                        .reviewStatusReason,
-                    reviewedAt:
-                      getApplicationProfile.data.housingReference.reviewedAt,
-                  }
-                : {
-                    reviewStatus: 'pending',
-                    reviewStatusReason: null,
-                    reviewedAt: null,
-                  }),
-            }
-          : undefined
+        if (!createOrUpdate.ok) {
+          ctx.status = 500
+          ctx.body = { error: 'unknown', ...metadata }
+          return
+        }
 
-      const createOrUpdate =
-        await leasingAdapter.createOrUpdateApplicationProfileByContactCode(
-          ctx.params.contactCode,
-          {
-            ...body,
-            expiresAt,
-            housingReference: housingReferenceParams,
-          }
-        )
-
-      if (!createOrUpdate.ok) {
-        ctx.status = 500
-        ctx.body = { error: 'unknown', ...metadata }
-        return
-      }
-
-      ctx.status = createOrUpdate.statusCode ?? 200
-      ctx.body = {
-        content: createOrUpdate.data satisfies z.infer<
-          typeof schemas.client.applicationProfile.UpdateApplicationProfileResponseData
-        >,
-        ...metadata,
+        ctx.status = createOrUpdate.statusCode ?? 200
+        ctx.body = {
+          content:
+            schemas.client.applicationProfile.UpdateApplicationProfileResponseData.parse(
+              createOrUpdate.data
+            ),
+          ...metadata,
+        }
       }
     }
   )
