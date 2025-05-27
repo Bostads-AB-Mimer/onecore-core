@@ -173,11 +173,7 @@ export const routes = (router: KoaRouter) => {
       }
 
       // Exchange code for tokens and set cookies
-      const { user } = await auth.handleTokenExchange(
-        code,
-        redirectUri,
-        ctx.response
-      )
+      const { user } = await auth.handleTokenExchange(code, redirectUri, ctx)
 
       ctx.body = user
     } catch (error) {
@@ -200,7 +196,7 @@ export const routes = (router: KoaRouter) => {
    */
   router.get('(.*)/auth/logout', async (ctx) => {
     // Clear cookies
-    auth.logout(ctx.response)
+    auth.logout(ctx)
 
     // Redirect to Keycloak logout
     const keycloakLogoutUrl = `${auth.keycloakUrl}/protocol/openid-connect/logout`
@@ -228,10 +224,7 @@ export const routes = (router: KoaRouter) => {
     '(.*)/auth/profile',
     auth.middleware.extractJwtToken,
     async (ctx) => {
-      ctx.body = {
-        profile: ctx.state.user,
-        message: 'This route is protected',
-      }
+      ctx.body = ctx.state.user
     }
   )
 }

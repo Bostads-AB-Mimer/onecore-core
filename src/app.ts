@@ -64,7 +64,7 @@ app.use(publicRouter.routes())
 app.use(
   jwt({
     secret: config.auth.secret,
-    cookie: 'access_token',
+    cookie: 'auth_token',
     passthrough: true, // Allow requests to pass through (for public routes)
   })
 )
