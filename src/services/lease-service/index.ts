@@ -30,6 +30,7 @@ import {
   Lease,
   mapLease,
 } from './schemas/lease'
+import { routes as commentsRoutes } from './comments'
 
 const getLeaseWithRelatedEntities = async (rentalId: string) => {
   const lease = await leasingAdapter.getLease(rentalId, 'true')
@@ -73,6 +74,8 @@ export const routes = (router: KoaRouter) => {
   // TODO: Remove this once all routes are migrated to the new application
   // profile (with housing references)
   applicationProfileRoutesOld(router)
+
+  commentsRoutes(router)
 
   /**
    * @swagger
