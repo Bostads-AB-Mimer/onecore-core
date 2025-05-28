@@ -15,7 +15,24 @@ import { routes as swagggerRoutes } from './services/swagger'
 
 const app = new Koa()
 
-app.use(cors())
+app.use(
+  cors({
+    credentials: true,
+    origin: (ctx) => {
+      const allowedOrigins = [
+        'http://localhost:3000',
+        'https://your-production-domain.com',
+      ]
+      const origin = ctx.request.headers.origin
+      if (origin && allowedOrigins.includes(origin)) {
+        return origin
+      }
+      return allowedOrigins[0]
+    },
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  })
+)
 
 app.use(
   koaSwagger({
@@ -30,7 +47,7 @@ app.on('error', (err) => {
   logger.error(err)
 })
 
-app.use(bodyParser())
+app.use(bodyParser({ multipart: true }))
 
 // Log the start and completion of all incoming requests
 app.use(loggerMiddlewares.pre)
@@ -43,7 +60,14 @@ healthRoutes(publicRouter)
 swagggerRoutes(publicRouter)
 app.use(publicRouter.routes())
 
-app.use(jwt({ secret: config.auth.secret }))
+// JWT middleware with multiple options
+app.use(
+  jwt({
+    secret: config.auth.secret,
+    cookie: 'auth_token',
+    passthrough: true, // Allow requests to pass through (for public routes)
+  })
+)
 
 app.use(api.routes())
 
