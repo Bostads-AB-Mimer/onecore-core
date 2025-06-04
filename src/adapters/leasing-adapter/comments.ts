@@ -33,7 +33,7 @@ const addComment = async (
     comment
   )
 
-  if (response.status === 200 || response.status == 301) {
+  if (response.status === 200 || response.status == 201) {
     return {
       ok: true,
       data: response.data.content,
