@@ -228,8 +228,3 @@ export const routes = (router: KoaRouter) => {
     }
   )
 }
-
-// Export middleware for use in other routes
-export const middleware = {
-  extractJwtToken: auth.middleware.extractJwtToken,
-}
