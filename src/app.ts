@@ -12,10 +12,28 @@ import { routes as healthRoutes } from './services/health-service'
 import { logger, loggerMiddlewares } from 'onecore-utilities'
 import { koaSwagger } from 'koa2-swagger-ui'
 import { routes as swagggerRoutes } from './services/swagger'
+import { requireAuth } from './middlewares/keycloak-auth'
 
 const app = new Koa()
 
-app.use(cors())
+app.use(
+  cors({
+    credentials: true,
+    origin: (ctx) => {
+      const allowedOrigins = [
+        'http://localhost:3000',
+        'https://your-production-domain.com',
+      ]
+      const origin = ctx.request.headers.origin
+      if (origin && allowedOrigins.includes(origin)) {
+        return origin
+      }
+      return allowedOrigins[0]
+    },
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  })
+)
 
 app.use(
   koaSwagger({
@@ -30,7 +48,7 @@ app.on('error', (err) => {
   logger.error(err)
 })
 
-app.use(bodyParser())
+app.use(bodyParser({ multipart: true }))
 
 // Log the start and completion of all incoming requests
 app.use(loggerMiddlewares.pre)
@@ -43,7 +61,16 @@ healthRoutes(publicRouter)
 swagggerRoutes(publicRouter)
 app.use(publicRouter.routes())
 
-app.use(jwt({ secret: config.auth.secret }))
+// JWT middleware with multiple options
+app.use((ctx, next) => {
+  if (ctx.cookies.get('auth_token') === undefined) {
+    return jwt({
+      secret: config.auth.secret,
+    })(ctx, next)
+  }
+
+  return requireAuth(ctx, next)
+})
 
 app.use(api.routes())
 
