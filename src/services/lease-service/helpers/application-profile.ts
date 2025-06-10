@@ -22,6 +22,7 @@ export function makeAdminApplicationProfileRequestParams(
       expiresAt: null,
       housingReference: {
         ...body.housingReference,
+        expiresAt: null,
         reviewedAt:
           body.housingReference.reviewStatus === 'PENDING' ? null : now,
       },
@@ -58,7 +59,10 @@ export function makeAdminApplicationProfileRequestParams(
       expiresAt: existingProfile.expiresAt,
       housingReference: {
         ...body.housingReference,
-        expiresAt,
+        expiresAt:
+          body.housingReference.reviewStatus === 'REJECTED'
+            ? body.housingReference.expiresAt
+            : expiresAt,
         reviewedAt: now,
       },
     }
@@ -89,7 +93,9 @@ function getDiffType(
 
   const reviewed =
     incomingHousingReference.reviewStatus !==
-    existingHousingReference.reviewStatus
+      existingHousingReference.reviewStatus ||
+    (incomingHousingReference.reviewStatus == 'REJECTED' &&
+      incomingHousingReference.expiresAt !== existingHousingReference.expiresAt)
 
   const profileUpdate =
     JSON.stringify(incomingProfile) !== JSON.stringify(existingProfile)
