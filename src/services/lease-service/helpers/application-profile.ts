@@ -22,7 +22,6 @@ export function makeAdminApplicationProfileRequestParams(
       expiresAt: null,
       housingReference: {
         ...body.housingReference,
-        expiresAt: null,
         reviewedAt:
           body.housingReference.reviewStatus === 'PENDING' ? null : now,
       },
