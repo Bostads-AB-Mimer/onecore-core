@@ -399,7 +399,7 @@ export const routes = (router: KoaRouter) => {
     const { rentalId } = ctx.params
 
     const getResidence =
-      await propertyBaseAdapter.getResidenceByRentalid(rentalId)
+      await propertyBaseAdapter.getResidenceByRentalId(rentalId)
 
     if (!getResidence.ok) {
       if (getResidence.err === 'not-found') {

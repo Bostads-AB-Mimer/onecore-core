@@ -202,7 +202,7 @@ export async function getResidenceDetails(
 type GetResidenceByRentalIdResponse =
   components['schemas']['GetResidenceByRentalIdResponse']['content']
 
-export async function getResidenceByRentalid(
+export async function getResidenceByRentalId(
   rentalId: string
 ): Promise<
   AdapterResult<GetResidenceByRentalIdResponse, 'not-found' | 'unknown'>
