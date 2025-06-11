@@ -1,5 +1,5 @@
 {
-  "version": "1.0.227",
+  "version": "1.0.228",
   "description": "",
   "main": "./src/index.ts",
   "private": "true",
@@ -77,7 +77,7 @@
     "lodash": "^4.17.21",
     "odoo-await": "^3.4.1",
     "onecore-types": "^3.11.0",
-    "onecore-utilities": "^1.1.0",
+    "onecore-utilities": "^1.2.0",
     "openapi-fetch": "^0.13.5",
     "pino": "^9.1.0",
     "pino-elasticsearch": "^8.0.0",
