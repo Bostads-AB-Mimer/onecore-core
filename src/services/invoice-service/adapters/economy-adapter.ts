@@ -54,7 +54,7 @@ export const saveInvoiceContactsToDb = async (
   }
 
   const result = await axios(
-    config.economyService.url + '/invoice-data/save-contacts',
+    config.economyService.url + '/invoices/import/save-contacts',
     axiosOptions
   )
 

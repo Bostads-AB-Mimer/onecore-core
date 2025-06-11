@@ -21,32 +21,39 @@ export const excelFileToInvoiceDataRows = async (
   const workbook = new Workbook()
   await workbook.xlsx.read(excelDataStream)
   const rowCount = workbook.worksheets[0].rowCount
-  const rows = workbook.worksheets[0].getRows(5, rowCount)
+  const rows = workbook.worksheets[0].getRows(2, rowCount)
   const invoiceRows: InvoiceDataRow[] = []
 
   if (rows) {
     for (const row of rows) {
       const currentRow: InvoiceDataRow = {}
 
-      const cellContractMatch = (getCellValue(row.getCell(1)) as string).match(
+      /*      const cellContractMatch = (getCellValue(row.getCell(1)) as string).match(
         RegExp(/[0-9-].*?\/[0-9]{2}/g)
       )
 
-      if (cellContractMatch && cellContractMatch.length > 0) {
-        row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
-          const columnName = columnNames[colNumber - 1]
-          const cellValue = getCellValue(cell)
+      if (cellContractMatch && cellContractMatch.length > 0) {*/
+      row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+        const columnName = columnNames[colNumber - 1]
+        const cellValue = getCellValue(cell)
 
-          currentRow[columnName] = cellValue
-        })
+        currentRow[columnName] = cellValue
+      })
+
+      // Skip invoice summation rows
+      if (
+        currentRow.rentArticle &&
+        (currentRow.rentArticle as string).trimEnd()
+      ) {
         invoiceRows.push(currentRow)
-      } else {
+      }
+      /*} else {
         console.log(
           'First cell of row is "',
           getCellValue(row.getCell(1)),
           '", row discarded'
         )
-      }
+      }*/
     }
   }
 

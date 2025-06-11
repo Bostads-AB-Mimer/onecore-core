@@ -55,7 +55,7 @@ export const processInvoiceDataFile = async (
 ): Promise<{ batchId: string; errors: string[] }> => {
   try {
     const errors: string[] = []
-    const CHUNK_SIZE = 1000
+    const CHUNK_SIZE = 500
 
     const invoiceDataRows =
       await excelFileToInvoiceDataRows(invoiceDataFileName)
