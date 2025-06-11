@@ -22,7 +22,7 @@ app.use(
     origin: (ctx) => {
       const allowedOrigins = [
         'http://localhost:3000',
-        'https://your-production-domain.com',
+        // TODO add our test/production domains here?
       ]
       const origin = ctx.request.headers.origin
       if (origin && allowedOrigins.includes(origin)) {
