@@ -19,19 +19,6 @@ const app = new Koa()
 app.use(
   cors({
     credentials: true,
-    origin: (ctx) => {
-      const allowedOrigins = [
-        'http://localhost:3000',
-        // TODO add our test/production domains here?
-      ]
-      const origin = ctx.request.headers.origin
-      if (origin && allowedOrigins.includes(origin)) {
-        return origin
-      }
-      return allowedOrigins[0]
-    },
-    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization', 'Accept'],
   })
 )
 
