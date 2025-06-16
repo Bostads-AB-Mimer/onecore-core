@@ -634,6 +634,73 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/parking-spaces/by-lease-id/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Gets a list of parking space by lease id
+         * @description Retrieves parking space from lease id.
+         *
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description The lease id. */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Successfully retrieved the parking space. Returns parking space object.
+                 *      */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            content?: components["schemas"]["ParkingSpace"];
+                        };
+                    };
+                };
+                /** @description Invalid id provided */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description No parking spaces found for the specified id */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/staircases": {
         parameters: {
             query?: never;
@@ -1341,6 +1408,33 @@ export interface components {
             subletFeeAmount: number;
             disableQuantitiesBelowCompany: number;
             timestamp: string;
+        };
+        ParkingSpace: {
+            rentalId: string;
+            companyCode: string;
+            companyName: string;
+            managementUnitCode: string;
+            managementUnitName: string;
+            propertyCode: string;
+            propertyName: string;
+            buildingCode: string | null;
+            buildingName: string | null;
+            parkingSpace: {
+                propertyObjectId: string;
+                code: string;
+                name: string;
+                parkingNumber: string;
+                parkingSpaceType: {
+                    code: string;
+                    name: string;
+                };
+            };
+            address: {
+                streetAddress: string | null;
+                streetAddress2: string | null;
+                postalCode: string | null;
+                city: string | null;
+            } | null;
         };
     };
     responses: never;
