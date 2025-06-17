@@ -634,7 +634,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/parking-spaces/by-lease-id/{id}": {
+    "/parking-spaces/by-rental-id/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -642,8 +642,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Gets a list of parking space by lease id
-         * @description Retrieves parking space from lease id.
+         * Gets a list of parking space by rental id
+         * @description Retrieves parking space from rental id.
          *
          */
         get: {
@@ -651,7 +651,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    /** @description The lease id. */
+                    /** @description The rental id. */
                     id: string;
                 };
                 cookie?: never;

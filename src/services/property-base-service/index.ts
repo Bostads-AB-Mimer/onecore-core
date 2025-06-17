@@ -600,19 +600,19 @@ export const routes = (router: KoaRouter) => {
 
   /**
    * @swagger
-   * /propertyBase/parking-spaces/by-lease-id/{leaseId}:
+   * /propertyBase/parking-spaces/by-rental-id/{rentalId}:
    *   get:
-   *     summary: Get parking space data by leaseId
+   *     summary: Get parking space data by rentalId
    *     tags:
    *       - Property base Service
-   *     description: Retrieves parking space data by leaseId
+   *     description: Retrieves parking space data by rentalId
    *     parameters:
    *       - in: path
-   *         name: leaseId
+   *         name: rentalId
    *         required: true
    *         schema:
    *           type: string
-   *         description: Id for the lease to fetch parking space for
+   *         description: Rental id to fetch parking space for
    *     responses:
    *       '200':
    *         description: Successfully retrieved parking space.
@@ -647,14 +647,14 @@ export const routes = (router: KoaRouter) => {
    *       - bearerAuth: []
    */
   router.get(
-    '(.*)/propertyBase/parking-spaces/by-lease-id/:leaseId',
+    '(.*)/propertyBase/parking-spaces/by-rental-id/:rentalId',
     async (ctx) => {
       const metadata = generateRouteMetadata(ctx)
-      const { leaseId } = ctx.params
+      const { rentalId } = ctx.params
 
       try {
         const response =
-          await propertyBaseAdapter.getParkingSpaceByLeaseId(leaseId)
+          await propertyBaseAdapter.getParkingSpaceByRentalId(rentalId)
 
         if (!response.ok) {
           if (response.err === 'not-found') {

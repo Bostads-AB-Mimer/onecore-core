@@ -243,12 +243,12 @@ export async function getRooms(
 
 type GetParkingSpaceResponse = components['schemas']['ParkingSpace']
 
-export async function getParkingSpaceByLeaseId(
-  leaseId: string
+export async function getParkingSpaceByRentalId(
+  rentalId: string
 ): Promise<AdapterResult<GetParkingSpaceResponse, 'not-found' | 'unknown'>> {
   try {
-    const response = await client().GET('/parking-spaces/by-lease-id/{id}', {
-      params: { path: { id: leaseId } },
+    const response = await client().GET('/parking-spaces/by-rental-id/{id}', {
+      params: { path: { id: rentalId } },
     })
 
     if (response.data?.content) {
@@ -260,7 +260,7 @@ export async function getParkingSpaceByLeaseId(
 
     return { ok: false, err: 'unknown' }
   } catch (err) {
-    logger.error({ err }, 'property-base-adapter.getParkingSpace')
+    logger.error({ err }, 'property-base-adapter.getParkingSpaceByRentalId')
     return { ok: false, err: 'unknown' }
   }
 }
