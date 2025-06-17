@@ -240,3 +240,27 @@ export async function getRooms(
     return { ok: false, err: 'unknown' }
   }
 }
+
+type GetParkingSpaceResponse = components['schemas']['ParkingSpace']
+
+export async function getParkingSpaceByRentalId(
+  rentalId: string
+): Promise<AdapterResult<GetParkingSpaceResponse, 'not-found' | 'unknown'>> {
+  try {
+    const response = await client().GET('/parking-spaces/by-rental-id/{id}', {
+      params: { path: { id: rentalId } },
+    })
+
+    if (response.data?.content) {
+      return { ok: true, data: response.data.content }
+    }
+    if (response.response.status === 404) {
+      return { ok: false, err: 'not-found' }
+    }
+
+    return { ok: false, err: 'unknown' }
+  } catch (err) {
+    logger.error({ err }, 'property-base-adapter.getParkingSpaceByRentalId')
+    return { ok: false, err: 'unknown' }
+  }
+}
