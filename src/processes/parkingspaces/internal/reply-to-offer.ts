@@ -68,7 +68,7 @@ export const acceptOffer = async (
     //Get listing
     const listing = await leasingAdapter.getListingByListingId(offer.listingId)
 
-    if (!listing || !listing.districtCode) {
+    if (!listing || !listing.rentalObject.restidentalAreaCode) {
       return endFailingProcess(
         log,
         ReplyToOfferErrorCodes.NoListing,
@@ -83,8 +83,8 @@ export const acceptOffer = async (
       lease = await leasingAdapter.createLease(
         listing.rentalObjectCode,
         offer.offeredApplicant.contactCode,
-        listing.vacantFrom != undefined
-          ? new Date(listing.vacantFrom).toISOString() // fix: vacantFrom is really a string...
+        listing.rentalObject.vacantFrom != undefined
+          ? new Date(listing.rentalObject.vacantFrom).toISOString() // fix: vacantFrom is really a string...
           : new Date().toISOString(),
         '001'
       )
@@ -210,7 +210,7 @@ export const denyOffer = async (
 
     //Get listing
     const listing = await leasingAdapter.getListingByListingId(offer.listingId)
-    if (!listing || !listing.districtCode) {
+    if (!listing || !listing.rentalObject.restidentalAreaCode) {
       return endFailingProcess(
         log,
         ReplyToOfferErrorCodes.NoListing,
@@ -286,7 +286,7 @@ export const expireOffer = async (
 
     //Get listing
     const listing = await leasingAdapter.getListingByListingId(offer.listingId)
-    if (!listing || !listing.districtCode) {
+    if (!listing || !listing.rentalObject.restidentalAreaCode) {
       return endFailingProcess(
         log,
         ReplyToOfferErrorCodes.NoListing,

@@ -114,10 +114,17 @@ describe('createOfferForInternalParkingSpace', () => {
   })
 
   it('passes applicants that are not eligible for renting in area with specific rental rule', async () => {
+    const rentalObject = factory.rentalObject
+      .params({
+        restidentalAreaCaption: 'Centrum',
+        restidentalAreaCode: 'CEN',
+      })
+      .build()
+
     jest.spyOn(leasingAdapter, 'getListingByListingId').mockResolvedValue(
       factory.listing.build({
         status: ListingStatus.Expired,
-        districtCode: 'CEN',
+        rentalObject: rentalObject,
       })
     )
 

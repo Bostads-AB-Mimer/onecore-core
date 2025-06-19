@@ -84,7 +84,7 @@
     "pino-pretty": "^11.0.0",
     "striptags": "^3.2.0",
     "swagger-jsdoc": "^6.2.8",
-    "zod": "^3.23.8",
+    "zod": "^3.25.67",
     "zod-to-json-schema": "^3.24.5"
   }
 }
