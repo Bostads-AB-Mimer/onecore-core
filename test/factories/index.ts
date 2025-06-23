@@ -1,3 +1,4 @@
+export { BuildingFactory as building } from './building'
 export { DetailedApplicantFactory as detailedApplicant } from './detailed-applicant'
 export { ListingFactory as listing } from './listing'
 export { RentalObjectFactory as rentalObject } from './rental-object'
