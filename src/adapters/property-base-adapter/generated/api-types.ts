@@ -1478,6 +1478,7 @@ export interface components {
                 hygieneFacility: string | null;
             };
             entrance: string | null;
+            floor: string | null;
             deleted: boolean;
             type: {
                 code: string;
@@ -1518,6 +1519,7 @@ export interface components {
                     hygieneFacility: string | null;
                 };
                 entrance: string | null;
+                floor: string | null;
                 deleted: boolean;
                 type: {
                     code: string;

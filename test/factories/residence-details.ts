@@ -86,4 +86,5 @@ export const ResidenceByRentalIdDetailsFactory = Factory.define<
     rentalId: '1234',
     type: { code: '1RK', name: '1 rum och kök' },
   },
+  floor: '1',
 }))

@@ -207,6 +207,7 @@ export const ResidenceByRentalIdSchema = z.object({
     hygieneFacility: z.string().nullable(),
   }),
   entrance: z.string().nullable(),
+  floor: z.string().nullable(),
   deleted: z.boolean(),
   type: z.object({
     code: z.string(),
