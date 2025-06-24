@@ -818,7 +818,7 @@ export const routes = (router: KoaRouter) => {
     const responseData = (await leasingAdapter.getListingByListingId(
       Number.parseInt(ctx.params.id)
     )) as Listing | undefined
-    console.log('responseData', responseData)
+
     if (!responseData) {
       ctx.status = 404
       ctx.body = { error: 'Listing not found', ...metadata }
