@@ -199,6 +199,39 @@ export async function getResidenceDetails(
   }
 }
 
+type GetResidenceByRentalIdResponse =
+  components['schemas']['GetResidenceByRentalIdResponse']['content']
+
+export async function getResidenceByRentalId(
+  rentalId: string
+): Promise<
+  AdapterResult<GetResidenceByRentalIdResponse, 'not-found' | 'unknown'>
+> {
+  try {
+    const fetchResponse = await client().GET(
+      '/residences/rental-id/{rentalId}',
+      {
+        params: { path: { rentalId: rentalId } },
+      }
+    )
+
+    if (fetchResponse.data?.content) {
+      return { ok: true, data: fetchResponse.data.content }
+    }
+
+    if (fetchResponse.response.status === 404) {
+      return { ok: false, err: 'not-found' }
+    }
+
+    throw new Error(
+      `Unexpected response status: ${fetchResponse.response.status}`
+    )
+  } catch (err) {
+    logger.error({ err }, 'property-base-adapter.getResidenceByRentalId')
+    return { ok: false, err: 'unknown' }
+  }
+}
+
 type GetStaircasesResponse = components['schemas']['Staircase'][]
 
 export async function getStaircases(
@@ -261,6 +294,35 @@ export async function getParkingSpaceByRentalId(
     return { ok: false, err: 'unknown' }
   } catch (err) {
     logger.error({ err }, 'property-base-adapter.getParkingSpaceByRentalId')
+    return { ok: false, err: 'unknown' }
+  }
+}
+
+type GetMaintenanceUnitsByRentalPropertyIdResponse =
+  components['schemas']['MaintenanceUnit'][]
+
+export async function getMaintenanceUnitsForRentalProperty(
+  rentalPropertyId: string
+): Promise<
+  AdapterResult<GetMaintenanceUnitsByRentalPropertyIdResponse, 'unknown'>
+> {
+  try {
+    const fetchResponse = await client().GET(
+      '/maintenance-units/by-rental-id/{id}',
+      {
+        params: { path: { id: rentalPropertyId } },
+      }
+    )
+    if (!fetchResponse.data?.content) {
+      throw { ok: false, err: 'unknown' }
+    }
+
+    return { ok: true, data: fetchResponse.data.content }
+  } catch (err) {
+    logger.error(
+      { err },
+      'property-base-adapter.getMaintenanceUnitsForRentalProperty'
+    )
     return { ok: false, err: 'unknown' }
   }
 }

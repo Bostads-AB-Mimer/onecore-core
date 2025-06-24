@@ -195,6 +195,48 @@ export const ResidenceDetailsSchema = z.object({
   size: z.number().nullable(),
 })
 
+export const ResidenceByRentalIdSchema = z.object({
+  id: z.string(),
+  code: z.string(),
+  name: z.string().nullable(),
+  accessibility: z.object({
+    wheelchairAccessible: z.boolean(),
+    elevator: z.boolean(),
+  }),
+  features: z.object({
+    hygieneFacility: z.string().nullable(),
+  }),
+  entrance: z.string().nullable(),
+  deleted: z.boolean(),
+  type: z.object({
+    code: z.string(),
+    name: z.string().nullable(),
+    roomCount: z.number().nullable(),
+    kitchen: z.number(),
+  }),
+  rentalInformation: z
+    .object({
+      apartmentNumber: z.string().nullable(),
+      rentalId: z.string().nullable(),
+      type: z.object({
+        code: z.string(),
+        name: z.string().nullable(),
+      }),
+    })
+    .nullable(),
+  property: z.object({
+    id: z.string().nullable(),
+    name: z.string().nullable(),
+    code: z.string().nullable(),
+  }),
+  building: z.object({
+    id: z.string().nullable(),
+    name: z.string().nullable(),
+    code: z.string().nullable(),
+  }),
+  areaSize: z.number().nullable(),
+})
+
 export const StaircaseSchema = z.object({
   id: z.string(),
   code: z.string(),
@@ -278,6 +320,16 @@ export const ParkingSpaceSchema = z.object({
   }),
 })
 
+export const MaintenanceUnitSchema = z.object({
+  id: z.string(),
+  rentalPropertyId: z.string(),
+  code: z.string(),
+  caption: z.string(),
+  type: z.string().nullable(),
+  estateCode: z.string(),
+  estate: z.string(),
+})
+
 export const GetRoomsQueryParamsSchema = z.object({
   residenceId: z.string().min(1, { message: 'residenceId is required.' }),
 })
@@ -303,7 +355,11 @@ export type Property = z.infer<typeof PropertySchema>
 export type PropertyDetails = z.infer<typeof PropertyDetailsSchema>
 export type Residence = z.infer<typeof ResidenceSchema>
 export type ResidenceDetails = z.infer<typeof ResidenceDetailsSchema>
+export type ResidenceByRentalIdDetails = z.infer<
+  typeof ResidenceByRentalIdSchema
+>
 export type Staircase = z.infer<typeof StaircaseSchema>
 export type RoomType = z.infer<typeof RoomTypeSchema>
 export type Room = z.infer<typeof RoomSchema>
 export type ParkingSpace = z.infer<typeof ParkingSpaceSchema>
+export type MaintenanceUnit = z.infer<typeof MaintenanceUnitSchema>

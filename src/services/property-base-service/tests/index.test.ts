@@ -15,6 +15,8 @@ import {
   ResidenceSchema,
   RoomSchema,
   StaircaseSchema,
+  MaintenanceUnitSchema,
+  ResidenceByRentalIdSchema,
 } from '../schemas'
 import { LeaseStatus } from 'onecore-types'
 
@@ -130,6 +132,38 @@ describe('property-base-service', () => {
     })
   })
 
+  describe('GET /propertyBase/residence/rental-id/:rentalId', () => {
+    it('returns 200 and a residence', async () => {
+      const residenceDetails = factory.residenceByRentalIdDetails.build()
+      const getResidenceDetailsSpy = jest
+        .spyOn(propertyBaseAdapter, 'getResidenceByRentalId')
+        .mockResolvedValueOnce({ ok: true, data: residenceDetails })
+
+      const res = await request(app.callback()).get(
+        `/propertyBase/residence/rental-id/1234`
+      )
+
+      expect(res.status).toBe(200)
+      expect(getResidenceDetailsSpy).toHaveBeenCalled()
+      expect(() =>
+        ResidenceByRentalIdSchema.parse(res.body.content)
+      ).not.toThrow()
+    })
+
+    it('returns 404 if no residence is found', async () => {
+      const getResidenceDetailsSpy = jest
+        .spyOn(propertyBaseAdapter, 'getResidenceByRentalId')
+        .mockResolvedValueOnce({ ok: false, err: 'not-found' })
+
+      const res = await request(app.callback()).get(
+        `/propertyBase/residence/rental-id/1234`
+      )
+
+      expect(res.status).toBe(404)
+      expect(getResidenceDetailsSpy).toHaveBeenCalled()
+    })
+  })
+
   describe('GET /propertyBase/residence/:residenceId', () => {
     it('returns 200 and a residence', async () => {
       const residenceDetails = factory.residenceDetails.build()
@@ -234,6 +268,42 @@ describe('property-base-service', () => {
       expect(res.status).toBe(200)
       expect(getRoomsSpy).toHaveBeenCalled()
       expect(() => z.array(RoomSchema).parse(res.body.content)).not.toThrow()
+    })
+  })
+
+  describe('GET /propertyBase/maintenance-units/by-rental-id/:id', () => {
+    it('returns 200 and a list of maintenance units for a rental property', async () => {
+      const maintenanceUnitsMock = factory.maintenanceUnitInfo.buildList(3)
+
+      const getMaintenanceUnitsSpy = jest
+        .spyOn(propertyBaseAdapter, 'getMaintenanceUnitsForRentalProperty')
+        .mockResolvedValueOnce({ ok: true, data: maintenanceUnitsMock })
+
+      const res = await request(app.callback()).get(
+        '/propertyBase/maintenance-units/by-rental-id/1234'
+      )
+
+      expect(res.status).toBe(200)
+      expect(getMaintenanceUnitsSpy).toHaveBeenCalledWith('1234')
+      expect(JSON.stringify(res.body.content)).toEqual(
+        JSON.stringify(maintenanceUnitsMock)
+      )
+      expect(() =>
+        z.array(MaintenanceUnitSchema).parse(res.body.content)
+      ).not.toThrow()
+    })
+
+    it('returns 500 if no maintenance units can be retrieved', async () => {
+      const getMaintenanceUnitsSpy = jest
+        .spyOn(propertyBaseAdapter, 'getMaintenanceUnitsForRentalProperty')
+        .mockResolvedValueOnce({ ok: false, err: 'unknown' })
+
+      const res = await request(app.callback()).get(
+        '/propertyBase/maintenance-units/by-rental-id/1234'
+      )
+
+      expect(res.status).toBe(500)
+      expect(getMaintenanceUnitsSpy).toHaveBeenCalledWith('1234')
     })
   })
 })
