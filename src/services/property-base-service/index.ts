@@ -752,9 +752,7 @@ export const routes = (router: KoaRouter) => {
         ctx.status = 200
 
         ctx.body = {
-          content: schemas.ParkingSpaceSchema.parse({
-            ...response.data,
-          }),
+          content: schemas.ParkingSpaceSchema.parse(response.data),
           ...metadata,
         }
       } catch (error) {
