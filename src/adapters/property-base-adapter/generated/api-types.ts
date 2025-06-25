@@ -1137,7 +1137,7 @@ export interface components {
                 smokeFree: boolean;
                 asbestos: boolean;
             };
-            entrance: string | null;
+            floor: string | null;
             partNo?: number | null;
             part?: string | null;
             deleted: boolean;
