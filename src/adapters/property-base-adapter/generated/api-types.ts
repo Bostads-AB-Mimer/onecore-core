@@ -1155,473 +1155,473 @@ export interface paths {
 }
 export type webhooks = Record<string, never>
 export interface components {
-  schemas: {
-    Residence: {
-      id: string
-      code: string
-      name: string
-      deleted: boolean
-      validityPeriod: {
-        /** Format: date-time */
-        fromDate: string
-        /** Format: date-time */
-        toDate: string
-      }
-    }
-    ResidenceDetails: {
-      id: string
-      code: string
-      name: string | null
-      location: string | null
-      accessibility: {
-        wheelchairAccessible: boolean
-        residenceAdapted: boolean
-        elevator: boolean
-      }
-      features: {
-        balcony1?: {
-          location: string
-          type: string
-        }
-        balcony2?: {
-          location: string
-          type: string
-        }
-        patioLocation: string | null
-        hygieneFacility: string | null
-        sauna: boolean
-        extraToilet: boolean
-        sharedKitchen: boolean
-        petAllergyFree: boolean
-        /** @description Is the apartment checked for electric allergy intolerance? */
-        electricAllergyIntolerance: boolean
-        smokeFree: boolean
-        asbestos: boolean
-      }
-      entrance: string | null
-      partNo?: number | null
-      part?: string | null
-      deleted: boolean
-      validityPeriod: {
-        /** Format: date-time */
-        fromDate: string
-        /** Format: date-time */
-        toDate: string
-      }
-      residenceType: {
-        residenceTypeId: string
-        code: string
-        name: string | null
-        roomCount: number | null
-        kitchen: number
-        systemStandard: number
-        checklistId: string | null
-        componentTypeActionId: string | null
-        statisticsGroupSCBId: string | null
-        statisticsGroup2Id: string | null
-        statisticsGroup3Id: string | null
-        statisticsGroup4Id: string | null
-        timestamp: string
-      }
-      propertyObject: {
-        energy: {
-          energyClass: number
-          /** Format: date-time */
-          energyRegistered?: string
-          /** Format: date-time */
-          energyReceived?: string
-          energyIndex?: number
-        }
-        rentalId: string | null
-        rentalInformation: {
-          type: {
-            code: string
-            name: string | null
-          }
-        } | null
-      }
-      property: {
-        name: string | null
-        code: string | null
-      }
-      building: {
-        name: string | null
-        code: string | null
-      }
-      malarEnergiFacilityId: string | null
-      size: number | null
-    }
-    ResidenceSearchResult: {
-      id: string
-      code: string
-      name: string | null
-      deleted: boolean
-      validityPeriod: {
-        /** Format: date-time */
-        fromDate: string
-        /** Format: date-time */
-        toDate: string
-      }
-      rentalId: string | null
-      property: {
-        code: string | null
-        name: string | null
-      }
-      building: {
-        code: string | null
-        name: string | null
-      }
-    }
-    Building: {
-      id: string
-      code: string
-      name: string
-      buildingType: {
-        id: string
-        code: string
-        name: string
-      }
-      construction: {
-        constructionYear: number | null
-        renovationYear: number | null
-        valueYear: number | null
-      }
-      features: {
-        heating?: string | null
-        fireRating?: string | null
-      }
-      insurance: {
-        class: string | null
-        value: number | null
-      }
-      deleted: boolean
-      property?: {
-        name: string | null
-        code: string
-        id: string
-      } | null
-    }
-    Component: {
-      id: string
-      code: string
-      name: string
-      details: {
-        manufacturer: string | null
-        typeDesignation: string | null
-      }
-      dates: {
-        /** Format: date-time */
-        installation: string | null
-        /** Format: date-time */
-        warrantyEnd: string | null
-      }
-      classification: {
-        componentType: {
-          code: string
-          name: string
-        }
-        category: {
-          code: string
-          name: string
-        }
-      }
-      maintenanceUnits: {
-        id: string
-        code: string
-        name: string
-      }[]
-    }
-    Property: {
-      id: string
-      propertyObjectId: string
-      marketAreaId: string
-      districtId: string
-      propertyDesignationId: string
-      valueAreaId: string | null
-      code: string
-      designation: string
-      /** @description Kommun */
-      municipality: string
-      tract: string
-      block: string
-      sector: string | null
-      propertyIndexNumber: string | null
-      congregation: string
-      builtStatus: number
-      separateAssessmentUnit: number
-      consolidationNumber: string
-      ownershipType: string
-      registrationDate: string | null
-      acquisitionDate: string | null
-      isLeasehold: number
-      leaseholdTerminationDate: string | null
-      area: string | null
-      purpose: string | null
-      buildingType: string | null
-      propertyTaxNumber: string | null
-      mainPartAssessedValue: number
-      includeInAssessedValue: number
-      grading: number
-      deleteMark: number
-      /** Format: date-time */
-      fromDate: string
-      /** Format: date-time */
-      toDate: string
-      timestamp: string
-    }
-    PropertyDetails: {
-      id: string
-      propertyObjectId: string
-      marketAreaId: string
-      districtId: string
-      propertyDesignationId: string
-      valueAreaId: string | null
-      code: string
-      designation: string
-      /** @description Municipality=kommun */
-      municipality: string
-      tract: string
-      block: string
-      sector: string | null
-      propertyIndexNumber: string | null
-      congregation: string
-      builtStatus: number
-      separateAssessmentUnit: number
-      consolidationNumber: string
-      ownershipType: string
-      registrationDate: string | null
-      acquisitionDate: string | null
-      isLeasehold: number
-      leaseholdTerminationDate: string | null
-      area: string | null
-      purpose: string | null
-      buildingType: string | null
-      propertyTaxNumber: string | null
-      mainPartAssessedValue: number
-      includeInAssessedValue: number
-      grading: number
-      deleteMark: number
-      /** Format: date-time */
-      fromDate: string
-      /** Format: date-time */
-      toDate: string
-      timestamp: string
-      propertyObject: {
-        id: string
-        deleteMark: number
-        timestamp: string
-        objectTypeId: string
-        barcode: string | null
-        barcodeType: number
-        condition: number
-        conditionInspectionDate: string | null
-        vatAdjustmentPrinciple: number
-        energyClass: number
-        energyRegistered: string | null
-        energyReceived: string | null
-        energyIndex: string | null
-        heatingNature: number
-      }
-    }
-    Staircase: {
-      id: string
-      code: string
-      name: string | null
-      features: {
-        floorPlan: string | null
-        accessibleByElevator: boolean
-      }
-      dates: {
-        /** Format: date-time */
-        from: string
-        /** Format: date-time */
-        to: string
-      }
-      deleted: boolean
-      timestamp: string
-    }
-    Room: {
-      id: string
-      code: string
-      name: string | null
-      usage: {
-        shared: boolean
-        allowPeriodicWorks: boolean
-        spaceType: number
-      }
-      features: {
-        hasToilet: boolean
-        isHeated: boolean
-        hasThermostatValve: boolean
-        orientation: number
-      }
-      dates: {
-        /** Format: date-time */
-        installation: string | null
-        /** Format: date-time */
-        from: string
-        /** Format: date-time */
-        to: string
-        /** Format: date-time */
-        availableFrom: string | null
-        /** Format: date-time */
-        availableTo: string | null
-      }
-      sortingOrder: number
-      deleted: boolean
-      timestamp: string
-      roomType: {
-        id: string
-        code: string
-        name: string | null
-        use: number
-        optionAllowed: number
-        isSystemStandard: number
-        allowSmallRoomsInValuation: number
-        timestamp: string
-      } | null
-    }
-    Company: {
-      id: string
-      propertyObjectId: string
-      code: string
-      name: string
-      organizationNumber: string | null
-    }
-    CompanyDetails: {
-      id: string
-      propertyObjectId: string
-      code: string
-      name: string
-      organizationNumber: string | null
-      phone: string | null
-      fax: string | null
-      vatNumber?: string | null
-      internalExternal: number
-      fTax: number
-      cooperativeHousingAssociation: number
-      differentiatedAdditionalCapital: number
-      rentAdministered: number
-      blocked: number
-      rentDaysPerMonth: number
-      economicPlanApproved: number
-      vatObligationPercent: number
-      vatRegistered: number
-      energyOptimization: number
-      ownedCompany: number
-      interestInvoice: number
-      errorReportAdministration: number
-      mediaBilling: number
-      ownResponsibilityForInternalMaintenance: number
-      subletPercentage: number
-      subletFeeAmount: number
-      disableQuantitiesBelowCompany: number
-      timestamp: string
-    }
-    MaintenanceUnit: {
-      id: string
-      rentalPropertyId: string
-      code: string
-      caption: string
-      type: string | null
-      estateCode: string
-      estate: string
-    }
-    ResidenceByRentalId: {
-      id: string
-      code: string
-      name: string | null
-      accessibility: {
-        wheelchairAccessible: boolean
-        elevator: boolean
-      }
-      features: {
-        hygieneFacility: string | null
-      }
-      entrance: string | null
-      deleted: boolean
-      type: {
-        code: string
-        name: string | null
-        roomCount: number | null
-        kitchen: number
-      }
-      rentalInformation: {
-        apartmentNumber: string | null
-        rentalId: string | null
-        type: {
-          code: string
-          name: string | null
-        }
-      } | null
-      property: {
-        id: string | null
-        name: string | null
-        code: string | null
-      }
-      building: {
-        id: string | null
-        name: string | null
-        code: string | null
-      }
-      areaSize: number | null
-    }
-    GetResidenceByRentalIdResponse: {
-      content: {
-        id: string
-        code: string
-        name: string | null
-        accessibility: {
-          wheelchairAccessible: boolean
-          elevator: boolean
-        }
-        features: {
-          hygieneFacility: string | null
-        }
-        entrance: string | null
-        deleted: boolean
-        type: {
-          code: string
-          name: string | null
-          roomCount: number | null
-          kitchen: number
-        }
-        rentalInformation: {
-          apartmentNumber: string | null
-          rentalId: string | null
-          type: {
-            code: string
-            name: string | null
-          }
-        } | null
-        property: {
-          id: string | null
-          name: string | null
-          code: string | null
-        }
-        building: {
-          id: string | null
-          name: string | null
-          code: string | null
-        }
-        areaSize: number | null
-      }
-      _links: {
-        self: {
-          href: string
-        }
-        link: {
-          href: string
-          templated: boolean
-        }
-      }
-    }
-  }
-  responses: never
-  parameters: never
-  requestBodies: never
-  headers: never
-  pathItems: never
+    schemas: {
+        Residence: {
+            id: string;
+            code: string;
+            name: string;
+            deleted: boolean;
+            validityPeriod: {
+                /** Format: date-time */
+                fromDate: string;
+                /** Format: date-time */
+                toDate: string;
+            };
+        };
+        ResidenceDetails: {
+            id: string;
+            code: string;
+            name: string | null;
+            location: string | null;
+            accessibility: {
+                wheelchairAccessible: boolean;
+                residenceAdapted: boolean;
+                elevator: boolean;
+            };
+            features: {
+                balcony1?: {
+                    location: string;
+                    type: string;
+                };
+                balcony2?: {
+                    location: string;
+                    type: string;
+                };
+                patioLocation: string | null;
+                hygieneFacility: string | null;
+                sauna: boolean;
+                extraToilet: boolean;
+                sharedKitchen: boolean;
+                petAllergyFree: boolean;
+                /** @description Is the apartment checked for electric allergy intolerance? */
+                electricAllergyIntolerance: boolean;
+                smokeFree: boolean;
+                asbestos: boolean;
+            };
+            entrance: string | null;
+            partNo?: number | null;
+            part?: string | null;
+            deleted: boolean;
+            validityPeriod: {
+                /** Format: date-time */
+                fromDate: string;
+                /** Format: date-time */
+                toDate: string;
+            };
+            residenceType: {
+                residenceTypeId: string;
+                code: string;
+                name: string | null;
+                roomCount: number | null;
+                kitchen: number;
+                systemStandard: number;
+                checklistId: string | null;
+                componentTypeActionId: string | null;
+                statisticsGroupSCBId: string | null;
+                statisticsGroup2Id: string | null;
+                statisticsGroup3Id: string | null;
+                statisticsGroup4Id: string | null;
+                timestamp: string;
+            };
+            propertyObject: {
+                energy: {
+                    energyClass: number;
+                    /** Format: date-time */
+                    energyRegistered?: string;
+                    /** Format: date-time */
+                    energyReceived?: string;
+                    energyIndex?: number;
+                };
+                rentalId: string | null;
+                rentalInformation: {
+                    type: {
+                        code: string;
+                        name: string | null;
+                    };
+                } | null;
+            };
+            property: {
+                name: string | null;
+                code: string | null;
+            };
+            building: {
+                name: string | null;
+                code: string | null;
+            };
+            malarEnergiFacilityId: string | null;
+            size: number | null;
+        };
+        ResidenceSearchResult: {
+            id: string;
+            code: string;
+            name: string | null;
+            deleted: boolean;
+            validityPeriod: {
+                /** Format: date-time */
+                fromDate: string;
+                /** Format: date-time */
+                toDate: string;
+            };
+            rentalId: string | null;
+            property: {
+                code: string | null;
+                name: string | null;
+            };
+            building: {
+                code: string | null;
+                name: string | null;
+            };
+        };
+        Building: {
+            id: string;
+            code: string;
+            name: string | null;
+            buildingType: {
+                id: string | null;
+                code: string | null;
+                name: string | null;
+            };
+            construction: {
+                constructionYear: number | null;
+                renovationYear: number | null;
+                valueYear: number | null;
+            };
+            features: {
+                heating?: string | null;
+                fireRating?: string | null;
+            };
+            insurance: {
+                class: string | null;
+                value: number | null;
+            };
+            deleted: boolean;
+            property?: {
+                name: string | null;
+                code: string;
+                id: string;
+            } | null;
+        };
+        Component: {
+            id: string;
+            code: string;
+            name: string;
+            details: {
+                manufacturer: string | null;
+                typeDesignation: string | null;
+            };
+            dates: {
+                /** Format: date-time */
+                installation: string | null;
+                /** Format: date-time */
+                warrantyEnd: string | null;
+            };
+            classification: {
+                componentType: {
+                    code: string;
+                    name: string;
+                };
+                category: {
+                    code: string;
+                    name: string;
+                };
+            };
+            maintenanceUnits: {
+                id: string;
+                code: string;
+                name: string;
+            }[];
+        };
+        Property: {
+            id: string;
+            propertyObjectId: string;
+            marketAreaId: string;
+            districtId: string;
+            propertyDesignationId: string;
+            valueAreaId: string | null;
+            code: string;
+            designation: string;
+            /** @description Kommun */
+            municipality: string;
+            tract: string;
+            block: string;
+            sector: string | null;
+            propertyIndexNumber: string | null;
+            congregation: string;
+            builtStatus: number;
+            separateAssessmentUnit: number;
+            consolidationNumber: string;
+            ownershipType: string;
+            registrationDate: string | null;
+            acquisitionDate: string | null;
+            isLeasehold: number;
+            leaseholdTerminationDate: string | null;
+            area: string | null;
+            purpose: string | null;
+            buildingType: string | null;
+            propertyTaxNumber: string | null;
+            mainPartAssessedValue: number;
+            includeInAssessedValue: number;
+            grading: number;
+            deleteMark: number;
+            /** Format: date-time */
+            fromDate: string;
+            /** Format: date-time */
+            toDate: string;
+            timestamp: string;
+        };
+        PropertyDetails: {
+            id: string;
+            propertyObjectId: string;
+            marketAreaId: string;
+            districtId: string;
+            propertyDesignationId: string;
+            valueAreaId: string | null;
+            code: string;
+            designation: string;
+            /** @description Municipality=kommun */
+            municipality: string;
+            tract: string;
+            block: string;
+            sector: string | null;
+            propertyIndexNumber: string | null;
+            congregation: string;
+            builtStatus: number;
+            separateAssessmentUnit: number;
+            consolidationNumber: string;
+            ownershipType: string;
+            registrationDate: string | null;
+            acquisitionDate: string | null;
+            isLeasehold: number;
+            leaseholdTerminationDate: string | null;
+            area: string | null;
+            purpose: string | null;
+            buildingType: string | null;
+            propertyTaxNumber: string | null;
+            mainPartAssessedValue: number;
+            includeInAssessedValue: number;
+            grading: number;
+            deleteMark: number;
+            /** Format: date-time */
+            fromDate: string;
+            /** Format: date-time */
+            toDate: string;
+            timestamp: string;
+            propertyObject: {
+                id: string;
+                deleteMark: number;
+                timestamp: string;
+                objectTypeId: string;
+                barcode: string | null;
+                barcodeType: number;
+                condition: number;
+                conditionInspectionDate: string | null;
+                vatAdjustmentPrinciple: number;
+                energyClass: number;
+                energyRegistered: string | null;
+                energyReceived: string | null;
+                energyIndex: string | null;
+                heatingNature: number;
+            };
+        };
+        Staircase: {
+            id: string;
+            code: string;
+            name: string | null;
+            features: {
+                floorPlan: string | null;
+                accessibleByElevator: boolean;
+            };
+            dates: {
+                /** Format: date-time */
+                from: string;
+                /** Format: date-time */
+                to: string;
+            };
+            deleted: boolean;
+            timestamp: string;
+        };
+        Room: {
+            id: string;
+            code: string;
+            name: string | null;
+            usage: {
+                shared: boolean;
+                allowPeriodicWorks: boolean;
+                spaceType: number;
+            };
+            features: {
+                hasToilet: boolean;
+                isHeated: boolean;
+                hasThermostatValve: boolean;
+                orientation: number;
+            };
+            dates: {
+                /** Format: date-time */
+                installation: string | null;
+                /** Format: date-time */
+                from: string;
+                /** Format: date-time */
+                to: string;
+                /** Format: date-time */
+                availableFrom: string | null;
+                /** Format: date-time */
+                availableTo: string | null;
+            };
+            sortingOrder: number;
+            deleted: boolean;
+            timestamp: string;
+            roomType: {
+                id: string;
+                code: string;
+                name: string | null;
+                use: number;
+                optionAllowed: number;
+                isSystemStandard: number;
+                allowSmallRoomsInValuation: number;
+                timestamp: string;
+            } | null;
+        };
+        Company: {
+            id: string;
+            propertyObjectId: string;
+            code: string;
+            name: string;
+            organizationNumber: string | null;
+        };
+        CompanyDetails: {
+            id: string;
+            propertyObjectId: string;
+            code: string;
+            name: string;
+            organizationNumber: string | null;
+            phone: string | null;
+            fax: string | null;
+            vatNumber?: string | null;
+            internalExternal: number;
+            fTax: number;
+            cooperativeHousingAssociation: number;
+            differentiatedAdditionalCapital: number;
+            rentAdministered: number;
+            blocked: number;
+            rentDaysPerMonth: number;
+            economicPlanApproved: number;
+            vatObligationPercent: number;
+            vatRegistered: number;
+            energyOptimization: number;
+            ownedCompany: number;
+            interestInvoice: number;
+            errorReportAdministration: number;
+            mediaBilling: number;
+            ownResponsibilityForInternalMaintenance: number;
+            subletPercentage: number;
+            subletFeeAmount: number;
+            disableQuantitiesBelowCompany: number;
+            timestamp: string;
+        };
+        MaintenanceUnit: {
+            id: string;
+            rentalPropertyId: string;
+            code: string;
+            caption: string;
+            type: string | null;
+            estateCode: string;
+            estate: string;
+        };
+        ResidenceByRentalId: {
+            id: string;
+            code: string;
+            name: string | null;
+            accessibility: {
+                wheelchairAccessible: boolean;
+                elevator: boolean;
+            };
+            features: {
+                hygieneFacility: string | null;
+            };
+            entrance: string | null;
+            deleted: boolean;
+            type: {
+                code: string;
+                name: string | null;
+                roomCount: number | null;
+                kitchen: number;
+            };
+            rentalInformation: {
+                apartmentNumber: string | null;
+                rentalId: string | null;
+                type: {
+                    code: string;
+                    name: string | null;
+                };
+            } | null;
+            property: {
+                id: string | null;
+                name: string | null;
+                code: string | null;
+            };
+            building: {
+                id: string | null;
+                name: string | null;
+                code: string | null;
+            };
+            areaSize: number | null;
+        };
+        GetResidenceByRentalIdResponse: {
+            content: {
+                id: string;
+                code: string;
+                name: string | null;
+                accessibility: {
+                    wheelchairAccessible: boolean;
+                    elevator: boolean;
+                };
+                features: {
+                    hygieneFacility: string | null;
+                };
+                entrance: string | null;
+                deleted: boolean;
+                type: {
+                    code: string;
+                    name: string | null;
+                    roomCount: number | null;
+                    kitchen: number;
+                };
+                rentalInformation: {
+                    apartmentNumber: string | null;
+                    rentalId: string | null;
+                    type: {
+                        code: string;
+                        name: string | null;
+                    };
+                } | null;
+                property: {
+                    id: string | null;
+                    name: string | null;
+                    code: string | null;
+                };
+                building: {
+                    id: string | null;
+                    name: string | null;
+                    code: string | null;
+                };
+                areaSize: number | null;
+            };
+            _links: {
+                self: {
+                    href: string;
+                };
+                link: {
+                    href: string;
+                    templated: boolean;
+                };
+            };
+        };
+    };
+    responses: never;
+    parameters: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 }
 export type $defs = Record<string, never>
 export type operations = Record<string, never>
