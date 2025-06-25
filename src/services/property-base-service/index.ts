@@ -25,6 +25,7 @@ import { z } from 'zod'
  *   - bearerAuth: []
  */
 export const routes = (router: KoaRouter) => {
+  registerSchema('Building', schemas.BuildingSchema)
   registerSchema('Company', schemas.CompanySchema)
   registerSchema('Property', schemas.PropertySchema)
   registerSchema('Residence', schemas.ResidenceSchema)
@@ -36,6 +37,88 @@ export const routes = (router: KoaRouter) => {
   registerSchema(
     'ResidenceByRentalIdDetails',
     schemas.ResidenceByRentalIdSchema
+  )
+
+  /**
+   * @swagger
+   * /propertyBase/buildings/by-building-code/{buildingCode}:
+   *   get:
+   *     summary: Get building by building code
+   *     tags:
+   *       - Property base Service
+   *     description: Retrieves building data by building code
+   *     parameters:
+   *       - in: path
+   *         name: buildingCode
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: The code of the building
+   *     responses:
+   *       '200':
+   *         description: Successfully retrieved building
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 content:
+   *                   $ref: '#/components/schemas/Building'
+   *       '404':
+   *         description: Building not found
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 error:
+   *                   type: string
+   *                   example: Building not found
+   *       '500':
+   *         description: Internal server error
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 error:
+   *                   type: string
+   *                   example: Internal server error
+   *     security:
+   *       - bearerAuth: []
+   */
+  router.get(
+    '(.*)/propertyBase/buildings/by-building-code/:buildingCode',
+    async (ctx) => {
+      const metadata = generateRouteMetadata(ctx)
+      const { buildingCode } = ctx.params
+
+      try {
+        const result = await propertyBaseAdapter.getBuildingByCode(buildingCode)
+
+        if (!result.ok) {
+          if (result.err === 'not-found') {
+            ctx.status = 404
+            ctx.body = { error: 'Building not found', ...metadata }
+            return
+          }
+
+          logger.error(result.err, 'Internal server error', metadata)
+          ctx.status = 500
+          ctx.body = { error: 'Internal server error', ...metadata }
+          return
+        }
+
+        ctx.body = {
+          content: result.data as schemas.Building,
+          ...metadata,
+        }
+      } catch (error) {
+        logger.error(error, 'Internal server error', metadata)
+        ctx.status = 500
+        ctx.body = { error: 'Internal server error', ...metadata }
+      }
+    }
   )
 
   /**
@@ -250,6 +333,73 @@ export const routes = (router: KoaRouter) => {
 
     try {
       const result = await propertyBaseAdapter.getProperties(companyCode, tract)
+
+      if (!result.ok) {
+        logger.error(result.err, 'Internal server error', metadata)
+        ctx.status = 500
+        ctx.body = { error: 'Internal server error', ...metadata }
+        return
+      }
+
+      ctx.body = {
+        content: result.data satisfies schemas.Property[],
+        ...metadata,
+      }
+    } catch (error) {
+      logger.error(error, 'Internal server error', metadata)
+      ctx.status = 500
+      ctx.body = { error: 'Internal server error', ...metadata }
+    }
+  })
+
+  /**
+   * @swagger
+   * /propertyBase/properties/search:
+   *   get:
+   *     summary: Search properties
+   *     description: |
+   *       Retrieves a list of all real estate properties by name.
+   *     tags:
+   *       - Property base Service
+   *     parameters:
+   *       - in: query
+   *         name: q
+   *         schema:
+   *           type: string
+   *         description: The search query.
+   *     responses:
+   *       200:
+   *         description: Successfully retrieved list of properties.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 content:
+   *                   type: array
+   *                   items:
+   *                     $ref: '#/components/schemas/Property'
+   *       400:
+   *         description: Invalid query parameters.
+   *       500:
+   *         description: Internal server error.
+   *     security:
+   *       - bearerAuth: []
+   */
+  router.get('(.*)/propertyBase/properties/search', async (ctx) => {
+    const metadata = generateRouteMetadata(ctx)
+    const params = z.object({ q: z.string() }).safeParse(ctx.query)
+
+    if (!params.success) {
+      ctx.status = 400
+      ctx.body = { error: params.error.errors }
+      return
+    }
+
+    const { q } = params.data
+
+    try {
+      const result = await propertyBaseAdapter.searchProperties(q)
 
       if (!result.ok) {
         logger.error(result.err, 'Internal server error', metadata)

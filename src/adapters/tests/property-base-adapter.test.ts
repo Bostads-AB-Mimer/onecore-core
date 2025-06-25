@@ -20,6 +20,56 @@ describe('property-base-adapter', () => {
     mockServer.close()
   })
 
+  describe('getBuildingByCode', () => {
+    it('returns err if request fails', async () => {
+      mockServer.use(
+        http.get(
+          `${config.propertyBaseService.url}/buildings/by-building-code/123-123`,
+          () => new HttpResponse(null, { status: 500 })
+        )
+      )
+
+      const result = await propertyBaseAdapter.getBuildingByCode('123-123')
+      expect(result.ok).toBe(false)
+      if (!result.ok) expect(result.err).toBe('unknown')
+    })
+
+    it('returns not-found if building is not found', async () => {
+      mockServer.use(
+        http.get(
+          `${config.propertyBaseService.url}/buildings/by-building-code/123-123`,
+          () => new HttpResponse(null, { status: 404 })
+        )
+      )
+
+      const result = await propertyBaseAdapter.getBuildingByCode('123-123')
+      expect(result.ok).toBe(false)
+      if (!result.ok) expect(result.err).toBe('not-found')
+    })
+
+    it('returns building', async () => {
+      const buildingMock = factory.building.build()
+      mockServer.use(
+        http.get(
+          `${config.propertyBaseService.url}/buildings/by-building-code/123-123`,
+          () =>
+            HttpResponse.json(
+              {
+                content: buildingMock,
+              },
+              { status: 200 }
+            )
+        )
+      )
+
+      const result = await propertyBaseAdapter.getBuildingByCode('123-123')
+      expect(result).toMatchObject({
+        ok: true,
+        data: buildingMock,
+      })
+    })
+  })
+
   describe('getCompanies', () => {
     it('returns err if request fails', async () => {
       mockServer.use(
@@ -185,6 +235,44 @@ describe('property-base-adapter', () => {
       expect(result).toMatchObject({
         ok: true,
         data: propertyDetailsMock,
+      })
+    })
+  })
+
+  describe('searchProperties', () => {
+    it('returns err if request fails', async () => {
+      mockServer.use(
+        http.get(
+          `${config.propertyBaseService.url}/properties/search`,
+          () => new HttpResponse(null, { status: 500 })
+        )
+      )
+
+      const result = await propertyBaseAdapter.searchProperties('001')
+
+      expect(result.ok).toBe(false)
+      if (!result.ok) expect(result.err).toBe('unknown')
+    })
+
+    it('returns properties', async () => {
+      const propertiesMock = factory.property.buildList(2)
+      mockServer.use(
+        http.get(`${config.propertyBaseService.url}/properties/search`, () =>
+          HttpResponse.json(
+            {
+              content: propertiesMock,
+            },
+            { status: 200 }
+          )
+        )
+      )
+
+      const result = await propertyBaseAdapter.searchProperties('KVARTER 1')
+
+      expect(result.ok).toBe(true)
+      expect(result).toMatchObject({
+        ok: true,
+        data: propertiesMock,
       })
     })
   })

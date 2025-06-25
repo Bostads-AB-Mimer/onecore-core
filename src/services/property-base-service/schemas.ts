@@ -1,5 +1,30 @@
 import { z } from 'zod'
 
+export const BuildingSchema = z.object({
+  id: z.string(),
+  code: z.string(),
+  name: z.string(),
+  buildingType: z.object({
+    id: z.string(),
+    code: z.string(),
+    name: z.string(),
+  }),
+  construction: z.object({
+    constructionYear: z.number(),
+    renovationYear: z.number(),
+    valueYear: z.number().nullable(),
+  }),
+  features: z.object({
+    heating: z.string().nullable(),
+    fireRating: z.string().nullable(),
+  }),
+  insurance: z.object({
+    class: z.string().nullable(),
+    value: z.number().nullable(),
+  }),
+  deleted: z.boolean(),
+})
+
 export const CompanySchema = z.object({
   id: z.string(),
   propertyObjectId: z.string(),
@@ -143,7 +168,7 @@ export const ResidenceDetailsSchema = z.object({
     smokeFree: z.boolean(),
     asbestos: z.boolean(),
   }),
-  entrance: z.string().nullable(),
+  floor: z.string().nullable(),
   partNo: z.number().optional().nullable(),
   part: z.string().optional().nullable(),
   deleted: z.boolean(),
@@ -207,6 +232,7 @@ export const ResidenceByRentalIdSchema = z.object({
     hygieneFacility: z.string().nullable(),
   }),
   entrance: z.string().nullable(),
+  floor: z.string().nullable(),
   deleted: z.boolean(),
   type: z.object({
     code: z.string(),
@@ -350,6 +376,7 @@ export const StaircasesQueryParamsSchema = z.object({
     .min(7, { message: 'buildingCode must be at least 7 characters long.' }),
 })
 
+export type Building = z.infer<typeof BuildingSchema>
 export type Company = z.infer<typeof CompanySchema>
 export type Property = z.infer<typeof PropertySchema>
 export type PropertyDetails = z.infer<typeof PropertyDetailsSchema>
