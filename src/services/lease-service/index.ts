@@ -871,10 +871,9 @@ export const routes = (router: KoaRouter) => {
       return
     }
 
-    const parkingSpacesResult =
-      await propertyManagementAdapter.getParkingSpaceByCode(
-        responseData.rentalObjectCode
-      )
+    const parkingSpacesResult = await leasingAdapter.getParkingSpaceByCode(
+      responseData.rentalObjectCode
+    )
 
     if (!parkingSpacesResult.ok) {
       parkingSpacesResult.err === 'not-found'
@@ -938,10 +937,9 @@ export const routes = (router: KoaRouter) => {
       return
     }
 
-    const parkingSpacesResult =
-      await propertyManagementAdapter.getParkingSpaces(
-        result.data.map((listing) => listing.rentalObjectCode)
-      )
+    const parkingSpacesResult = await leasingAdapter.getParkingSpaces(
+      result.data.map((listing) => listing.rentalObjectCode)
+    )
     if (!parkingSpacesResult.ok) {
       parkingSpacesResult.err === 'not-found'
         ? (ctx.status = 404)
