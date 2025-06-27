@@ -6,6 +6,7 @@ import {
 
 import { createOfferForInternalParkingSpace } from '../create-offer'
 import * as leasingAdapter from '../../../../adapters/leasing-adapter'
+import * as propertyMgmtAdapter from '../../../../adapters/property-management-adapter'
 import * as communicationAdapter from '../../../../adapters/communication-adapter'
 import * as factory from '../../../../../test/factories'
 import { ProcessStatus } from '../../../../common/types'
@@ -39,11 +40,19 @@ describe('createOfferForInternalParkingSpace', () => {
   })
 
   it('fails if listing is not expired', async () => {
+    const listing = factory.listing.build({ status: ListingStatus.Active })
     jest
       .spyOn(leasingAdapter, 'getListingByListingId')
-      .mockResolvedValueOnce(
-        factory.listing.build({ status: ListingStatus.Active })
-      )
+      .mockResolvedValue(listing)
+
+    jest.spyOn(propertyMgmtAdapter, 'getParkingSpaceByCode').mockResolvedValue({
+      ok: true,
+      data: factory.vacantParkingSpace
+        .params({
+          rentalObjectCode: listing.rentalObjectCode,
+        })
+        .build(),
+    })
 
     const result = await createOfferForInternalParkingSpace(123)
 
@@ -59,11 +68,19 @@ describe('createOfferForInternalParkingSpace', () => {
   })
 
   it('fails if there are no applicants', async () => {
+    const listing = factory.listing.build({ status: ListingStatus.Expired })
     jest
       .spyOn(leasingAdapter, 'getListingByListingId')
-      .mockResolvedValueOnce(
-        factory.listing.build({ status: ListingStatus.Expired })
-      )
+      .mockResolvedValue(listing)
+
+    jest.spyOn(propertyMgmtAdapter, 'getParkingSpaceByCode').mockResolvedValue({
+      ok: true,
+      data: factory.vacantParkingSpace
+        .params({
+          rentalObjectCode: listing.rentalObjectCode,
+        })
+        .build(),
+    })
     jest
       .spyOn(leasingAdapter, 'getDetailedApplicantsByListingId')
       .mockResolvedValueOnce({ ok: true, data: [] })
@@ -86,11 +103,19 @@ describe('createOfferForInternalParkingSpace', () => {
   })
 
   it('fails if updating listing status fails', async () => {
+    const listing = factory.listing.build({ status: ListingStatus.Expired })
     jest
       .spyOn(leasingAdapter, 'getListingByListingId')
-      .mockResolvedValueOnce(
-        factory.listing.build({ status: ListingStatus.Expired })
-      )
+      .mockResolvedValue(listing)
+
+    jest.spyOn(propertyMgmtAdapter, 'getParkingSpaceByCode').mockResolvedValue({
+      ok: true,
+      data: factory.vacantParkingSpace
+        .params({
+          rentalObjectCode: listing.rentalObjectCode,
+        })
+        .build(),
+    })
     jest
       .spyOn(leasingAdapter, 'getDetailedApplicantsByListingId')
       .mockResolvedValueOnce({ ok: true, data: [] })
@@ -121,12 +146,22 @@ describe('createOfferForInternalParkingSpace', () => {
       })
       .build()
 
-    jest.spyOn(leasingAdapter, 'getListingByListingId').mockResolvedValue(
-      factory.listing.build({
-        status: ListingStatus.Expired,
-        rentalObject: rentalObject,
-      })
-    )
+    const listing = factory.listing.build({
+      status: ListingStatus.Expired,
+      rentalObject: rentalObject,
+    })
+    jest
+      .spyOn(leasingAdapter, 'getListingByListingId')
+      .mockResolvedValue(listing)
+
+    jest.spyOn(propertyMgmtAdapter, 'getParkingSpaceByCode').mockResolvedValue({
+      ok: true,
+      data: factory.vacantParkingSpace
+        .params({
+          rentalObjectCode: listing.rentalObjectCode,
+        })
+        .build(),
+    })
 
     const applicants = [
       factory.detailedApplicant
@@ -181,11 +216,19 @@ describe('createOfferForInternalParkingSpace', () => {
   )
 
   it('fails if retrieving contact information fails', async () => {
+    const listing = factory.listing.build({ status: ListingStatus.Expired })
     jest
       .spyOn(leasingAdapter, 'getListingByListingId')
-      .mockResolvedValueOnce(
-        factory.listing.build({ status: ListingStatus.Expired })
-      )
+      .mockResolvedValue(listing)
+
+    jest.spyOn(propertyMgmtAdapter, 'getParkingSpaceByCode').mockResolvedValue({
+      ok: true,
+      data: factory.vacantParkingSpace
+        .params({
+          rentalObjectCode: listing.rentalObjectCode,
+        })
+        .build(),
+    })
     jest
       .spyOn(leasingAdapter, 'getDetailedApplicantsByListingId')
       .mockResolvedValueOnce({
@@ -210,11 +253,19 @@ describe('createOfferForInternalParkingSpace', () => {
   })
 
   it('fails if update applicant status fails', async () => {
+    const listing = factory.listing.build({ status: ListingStatus.Expired })
     jest
       .spyOn(leasingAdapter, 'getListingByListingId')
-      .mockResolvedValueOnce(
-        factory.listing.build({ status: ListingStatus.Expired })
-      )
+      .mockResolvedValue(listing)
+
+    jest.spyOn(propertyMgmtAdapter, 'getParkingSpaceByCode').mockResolvedValue({
+      ok: true,
+      data: factory.vacantParkingSpace
+        .params({
+          rentalObjectCode: listing.rentalObjectCode,
+        })
+        .build(),
+    })
     jest
       .spyOn(leasingAdapter, 'getDetailedApplicantsByListingId')
       .mockResolvedValueOnce({
@@ -242,11 +293,19 @@ describe('createOfferForInternalParkingSpace', () => {
   })
 
   it('fails if create offer fails', async () => {
+    const listing = factory.listing.build({ status: ListingStatus.Expired })
     jest
       .spyOn(leasingAdapter, 'getListingByListingId')
-      .mockResolvedValueOnce(
-        factory.listing.build({ status: ListingStatus.Expired })
-      )
+      .mockResolvedValue(listing)
+
+    jest.spyOn(propertyMgmtAdapter, 'getParkingSpaceByCode').mockResolvedValue({
+      ok: true,
+      data: factory.vacantParkingSpace
+        .params({
+          rentalObjectCode: listing.rentalObjectCode,
+        })
+        .build(),
+    })
     jest
       .spyOn(leasingAdapter, 'getDetailedApplicantsByListingId')
       .mockResolvedValueOnce({
@@ -277,11 +336,19 @@ describe('createOfferForInternalParkingSpace', () => {
   })
 
   it('creates offer', async () => {
+    const listing = factory.listing.build({ status: ListingStatus.Expired })
     jest
       .spyOn(leasingAdapter, 'getListingByListingId')
-      .mockResolvedValue(
-        factory.listing.build({ status: ListingStatus.Expired })
-      )
+      .mockResolvedValue(listing)
+
+    jest.spyOn(propertyMgmtAdapter, 'getParkingSpaceByCode').mockResolvedValue({
+      ok: true,
+      data: factory.vacantParkingSpace
+        .params({
+          rentalObjectCode: listing.rentalObjectCode,
+        })
+        .build(),
+    })
     jest
       .spyOn(leasingAdapter, 'getDetailedApplicantsByListingId')
       .mockResolvedValueOnce({
