@@ -1158,6 +1158,65 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/maintenance-units/by-property-code/{code}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get all maintenance units for a specific property code
+         * @description Retrieves all maintenance units associated with a given property code.
+         *
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description The code of the property or which to retrieve maintenance units. */
+                    code: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Successfully retrieved the maintenance units. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            content?: components["schemas"]["MaintenanceUnit"][];
+                        };
+                    };
+                };
+                /** @description Invalid query parameters. */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Internal server error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/facilities/rental-id/{rentalId}": {
         parameters: {
             query?: never;
@@ -1643,12 +1702,12 @@ export interface components {
         };
         MaintenanceUnit: {
             id: string;
-            rentalPropertyId: string;
+            rentalPropertyId?: string;
             code: string;
-            caption: string;
+            caption: string | null;
             type: string | null;
-            estateCode: string;
-            estate: string;
+            propertyCode: string | null;
+            propertyName: string | null;
         };
         ResidenceByRentalId: {
             id: string;
