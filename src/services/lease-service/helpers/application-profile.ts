@@ -80,16 +80,26 @@ export function makeAdminApplicationProfileRequestParams(
   }
 }
 
+const ComparableProfileSchema = z.object({
+  numAdults: z.number(),
+  numChildren: z.number(),
+  housingTypeDescription: z.string().nullable(),
+  landlord: z.string().nullable(),
+  housingType: z.nullable(
+    schemas.admin.applicationProfile.UpdateApplicationProfileRequestParams.shape
+      .housingType
+  ),
+})
+
 function getDiffType(
-  params: UpdateAdminApplicationProfileRequestParams,
+  incoming: UpdateAdminApplicationProfileRequestParams,
   existing: leasingAdapter.GetApplicationProfileResponseData
 ): 'profile' | 'review' | 'both' | 'neither' {
-  const { housingReference: incomingHousingReference, ...incomingProfile } =
-    params
-  const { housingReference: existingHousingReference, ...existingProfile } =
-    schemas.admin.applicationProfile.UpdateApplicationProfileRequestParams.parse(
-      existing
-    )
+  const incomingHousingReference = incoming.housingReference
+  const existingHousingReference = existing.housingReference
+
+  const incomingProfile = ComparableProfileSchema.parse(incoming)
+  const existingProfile = ComparableProfileSchema.parse(existing)
 
   const reviewed =
     incomingHousingReference.reviewStatus !==
