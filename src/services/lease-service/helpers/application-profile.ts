@@ -8,71 +8,120 @@ type UpdateAdminApplicationProfileRequestParams = z.infer<
   typeof schemas.admin.applicationProfile.UpdateApplicationProfileRequestParams
 >
 
+/**
+ * This function returns different update payloads
+ * based on conditions.
+ */
 export function makeAdminApplicationProfileRequestParams(
-  body: UpdateAdminApplicationProfileRequestParams,
-  existingProfile?: leasingAdapter.GetApplicationProfileResponseData
+  incoming: UpdateAdminApplicationProfileRequestParams,
+  existing?: leasingAdapter.GetApplicationProfileResponseData
 ): leasingAdapter.CreateOrUpdateApplicationProfileRequestParams {
   const now = new Date()
   const expiresAt = dayjs(now).add(6, 'months').toDate()
 
-  if (!existingProfile) {
+  if (!existing) {
     return {
-      ...body,
+      housingType: incoming.housingType,
+      housingTypeDescription: incoming.housingTypeDescription,
+      landlord: incoming.landlord,
+      numAdults: incoming.numAdults,
+      numChildren: incoming.numChildren,
       lastUpdatedAt: null,
       expiresAt: null,
       housingReference: {
-        ...body.housingReference,
+        reviewStatus: 'PENDING',
+        phone: incoming.housingReference.phone,
+        email: incoming.housingReference.email,
+        comment: incoming.housingReference.comment,
+        reasonRejected: incoming.housingReference.reasonRejected,
+        reviewedBy: incoming.housingReference.reviewedBy,
         expiresAt: null,
         reviewedAt:
-          body.housingReference.reviewStatus === 'PENDING' ? null : now,
+          incoming.housingReference.reviewStatus === 'PENDING' ? null : now,
       },
     }
   }
 
-  const diffType = getDiffType(body, existingProfile)
-  if (diffType === 'neither') {
+  const changed = getDiffType(incoming, existing)
+  if (changed === 'neither') {
     return {
-      ...body,
-      lastUpdatedAt: existingProfile.lastUpdatedAt,
-      expiresAt: existingProfile.expiresAt,
+      housingType: incoming.housingType,
+      housingTypeDescription: incoming.housingTypeDescription,
+      landlord: incoming.landlord,
+      numAdults: incoming.numAdults,
+      numChildren: incoming.numChildren,
+      lastUpdatedAt: existing.lastUpdatedAt,
+      expiresAt: existing.expiresAt,
       housingReference: {
-        ...body.housingReference,
-        reviewedAt: existingProfile.housingReference.reviewedAt,
-        expiresAt: existingProfile.housingReference.expiresAt,
+        reviewStatus: incoming.housingReference.reviewStatus,
+        phone: incoming.housingReference.phone,
+        email: incoming.housingReference.email,
+        comment: incoming.housingReference.comment,
+        reasonRejected: incoming.housingReference.reasonRejected,
+        reviewedBy: incoming.housingReference.reviewedBy,
+        expiresAt: existing.housingReference.expiresAt,
+        reviewedAt: existing.housingReference.reviewedAt,
       },
     }
-  } else if (diffType === 'profile') {
+  } else if (changed === 'profile') {
     return {
-      ...body,
+      housingType: incoming.housingType,
+      housingTypeDescription: incoming.housingTypeDescription,
+      landlord: incoming.landlord,
+      numAdults: incoming.numAdults,
+      numChildren: incoming.numChildren,
       expiresAt,
       lastUpdatedAt: now,
       housingReference: {
-        ...body.housingReference,
-        reviewedAt: existingProfile.housingReference.reviewedAt,
-        expiresAt: existingProfile.housingReference.expiresAt,
+        reviewStatus: incoming.housingReference.reviewStatus,
+        phone: incoming.housingReference.phone,
+        email: incoming.housingReference.email,
+        comment: incoming.housingReference.comment,
+        reasonRejected: incoming.housingReference.reasonRejected,
+        reviewedBy: incoming.housingReference.reviewedBy,
+        reviewedAt: existing.housingReference.reviewedAt,
+        expiresAt: existing.housingReference.expiresAt,
       },
     }
-  } else if (diffType === 'review') {
+  } else if (changed === 'review') {
     return {
-      ...body,
-      lastUpdatedAt: existingProfile.lastUpdatedAt,
-      expiresAt: existingProfile.expiresAt,
+      housingType: incoming.housingType,
+      housingTypeDescription: incoming.housingTypeDescription,
+      landlord: incoming.landlord,
+      numAdults: incoming.numAdults,
+      numChildren: incoming.numChildren,
+      lastUpdatedAt: existing.lastUpdatedAt,
+      expiresAt: existing.expiresAt,
       housingReference: {
-        ...body.housingReference,
+        reviewStatus: incoming.housingReference.reviewStatus,
+        phone: incoming.housingReference.phone,
+        email: incoming.housingReference.email,
+        comment: incoming.housingReference.comment,
+        reasonRejected: incoming.housingReference.reasonRejected,
+        reviewedBy: incoming.housingReference.reviewedBy,
         expiresAt:
-          body.housingReference.reviewStatus === 'REJECTED'
-            ? body.housingReference.expiresAt
+          incoming.housingReference.reviewStatus === 'REJECTED'
+            ? incoming.housingReference.expiresAt
             : expiresAt,
         reviewedAt: now,
       },
     }
   } else {
     return {
-      ...body,
+      housingType: incoming.housingType,
+      housingTypeDescription: incoming.housingTypeDescription,
+      landlord: incoming.landlord,
+      numAdults: incoming.numAdults,
+      numChildren: incoming.numChildren,
       expiresAt,
       lastUpdatedAt: now,
       housingReference: {
-        ...body.housingReference,
+        reviewStatus: incoming.housingReference.reviewStatus,
+        phone: incoming.housingReference.phone,
+        email: incoming.housingReference.email,
+        comment: incoming.housingReference.comment,
+        reasonRejected: incoming.housingReference.reasonRejected,
+        reviewedBy: incoming.housingReference.reviewedBy,
         expiresAt,
         reviewedAt: now,
       },
@@ -91,6 +140,16 @@ const ComparableProfileSchema = z.object({
   ),
 })
 
+/*
+ * This function takes the incoming application profile,
+ * the existing application profile and compares them.
+ *
+ * 1. Check wether profile was reviewed.
+ * 2. Check if any profile fields were updated.
+ *    The existing application profile can have a null housingType
+ *    and the incoming _can not_. So I used an intermediary schema (ComparableProfileSchema) to parse
+ *    them both into comparable objects.
+ */
 function getDiffType(
   incoming: UpdateAdminApplicationProfileRequestParams,
   existing: leasingAdapter.GetApplicationProfileResponseData
