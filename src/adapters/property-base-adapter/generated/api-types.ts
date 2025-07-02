@@ -1648,8 +1648,8 @@ export interface components {
             id: string;
             rentalPropertyId?: string;
             code: string;
-            caption: string;
-            type?: string | null;
+            caption: string | null;
+            type: string | null;
             propertyCode: string | null;
             propertyName: string | null;
         };
