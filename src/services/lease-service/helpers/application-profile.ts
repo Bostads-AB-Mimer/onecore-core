@@ -29,7 +29,7 @@ export function makeAdminApplicationProfileRequestParams(
       lastUpdatedAt: null,
       expiresAt: null,
       housingReference: {
-        reviewStatus: 'PENDING',
+        reviewStatus: incoming.housingReference.reviewStatus,
         phone: incoming.housingReference.phone,
         email: incoming.housingReference.email,
         comment: incoming.housingReference.comment,
