@@ -129,16 +129,13 @@ export function makeAdminApplicationProfileRequestParams(
   }
 }
 
-const ComparableProfileSchema = z.object({
-  numAdults: z.number(),
-  numChildren: z.number(),
-  housingTypeDescription: z.string().nullable(),
-  landlord: z.string().nullable(),
-  housingType: z.nullable(
-    schemas.admin.applicationProfile.UpdateApplicationProfileRequestParams.shape
-      .housingType
-  ),
-})
+type ComparableProfile = {
+  numAdults: number
+  numChildren: number
+  housingType: string | null
+  landlord: string | null
+  housingTypeDescription: string | null
+}
 
 /*
  * This function takes the incoming application profile,
@@ -147,7 +144,7 @@ const ComparableProfileSchema = z.object({
  * 1. Check wether housing reference was reviewed.
  * 2. Check wether any profile fields were updated.
  *    The existing application profile can have a null housingType
- *    and the incoming _can not_. So I used an intermediary schema (ComparableProfileSchema) to parse
+ *    and the incoming _can not_. So I used an intermediary type (ComparableProfile) to map
  *    them both into 'comparable' objects, i.e objects with identical fields.
  */
 function getDiffType(
@@ -157,8 +154,21 @@ function getDiffType(
   const incomingHousingReference = incoming.housingReference
   const existingHousingReference = existing.housingReference
 
-  const incomingProfile = ComparableProfileSchema.parse(incoming)
-  const existingProfile = ComparableProfileSchema.parse(existing)
+  const incomingProfile: ComparableProfile = {
+    housingType: incoming.housingType,
+    housingTypeDescription: incoming.housingTypeDescription,
+    landlord: incoming.landlord,
+    numAdults: incoming.numAdults,
+    numChildren: incoming.numChildren,
+  }
+
+  const existingProfile: ComparableProfile = {
+    housingType: existing.housingType,
+    housingTypeDescription: existing.housingTypeDescription,
+    landlord: existing.landlord,
+    numAdults: existing.numAdults,
+    numChildren: existing.numChildren,
+  }
 
   const reviewed =
     incomingHousingReference.reviewStatus !==
