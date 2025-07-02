@@ -9,8 +9,8 @@ type UpdateAdminApplicationProfileRequestParams = z.infer<
 >
 
 /**
- * This function returns different update payloads
- * based on conditions.
+ * This function takes the incoming update payload and the optional existing profile
+ * and returns a new update payload based on conditions.
  */
 export function makeAdminApplicationProfileRequestParams(
   incoming: UpdateAdminApplicationProfileRequestParams,
@@ -142,13 +142,13 @@ const ComparableProfileSchema = z.object({
 
 /*
  * This function takes the incoming application profile,
- * the existing application profile and compares them.
+ * the existing application profile, compares them and returns what changed.
  *
- * 1. Check wether profile was reviewed.
- * 2. Check if any profile fields were updated.
+ * 1. Check wether housing reference was reviewed.
+ * 2. Check wether any profile fields were updated.
  *    The existing application profile can have a null housingType
  *    and the incoming _can not_. So I used an intermediary schema (ComparableProfileSchema) to parse
- *    them both into comparable objects.
+ *    them both into 'comparable' objects, i.e objects with identical fields.
  */
 function getDiffType(
   incoming: UpdateAdminApplicationProfileRequestParams,
