@@ -43,7 +43,8 @@ export const excelFileToInvoiceDataRows = async (
       // Skip invoice summation rows
       if (
         currentRow.rentArticle &&
-        (currentRow.rentArticle as string).trimEnd()
+        (currentRow.rentArticle as string).trimEnd() &&
+        'HYRA'.localeCompare(currentRow.transactionType as string) === 0
       ) {
         invoiceRows.push(currentRow)
       }
