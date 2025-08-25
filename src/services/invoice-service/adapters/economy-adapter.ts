@@ -19,17 +19,13 @@ export const createInvoiceBatch = async () => {
 
 export const enrichInvoiceDataRows = async (
   invoiceDataRows: InvoiceDataRow[],
-  batchId: string,
-  invoiceDate: string,
-  invoiceDueDate: string
+  batchId: string
 ) => {
   const axiosOptions = {
     method: 'POST',
     data: {
       invoiceDataRows,
       batchId,
-      invoiceDate,
-      invoiceDueDate,
     },
   }
 
@@ -42,13 +38,13 @@ export const enrichInvoiceDataRows = async (
 }
 
 export const saveInvoiceContactsToDb = async (
-  contacts: Contact[],
+  contactCodes: string[],
   batchId: string
 ) => {
   const axiosOptions = {
     method: 'POST',
     data: {
-      contacts,
+      contactCodes,
       batchId,
     },
   }

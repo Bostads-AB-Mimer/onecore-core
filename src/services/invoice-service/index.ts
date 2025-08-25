@@ -9,10 +9,7 @@ import {
   getBatchLedgerRows,
 } from './adapters/economy-adapter'
 import { logger } from 'onecore-utilities'
-import {
-  getContactsByContactCodes,
-  getInvoicesForContact,
-} from '../../adapters/leasing-adapter'
+import { getInvoicesForContact } from '../../adapters/leasing-adapter'
 import { InvoiceDataRow } from './types'
 import { Contact } from 'onecore-types'
 
@@ -49,12 +46,13 @@ export const getContactFromInvoiceRows = (
 }
 
 export const processInvoiceDataFile = async (
-  invoiceDataFileName: string,
-  invoiceDate: string,
-  invoiceDueDate: string
-): Promise<{ batchId: string; errors: string[] }> => {
+  invoiceDataFileName: string
+): Promise<{
+  batchId: string
+  errors: { invoiceNumber: string; error: string }[]
+}> => {
   try {
-    const errors: string[] = []
+    const errors: { invoiceNumber: string; error: string }[] = []
     const CHUNK_SIZE = 500
 
     const invoiceDataRows =
@@ -77,30 +75,13 @@ export const processInvoiceDataFile = async (
       )
       const contactCodes = await enrichInvoiceDataRows(
         currentInvoiceDataRows,
-        batchId,
-        invoiceDate,
-        invoiceDueDate
+        batchId
       )
 
-      const contacts = await getContactsByContactCodes(contactCodes)
-      if (contacts.ok) {
-        if (contacts.data.errors) {
-          for (const errorContactCode of contacts.data.errors) {
-            // Fallback to info in excel file.
-            const errorContact = getContactFromInvoiceRows(
-              errorContactCode,
-              currentInvoiceDataRows
-            )
+      await saveInvoiceContactsToDb(contactCodes.contacts, batchId)
 
-            if (errorContact) {
-              contacts.data.contacts.push(errorContact)
-              logger.info(`Using invoice data for contact ${errorContact}`)
-            } else {
-              errors.push(errorContactCode)
-            }
-          }
-        }
-        await saveInvoiceContactsToDb(contacts.data.contacts, batchId)
+      if (contactCodes.errors && contactCodes.errors.length > 0) {
+        errors.push(contactCodes.errors)
       }
 
       chunkNum++
@@ -131,14 +112,10 @@ export const routes = (router: KoaRouter) => {
   router.post('(.*)/invoices/batches', async (ctx) => {
     try {
       const invoiceRowsExcelFile = ctx.request.files?.['excelData']
-      const invoiceDate = ctx.request.body.invoiceDate
-      const invoiceDueDate = ctx.request.body.invoiceDueDate
 
       if (invoiceRowsExcelFile && !Array.isArray(invoiceRowsExcelFile)) {
         const result = await processInvoiceDataFile(
-          invoiceRowsExcelFile.filepath,
-          invoiceDate,
-          invoiceDueDate
+          invoiceRowsExcelFile.filepath
         )
         ctx.status = 200
         ctx.body = result
@@ -175,12 +152,12 @@ export const routes = (router: KoaRouter) => {
       const csvContent: string[] = []
 
       csvContent.push(
-        'Code;Description;Company No;Email;Street Address;Zip Code;City;Invoice Delivery Method;GL Object Value 5;Group'
+        'Code;Description;Company No;Email;Street Address;Zip Code;City;Invoice Delivery Method;GL Object Value 5;Group;Collection Code'
       )
 
       contacts.data.forEach((contact) => {
         csvContent.push(
-          `${contact.code};${contact.description};${contact.companyNo};${contact.email};${contact.streetAddress};${contact.zipCode};${contact.city};${contact.invoiceDeliveryMethod};${contact.counterPart};${contact.group}`
+          `${contact.code};${contact.description};${contact.companyNo};${contact.email};${contact.streetAddress};${contact.zipCode};${contact.city};${contact.invoiceDeliveryMethod};${contact.counterPart};${contact.group};${contact.counterPart ? contact.group : ''}`
         )
       })
 
