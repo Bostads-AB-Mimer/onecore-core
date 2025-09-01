@@ -46,7 +46,8 @@ export const getContactFromInvoiceRows = (
 }
 
 export const processInvoiceDataFile = async (
-  invoiceDataFileName: string
+  invoiceDataFileName: string,
+  companyId: string
 ): Promise<{
   batchId: string
   errors: { invoiceNumber: string; error: string }[]
@@ -55,8 +56,16 @@ export const processInvoiceDataFile = async (
     const errors: { invoiceNumber: string; error: string }[] = []
     const CHUNK_SIZE = 500
 
-    const invoiceDataRows =
+    const invoiceDataRows = (
       await excelFileToInvoiceDataRows(invoiceDataFileName)
+    ).filter((row) => (row.company as string) === companyId)
+
+    console.log(
+      'Importing',
+      invoiceDataRows.length,
+      'rows for company',
+      companyId
+    )
 
     let chunkNum = 0
     const batchId = await createInvoiceBatch()
@@ -109,13 +118,16 @@ const transformDate = (value: string | number) => {
 }
 
 export const routes = (router: KoaRouter) => {
-  router.post('(.*)/invoices/batches', async (ctx) => {
+  router.post('(.*)/invoices/batches/:companyId', async (ctx) => {
     try {
+      // Mimer company, ie "001" = Mimer AB, "006" = Björnklockan AB
+      const companyId = ctx.params.companyId
       const invoiceRowsExcelFile = ctx.request.files?.['excelData']
 
       if (invoiceRowsExcelFile && !Array.isArray(invoiceRowsExcelFile)) {
         const result = await processInvoiceDataFile(
-          invoiceRowsExcelFile.filepath
+          invoiceRowsExcelFile.filepath,
+          companyId
         )
         ctx.status = 200
         ctx.body = result
