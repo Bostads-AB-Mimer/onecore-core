@@ -29,6 +29,8 @@ export interface Config {
   }
   economyService: {
     url: string
+    rentalInvoiceImportDirectory: string
+    rentalInvoiceExportDirectory: string
   }
   minaSidor: {
     url: string
@@ -101,6 +103,8 @@ const config = configPackage({
     },
     economyService: {
       url: 'http://localhost:5080',
+      rentalInvoiceImportDirectory: './rental-invoice-files',
+      rentalInvoiceExportDirectory: './rental-invoice-export',
     },
     propertyBaseService: {
       url: 'http://localhost:5050',

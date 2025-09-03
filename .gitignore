@@ -11,3 +11,7 @@ config.json
 
 .vscode
 .aider*
+
+# local file locations for import and export
+rental-invoice-files
+rental-invoice-export

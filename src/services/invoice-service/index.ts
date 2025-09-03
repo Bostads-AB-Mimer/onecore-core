@@ -1,121 +1,13 @@
 import KoaRouter from '@koa/router'
-import { excelFileToInvoiceDataRows } from './adapters/excel-adapter'
-import {
-  createInvoiceBatch,
-  enrichInvoiceDataRows,
-  saveInvoiceContactsToDb,
-  getBatchContacts,
-  getBatchAggregatedRows,
-  getBatchLedgerRows,
-} from './adapters/economy-adapter'
+import { getBatchAggregatedRows } from './adapters/economy-adapter'
 import { logger } from 'onecore-utilities'
 import { getInvoicesForContact } from '../../adapters/leasing-adapter'
-import { InvoiceDataRow } from './types'
-import { Contact } from 'onecore-types'
-
-export const getContactFromInvoiceRows = (
-  contactCode: string,
-  invoiceDataRows: InvoiceDataRow[]
-): Contact | null => {
-  const invoiceRow = invoiceDataRows.find((row) => {
-    return (row.contactCode as string) === contactCode
-  })
-
-  if (!invoiceRow) {
-    logger.error({ contactCode }, 'Could not find contact in invoiceDataRows')
-    return null
-  }
-
-  return {
-    contactCode: invoiceRow.contactCode as string,
-    address: {
-      street: invoiceRow.rentalObjectName as string,
-      city: 'Västerås',
-      postalCode: '',
-      number: '',
-    },
-    contactKey: '',
-    firstName: '',
-    lastName: '',
-    fullName: invoiceRow.tenantName as string,
-    nationalRegistrationNumber: '',
-    isTenant: true,
-    phoneNumbers: [],
-    birthDate: new Date(),
-  }
-}
-
-export const processInvoiceDataFile = async (
-  invoiceDataFileName: string,
-  companyId: string
-): Promise<{
-  batchId: string
-  errors: { invoiceNumber: string; error: string }[]
-}> => {
-  try {
-    const errors: { invoiceNumber: string; error: string }[] = []
-    const CHUNK_SIZE = 500
-
-    const invoiceDataRows = (
-      await excelFileToInvoiceDataRows(invoiceDataFileName)
-    ).filter((row) => (row.company as string) === companyId)
-
-    console.log(
-      'Importing',
-      invoiceDataRows.length,
-      'rows for company',
-      companyId
-    )
-
-    let chunkNum = 0
-    const batchId = await createInvoiceBatch()
-    logger.info(`Created new batch: ${batchId}`)
-
-    while (CHUNK_SIZE * chunkNum < invoiceDataRows.length) {
-      const startNum = chunkNum * CHUNK_SIZE
-      const endNum = Math.min(
-        (chunkNum + 1) * CHUNK_SIZE,
-        invoiceDataRows.length
-      )
-      const currentInvoiceDataRows = invoiceDataRows.slice(startNum, endNum)
-      logger.info(
-        { startNum, endNum, totalrows: currentInvoiceDataRows.length },
-        'Processing rows'
-      )
-      const contactCodes = await enrichInvoiceDataRows(
-        currentInvoiceDataRows,
-        batchId
-      )
-
-      await saveInvoiceContactsToDb(contactCodes.contacts, batchId)
-
-      if (contactCodes.errors && contactCodes.errors.length > 0) {
-        errors.push(contactCodes.errors)
-      }
-
-      chunkNum++
-    }
-
-    return {
-      batchId,
-      errors,
-    }
-  } catch (error: any) {
-    logger.error(
-      error,
-      'Error processing invoice data file - batch could not be created'
-    )
-
-    throw error
-  }
-}
-
-const transformDate = (value: string | number) => {
-  if (value == undefined || typeof value === 'number' || value === '') {
-    return ''
-  }
-  return (value as string).replaceAll('-', '')
-}
+import {
+  getBatchAggregatedRowsCsv,
+  getBatchContactsCsv,
+  getBatchLedgerRowsCsv,
+  processInvoiceDataFile,
+} from './service'
 
 export const routes = (router: KoaRouter) => {
   router.post('(.*)/invoices/batches/:companyId', async (ctx) => {
@@ -158,83 +50,48 @@ export const routes = (router: KoaRouter) => {
   })
 
   router.get('(.*)/invoices/batches/:batchId/contacts', async (ctx) => {
-    const contacts = await getBatchContacts(ctx.params.batchId as string)
-
-    if (contacts.ok) {
-      const csvContent: string[] = []
-
-      csvContent.push(
-        'Code;Description;Company No;Email;Street Address;Zip Code;City;Invoice Delivery Method;GL Object Value 5;Group;Collection Code'
+    try {
+      const contactsCsv = await getBatchContactsCsv(
+        ctx.params.batchId as string
       )
-
-      contacts.data.forEach((contact) => {
-        csvContent.push(
-          `${contact.code};${contact.description};${contact.companyNo};${contact.email};${contact.streetAddress};${contact.zipCode};${contact.city};${contact.invoiceDeliveryMethod};${contact.counterPart};${contact.group};${contact.counterPart ? contact.group : ''}`
-        )
-      })
-
       ctx.status = 200
       ctx.response.type = 'text/plain'
-      ctx.body = csvContent.join('\n')
-    } else {
+      ctx.body = contactsCsv
+    } catch (error: unknown) {
       ctx.status = 500
-      ctx.body = ''
+      ctx.body = { error }
     }
   })
 
   router.get('(.*)/invoices/batches/:batchId/aggregated-rows', async (ctx) => {
-    ctx.request.socket.setTimeout(0)
-    const transactionRows = await getBatchAggregatedRows(
-      ctx.params.batchId as string
-    )
-
-    if (transactionRows.ok) {
-      const csvContent: string[] = []
-
-      csvContent.push(
-        'Voucher Type;Voucher No;Voucher Date;Account;Posting 1;Posting 2;Posting 3;Posting 4;Posting 5;Period Start;No of Periods;Subledger No;Invoice Date;Invoice No;OCR;Due Date;Text;TaxRule;Amount'
+    try {
+      ctx.request.socket.setTimeout(0)
+      const transactionRowsCsv = await getBatchAggregatedRowsCsv(
+        ctx.params.batchId as string
       )
-
-      transactionRows.data.forEach((transactionRow) => {
-        csvContent.push(
-          `${transactionRow.voucherType};${transactionRow.voucherNo};${transformDate(transactionRow.voucherDate)};${transactionRow.account};${transactionRow.posting1 || ''};${transactionRow.posting2 || ''};${transactionRow.posting3 || ''};${transactionRow.posting4 || ''};${transactionRow.posting5 || ''};${transformDate(transactionRow.periodStart)};${transactionRow.noOfPeriods};${transactionRow.subledgerNo};${transformDate(transactionRow.invoiceDate)};${transactionRow.invoiceNo};${transactionRow.ocr};${transformDate(transactionRow.dueDate)};${transactionRow.text};${transactionRow.taxRule};${transactionRow.amount}`
-        )
-      })
 
       ctx.status = 200
       ctx.response.type = 'text/plain'
-      ctx.body = csvContent.join('\n')
-    } else {
+      ctx.body = transactionRowsCsv
+    } catch (error: unknown) {
       ctx.status = 500
-      ctx.body = ''
+      ctx.body = { error }
     }
   })
 
   router.get('(.*)/invoices/batches/:batchId/ledger-rows', async (ctx) => {
-    ctx.request.socket.setTimeout(0)
-    const transactionRows = await getBatchLedgerRows(
-      ctx.params.batchId as string
-    )
-
-    if (transactionRows.ok) {
-      const csvContent: string[] = []
-
-      csvContent.push(
-        'Voucher Type;Voucher No;Voucher Date;Account;Posting 1;Posting 2;Posting 3;Posting 4;Posting 5;Period Start;No of Periods;Subledger No;Invoice Date;Invoice No;OCR;Due Date;Text;TaxRule;Amount'
+    try {
+      ctx.request.socket.setTimeout(0)
+      const transactionRowsCsv = await getBatchLedgerRowsCsv(
+        ctx.params.batchId as string
       )
-
-      transactionRows.data.forEach((transactionRow) => {
-        csvContent.push(
-          `${transactionRow.voucherType};${transactionRow.voucherNo};${transformDate(transactionRow.voucherDate)};${transactionRow.account};${transactionRow.posting1};${transactionRow.posting2};${transactionRow.posting3};${transactionRow.posting4};${transactionRow.posting5};${transformDate(transactionRow.periodStart)};${transactionRow.noOfPeriods};${transactionRow.subledgerNo};${transformDate(transactionRow.invoiceDate)};${transactionRow.invoiceNo};${transactionRow.ocr};${transformDate(transactionRow.dueDate)};${transactionRow.text};${transactionRow.taxRule};${transactionRow.amount}`
-        )
-      })
 
       ctx.status = 200
       ctx.response.type = 'text/plain'
-      ctx.body = csvContent.join('\n')
-    } else {
+      ctx.body = transactionRowsCsv
+    } catch (error: unknown) {
       ctx.status = 500
-      ctx.body = ''
+      ctx.body = { error }
     }
   })
 
