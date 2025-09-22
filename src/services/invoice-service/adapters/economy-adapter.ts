@@ -1,7 +1,6 @@
 import { loggedAxios as axios } from 'onecore-utilities'
 import config from '../../../common/config'
 import { InvoiceDataRow } from '../types'
-import { Contact } from 'onecore-types'
 import { AdapterResult } from '../../../adapters/types'
 
 export const createInvoiceBatch = async () => {
@@ -130,6 +129,26 @@ export const getBatchAggregatedRows = async (
   const result = await axios(
     config.economyService.url +
       `/invoices/import/batches/${batchId}/aggregated-rows`,
+    axiosOptions
+  )
+
+  return { ok: true, data: result.data.content }
+}
+
+export const uploadInvoiceFile = async (
+  filename: string,
+  csvContent: string
+): Promise<AdapterResult<InvoiceDataRow[], 'error'>> => {
+  const axiosOptions = {
+    method: 'POST',
+    data: {
+      filename,
+      fileContents: csvContent,
+    },
+  }
+
+  const result = await axios(
+    config.economyService.url + `/invoices/import/upload-file`,
     axiosOptions
   )
 

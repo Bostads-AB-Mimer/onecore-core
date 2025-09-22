@@ -6,6 +6,7 @@ import {
   getBatchContacts,
   getBatchLedgerRows,
   saveInvoiceContactsToDb,
+  uploadInvoiceFile as uploadInvoiceFileEconomy,
 } from './adapters/economy-adapter'
 import { InvoiceDataRow } from './types'
 import { Contact } from 'onecore-types'
@@ -180,4 +181,11 @@ export const transformDate = (value: string | number) => {
     return ''
   }
   return (value as string).replaceAll('-', '')
+}
+
+export const uploadInvoiceFile = async (
+  filename: string,
+  csvContent: string
+) => {
+  await uploadInvoiceFileEconomy(filename, csvContent)
 }
